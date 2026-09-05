@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.7.1</title>
+<title>Le Diamant v0.7.2</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -96,7 +96,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.7.1 • 2 ÉQUIPES</div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.7.2 • 2 ÉQUIPES</div></div>
 
   <section id="pregame">
     <div class="card">
@@ -151,6 +151,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
       </div>
       <div class="bench-box">
         <div class="bench-title">🪑 BANC</div>
+        <div id="benchList"></div>
         <div id="benchEditor"></div>
         <div class="bench-controls" id="benchControls">
           <button id="addBenchBtn" type="button" onclick="addBenchPlayer(coachTeam)">＋ JOUEUR AU BANC</button>
@@ -446,10 +447,11 @@ function renderPregameStatus(){
 
 
 function addBenchPlayer(teamName){
-  if(gameStarted){toast("Pendant le match, utilisez « Effectuer un remplacement »");return}
+  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
   const t=teams[teamName];
   if(!t){toast("Équipe introuvable");return}
-  if(!Array.isArray(t.bench)) t.bench=[];
+  if(!Array.isArray(t.bench))t.bench=[];
+  if(!Array.isArray(t.roster))t.roster=t.lineup.map(p=>({...p}));
 
   extraPlayerSeq++;
   t.bench.push({
@@ -458,14 +460,14 @@ function addBenchPlayer(teamName){
     name:"Choisir un joueur",
     pos:"DH",
     active:false,
-    ab:0,h:0,hr:0,rbi:0,r:0,bv:0,
-    placeholder:true
+    placeholder:true,
+    ab:0,h:0,hr:0,rbi:0,r:0,bv:0
   });
 
   t.submitted=false;
   renderLineupEditor();
   renderPregameStatus();
-  setTimeout(()=>openRosterForBench(t.bench.length-1),0);
+  openRosterForBench(t.bench.length-1);
 }
 function removeBenchPlayer(teamName){
   if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
@@ -474,17 +476,11 @@ function removeBenchPlayer(teamName){
     toast("Aucun joueur à retirer du banc");
     return;
   }
-
   const removed=t.bench.pop();
   t.submitted=false;
   renderLineupEditor();
   renderPregameStatus();
-
-  if(removed && !removed.placeholder){
-    toast(`${removed.name} retiré du banc`);
-  }else{
-    toast("Place retirée du banc");
-  }
+  toast(removed && !removed.placeholder ? `${removed.name} retiré du banc` : "Place retirée du banc");
 }
 function updateBenchPlayer(idx,field,value){
   if(gameStarted)return;
@@ -497,24 +493,35 @@ function updateBenchPlayer(idx,field,value){
 function openRosterForBench(i){
   if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
   const t=teams[coachTeam];
-  if(!t || !t.bench[i])return;
+  if(!t || !Array.isArray(t.bench) || !t.bench[i])return;
+
   selectedBenchSlot=i;
 
   const used=new Set([
     ...t.lineup.map(p=>rosterPlayerKey(p)),
-    ...t.bench.map((p,idx)=>idx===i?null:rosterPlayerKey(p))
+    ...t.bench.map((p,idx)=>idx===i || p.placeholder ? null : rosterPlayerKey(p))
   ].filter(Boolean));
 
-  const choices=t.roster.filter(p=>!used.has(rosterPlayerKey(p)));
+  const choices=(t.roster||[]).filter(p=>!used.has(rosterPlayerKey(p)));
 
-  $("benchRosterInfo").textContent=`Choisissez un joueur enregistré pour ${coachTeam}.`;
+  const info=$("benchRosterInfo");
+  const list=$("benchRosterChoices");
+  const modal=$("benchRosterModal");
   const removeBtn=$("removeSelectedBenchPlayerBtn");
-  if(removeBtn) removeBtn.style.display=t.bench[i].placeholder?"none":"block";
-  $("benchRosterChoices").innerHTML=choices.length
-    ? choices.map(p=>`<button type="button" class="roster-choice" onclick='chooseRosterPlayerForBench(${JSON.stringify(p.id||p.name)})'><b>${p.name}</b><small>Position habituelle : ${p.pos||"DH"}</small></button>`).join("")
-    : '<div class="muted">Aucun autre joueur disponible dans la liste de cette équipe.</div>';
 
-  $("benchRosterModal").classList.add("show");
+  if(!modal || !list){
+    toast("Erreur d’affichage du banc");
+    return;
+  }
+
+  if(info) info.textContent=`Choisissez un joueur enregistré pour ${coachTeam}.`;
+  if(removeBtn) removeBtn.style.display=t.bench[i].placeholder?"none":"block";
+
+  list.innerHTML=choices.length
+    ? choices.map(p=>`<button type="button" class="roster-choice" onclick='chooseRosterPlayerForBench(${JSON.stringify(p.id||p.name)})'><b>${p.name}</b><small>Position habituelle : ${p.pos||"DH"}</small></button>`).join("")
+    : '<div class="muted">Aucun autre joueur disponible. Ajoutez d’abord un joueur dans la liste de cette équipe.</div>';
+
+  modal.classList.add("show");
 }
 
 
@@ -526,27 +533,24 @@ function removeSelectedBenchPlayer(){
   const removed=t.bench[selectedBenchSlot];
   t.bench.splice(selectedBenchSlot,1);
   t.submitted=false;
-
   closeBenchRosterModal();
   renderLineupEditor();
   renderPregameStatus();
-
-  if(removed && !removed.placeholder){
-    toast(`${removed.name} retiré du banc`);
-  }else{
-    toast("Place retirée du banc");
-  }
+  toast(removed && !removed.placeholder ? `${removed.name} retiré du banc` : "Place retirée du banc");
 }
 
 function chooseRosterPlayerForBench(playerId){
   if(gameStarted || selectedBenchSlot===null)return;
   const t=teams[coachTeam];
-  const incoming=t.roster.find(p=>(p.id||p.name)===playerId);
-  if(!incoming)return;
+  if(!t || !t.bench[selectedBenchSlot])return;
+
+  const incoming=(t.roster||[]).find(p=>(p.id||p.name)===playerId);
+  if(!incoming){toast("Joueur introuvable");return}
 
   t.bench[selectedBenchSlot]={
     ...incoming,
     active:false,
+    placeholder:false,
     ab:0,h:0,hr:0,rbi:0,r:0,bv:0
   };
 
@@ -558,7 +562,8 @@ function chooseRosterPlayerForBench(playerId){
 }
 
 function closeBenchRosterModal(){
-  $("benchRosterModal").classList.remove("show");
+  const modal=$("benchRosterModal");
+  if(modal)modal.classList.remove("show");
   selectedBenchSlot=null;
 }
 
@@ -568,6 +573,11 @@ function renderBenchEditor(){
   const t=teams[coachTeam];
   if(!t.bench)t.bench=[];
 
+  if(!t.bench.length){
+    host.innerHTML='<div class="muted" style="font-size:12px;margin-top:8px">Aucun joueur au banc.</div>';
+    return;
+  }
+
   host.innerHTML=t.bench.map((p,i)=>`
     <div class="lineup-row">
       <div class="order">${i+1}</div>
@@ -575,17 +585,18 @@ function renderBenchEditor(){
         <button type="button"
           class="lineup-player-btn"
           onclick="openRosterForBench(${i})"
-          ${gameStarted?"disabled":""}
-          title="Choisir un joueur de la liste de l’équipe pour ce banc">
-          ${p.name||"Choisir un joueur"}
+          ${gameStarted?"disabled":""}>
+          ${p.placeholder ? "Choisir un joueur" : p.name}
         </button>
-        <div class="muted" style="font-size:12px">Touchez pour choisir ou enlever ce joueur du banc</div>
+        <div class="muted" style="font-size:12px">
+          ${p.placeholder ? "Touchez pour choisir dans la liste de l’équipe" : "Touchez pour remplacer ou enlever"}
+        </div>
       </div>
       <select ${gameStarted?"disabled":""} onchange="updateBenchPlayer(${i},'pos',this.value)">
         ${POSITIONS.map(pos=>`<option ${pos===p.pos?"selected":""}>${pos}</option>`).join("")}
       </select>
     </div>
-  `).join("") || '<div class="muted" style="font-size:12px">Aucun joueur au banc. Utilisez + JOUEUR AU BANC pour ajouter une place.</div>';
+  `).join("");
 }
 function toggleSubstitutionPanel(){
   if(!gameStarted)return;

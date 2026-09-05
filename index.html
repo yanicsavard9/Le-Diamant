@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.6.7</title>
+<title>Le Diamant v0.6.9</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -72,8 +72,6 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .lineup-player-btn{appearance:none;border:0;background:transparent;color:inherit;padding:0;text-align:left;font:inherit;font-weight:900;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px;min-height:44px}
 .roster-box{margin-top:14px;padding:12px;border:1px solid #33465a;border-radius:14px;background:#101820}
 .roster-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.roster-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
-.roster-chip{padding:7px 9px;border:1px solid #40566b;border-radius:999px;font-size:12px;background:#15212c}
 .roster-add{display:grid;grid-template-columns:1fr 90px 46px;gap:7px;margin-top:10px}
 .roster-add input,.roster-add select{width:100%}
 #rosterModal .modal-card{max-height:78%;overflow:auto}
@@ -98,7 +96,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.6.7 • 2 ÉQUIPES</div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.6.9 • 2 ÉQUIPES</div></div>
 
   <section id="pregame">
     <div class="card">
@@ -125,6 +123,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
         <button id="tabYankees" onclick="showCoach('Yankees')">YANKEES</button>
       </div>
       <div class="section-title" id="coachTitle">Alignement Brewers</div>
+      <div class="muted" style="font-size:12px;margin-bottom:7px">Touchez le nom d’un joueur dans l’alignement pour ouvrir la liste des joueurs de cette équipe.</div>
       <div id="lineupEditor"></div>
       <div class="lineup-controls" id="lineupControls">
         <button onclick="addHitter(coachTeam)">＋ FRAPPEUR</button>
@@ -132,21 +131,30 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
       </div>
       <div class="roster-box">
         <div class="roster-head">
-          <div><b>👥 LISTE DE L’ÉQUIPE</b><div class="muted" style="font-size:12px">Joueurs inscrits disponibles pour l’alignement.</div></div>
+          <div>
+            <b>👥 JOUEURS DE L’ÉQUIPE</b>
+            <div class="muted" style="font-size:12px">
+              Ajoutez les joueurs ici. La liste complète apparaîtra seulement quand vous choisirez un joueur dans l’alignement.
+            </div>
+          </div>
         </div>
-        <div id="teamRosterList" class="roster-list"></div>
         <div id="rosterAddControls" class="roster-add">
           <input id="newRosterName" placeholder="Nom du joueur">
-          <select id="newRosterPos"><option>C</option><option>1B</option><option>2B</option><option>3B</option><option>SS</option><option>LF</option><option>CF</option><option>RF</option><option>L</option><option>DH</option><option>Piton</option><option>R</option></select>
+          <select id="newRosterPos">
+            <option>C</option><option>1B</option><option>2B</option><option>3B</option>
+            <option>SS</option><option>LF</option><option>CF</option><option>RF</option>
+            <option>L</option><option>DH</option><option>Piton</option><option>R</option>
+          </select>
           <button type="button" onclick="addRosterPlayer()">＋</button>
         </div>
+        <div id="rosterSavedMsg" class="muted" style="font-size:12px;margin-top:7px"></div>
       </div>
       <div class="bench-box">
         <div class="bench-title">🪑 BANC</div>
         <div id="benchEditor"></div>
         <div class="bench-controls" id="benchControls">
-          <button onclick="addBenchPlayer(coachTeam)">＋ JOUEUR AU BANC</button>
-          <button onclick="removeBenchPlayer(coachTeam)">− JOUEUR AU BANC</button>
+          <button id="addBenchBtn" type="button" onclick="addBenchPlayer(coachTeam)">＋ JOUEUR AU BANC</button>
+          <button id="removeBenchBtn" type="button" onclick="removeBenchPlayer(coachTeam)">− JOUEUR AU BANC</button>
         </div>
       </div>
       <button id="openSubBtn" class="sub-btn hidden" onclick="toggleSubstitutionPanel()">⇄ EFFECTUER UN REMPLACEMENT</button>
@@ -315,9 +323,11 @@ function showCoach(team){coachTeam=team;$("tabBrewers").classList.toggle("active
 
 function rosterPlayerKey(p){return String(p.id||p.name).toLowerCase()}
 function renderTeamRoster(){
-  const host=$("teamRosterList"), t=teams[coachTeam];
-  if(!host||!t)return;
-  host.innerHTML=t.roster.map(p=>`<span class="roster-chip">${p.name} · ${p.pos||"DH"}</span>`).join("");
+  const t=teams[coachTeam];
+  const msg=$("rosterSavedMsg");
+  if(msg && t){
+    msg.textContent=`${t.roster.length} joueur${t.roster.length>1?"s":""} enregistré${t.roster.length>1?"s":""} pour ${coachTeam}.`;
+  }
   const controls=$("rosterAddControls");
   if(controls) controls.querySelectorAll("input,select,button").forEach(el=>el.disabled=gameStarted);
 }
@@ -327,7 +337,7 @@ function addRosterPlayer(){
   const pos=$("newRosterPos").value||"DH";
   if(!name){toast("Entrez le nom du joueur");return}
   const t=teams[coachTeam];
-  if(t.roster.some(p=>p.name.toLowerCase()===name.toLowerCase())){toast("Ce joueur est déjà dans la liste");return}
+  if(t.roster.some(p=>p.name.toLowerCase()===name.toLowerCase())){toast("Ce joueur est déjà enregistré pour cette équipe");return}
   extraPlayerSeq++;
   const p=freshPlayer({name,pos},extraPlayerSeq,coachTeam==="Brewers"?"B":"Y");
   p.id=(coachTeam==="Brewers"?"B":"Y")+"_R_"+extraPlayerSeq;
@@ -381,7 +391,7 @@ function renderLineupEditor(){
   $("lineupEditor").innerHTML=list.map((p,i)=>`
     <div class="lineup-row">
       <div class="order">${i+1}</div>
-      <div><button type="button" class="lineup-player-btn" onclick="openRosterForSlot(${i})" ${gameStarted?"disabled":""}>${p.name}</button><label class="muted" style="font-size:12px"><input type="checkbox" ${p.active?"checked":""} onchange="toggleActive(${i},this.checked)"> Actif</label></div>
+      <div><button type="button" class="lineup-player-btn" onclick="openRosterForSlot(${i})" title="Choisir un joueur pour cette place dans l’alignement" ${gameStarted?"disabled":""}>${p.name}</button><label class="muted" style="font-size:12px"><input type="checkbox" ${p.active?"checked":""} onchange="toggleActive(${i},this.checked)"> Actif</label></div>
       <select class="pos-select" onchange="changePos(${i},this.value)">${POSITIONS.map(pos=>`<option ${pos===p.pos?"selected":""}>${pos}</option>`).join("")}</select>
       <div class="row-tools"><button onclick="movePlayer(${i},-1)" ${i===0?"disabled":""}>↑ Monter</button><button onclick="movePlayer(${i},1)" ${i===list.length-1?"disabled":""}>↓ Descendre</button></div>
     </div>`).join("");
@@ -399,7 +409,9 @@ function renderLineupEditor(){
   if($("openSubBtn")) $("openSubBtn").classList.toggle("hidden",!gameStarted);
   if($("substitutionPanel") && !gameStarted) $("substitutionPanel").classList.add("hidden");
   if($("lineupControls")) $("lineupControls").querySelectorAll("button").forEach(b=>b.disabled=gameStarted);
-  if($("benchControls")) $("benchControls").querySelectorAll("button").forEach(b=>b.disabled=gameStarted);
+  if($("benchControls")) $("benchControls").querySelectorAll("button").forEach(b=>b.disabled=!!gameStarted);
+  if($("addBenchBtn")) $("addBenchBtn").disabled=!!gameStarted;
+  if($("removeBenchBtn")) $("removeBenchBtn").disabled=!!gameStarted;
   if($("resetLineupBtn")) $("resetLineupBtn").disabled=gameStarted;
   if($("submitLineupBtn")) $("submitLineupBtn").disabled=gameStarted;
   if(gameStarted) refreshSubstitutionOptions();
@@ -433,26 +445,37 @@ function renderPregameStatus(){
 
 
 function addBenchPlayer(teamName){
-  if(gameStarted){alert("Pendant le match, utilisez « Effectuer un remplacement ».");return;}
+  if(gameStarted){toast("Pendant le match, utilisez « Effectuer un remplacement »");return}
   const t=teams[teamName];
-  if(!t)return;
+  if(!t){toast("Équipe introuvable");return}
+  if(!Array.isArray(t.bench)) t.bench=[];
+  if(!Array.isArray(t.roster)) t.roster=t.lineup.map(p=>({...p}));
+
   extraPlayerSeq++;
-  const bp={id:(teamName==="Brewers"?"B":"Y")+"_B_"+extraPlayerSeq,no:extraPlayerSeq,name:"Joueur du banc",pos:"DH",active:false,
-    stats:{AB:0,H:0,HR:0,RBI:0,R:0,BB:0,HBP:0,K:0,E:0}};
+  const bp={
+    id:(teamName==="Brewers"?"B":"Y")+"_B_"+extraPlayerSeq,
+    no:extraPlayerSeq,
+    name:"Joueur du banc "+(t.bench.length+1),
+    pos:"DH",
+    active:false,
+    ab:0,h:0,hr:0,rbi:0,r:0,bv:0
+  };
   t.bench.push(bp);
   if(!t.roster.some(p=>rosterPlayerKey(p)===rosterPlayerKey(bp))) t.roster.push({...bp});
   t.submitted=false;
   renderLineupEditor();
   renderPregameStatus();
+  toast("Joueur ajouté au banc");
 }
 function removeBenchPlayer(teamName){
-  if(gameStarted){alert("Le banc est verrouillé pendant le match.");return;}
+  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
   const t=teams[teamName];
-  if(!t || !t.bench.length)return;
-  t.bench.pop();
+  if(!t || !Array.isArray(t.bench) || !t.bench.length){toast("Aucun joueur à retirer du banc");return}
+  const removed=t.bench.pop();
   t.submitted=false;
   renderLineupEditor();
   renderPregameStatus();
+  toast(`${removed.name} retiré du banc`);
 }
 function updateBenchPlayer(idx,field,value){
   if(gameStarted)return;
@@ -471,7 +494,7 @@ function renderBenchEditor(){
   }else{
     host.innerHTML=t.bench.map((p,i)=>`
       <div class="bench-row">
-        <input value="${p.name||""}" ${gameStarted?"disabled":""} onchange="updateBenchPlayer(${i},'name',this.value)">
+        <input value="${p.name||""}" ${gameStarted?"disabled":""} oninput="updateBenchPlayer(${i},'name',this.value)">
         <select ${gameStarted?"disabled":""} onchange="updateBenchPlayer(${i},'pos',this.value)">
           ${["DH","C","1B","2B","3B","SS","LF","CF","RF","L","Piton","R"].map(pos=>`<option ${p.pos===pos?"selected":""}>${pos}</option>`).join("")}
         </select>
@@ -697,7 +720,7 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
 
 <div id="rosterModal" class="modal">
   <div class="modal-card">
-    <div class="modal-title">Choisir un joueur</div>
+    <div class="modal-title">Choisir un joueur de l’équipe</div>
     <div id="rosterReplaceInfo" class="muted" style="margin-bottom:10px"></div>
     <div id="rosterChoices"></div>
     <button type="button" class="secondary" style="width:100%;margin-top:10px" onclick="closeRosterModal()">ANNULER</button>

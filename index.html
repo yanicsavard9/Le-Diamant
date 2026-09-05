@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>TheGame Basic v0.5.1</title>
+<title>Le Diamant Basic v0.5.2</title>
 <style>
 :root{
   --bg:#0f1720; --card:#18222e; --card2:#223140; --text:#f4f7fb;
@@ -88,7 +88,7 @@ button.small{font-size:13px;padding:10px}
 .pitcher-center .player-link.team-brewers{border-color:#2f78c4;background:rgba(47,120,196,.18)}
 
 
-/* v0.5.1 — identité d'équipe plus visible */
+/* v0.5.2 — validation réaliste des positions des coureurs */
 #awayTeam,#homeTeam{border:2px solid transparent}
 #awayTeam{border-color:#2f78c4;background:rgba(47,120,196,.10)}
 #homeTeam{border-color:#d84a4a;background:rgba(216,74,74,.10)}
@@ -112,7 +112,7 @@ button.small{font-size:13px;padding:10px}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ THEGAME</div><div class="badge">BASIC • v0.5.1</div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">BASIC • v0.5.2</div></div>
 
   <div class="score">
     <div class="teams">
@@ -364,7 +364,7 @@ function beginHitLike(dest,label,isHit=true){
   saveHistory();
   const b=batter(); b.ab++; if(isHit){b.h++; pitcher.h++;}
   const pending=[];
-  [3,2,1].forEach(base=>{ if(state.bases[base]) pending.push({runner:state.bases[base],origin:base}); });
+  [3,2,1].forEach(base=>{ if(state.bases[base]) pending.push({runner:state.bases[base],origin:base,batterDest:dest}); });
   state.bases={1:null,2:null,3:null};
   state.bases[dest]={name:b.name,no:b.no,team:state.top?"Brewers":"Yankees"};
   state.pending=pending;
@@ -381,8 +381,11 @@ function showPending(){
   const item=state.pending[0], r=item.runner;
   pendingTitle.textContent=r.name;
   pendingCurrent.textContent=`Était au ${item.origin===1?"1er":item.origin+"e"} but — où termine-t-il?`;
-  p2.disabled=!!state.bases[2] || item.origin>=2;
-  p3.disabled=!!state.bases[3] || item.origin>=3;
+  // Un coureur ne peut jamais terminer derrière le frappeur ni sur le même but.
+  // Il peut toutefois rester sur son but s'il est toujours devant le frappeur.
+  const batterDest=item.batterDest||1;
+  p2.disabled=!!state.bases[2] || 2<item.origin || 2<=batterDest;
+  p3.disabled=!!state.bases[3] || 3<item.origin || 3<=batterDest;
   pendingModal.classList.add("show");
 }
 function resolvePending(dest){

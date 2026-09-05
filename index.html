@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.6.0</title>
+<title>Le Diamant v0.6.3</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -46,7 +46,26 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .batter-name{font-size:24px}.batter-sub,.next-sub{font-size:13px;color:var(--muted);margin-top:4px}.next-box{margin-top:12px;padding-top:11px;border-top:1px solid #2c3d4d}
 .next-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}.next-name{font-size:17px;font-weight:800;margin-top:3px}
 .pending-note{display:none;margin-top:10px;background:#3b2f1d;border:1px solid #6a5530;padding:9px 10px;border-radius:12px;font-size:13px}.pending-note.show{display:block}
-.diamond-wrap{height:280px;position:relative}.diamond{width:165px;height:165px;border:2px solid #718196;transform:rotate(45deg);position:absolute;left:50%;top:48%;translate:-50% -50%}
+.diamond-wrap{height:300px;position:relative}
+.outs-panel{display:flex;align-items:center;justify-content:center;gap:10px;margin:4px 0 10px}
+.outs-label{font-size:11px;color:var(--muted);font-weight:900;letter-spacing:.8px}
+.out-ball{width:30px;height:30px;border-radius:50%;border:2px solid #73849a;background:#101820;display:flex;align-items:center;justify-content:center;font-size:17px;opacity:.55}
+.out-ball.filled{background:#f4f7fb;color:#101820;border-color:#f4f7fb;opacity:1}
+.return-match{width:100%;margin-top:10px;background:#244c65;border-color:#4e7c9a}
+.lineup-controls{display:flex;gap:8px;margin-top:10px}
+.lineup-controls button{flex:1}
+.lineup-locked{opacity:.7}
+.lock-note{margin-top:8px;font-size:12px;color:var(--muted);font-weight:800}
+.bench-box{margin-top:14px;padding:12px;border:1px solid #33465a;border-radius:14px;background:#101820}
+.bench-title{font-weight:900;margin-bottom:8px}
+.bench-row{display:grid;grid-template-columns:1fr 92px 38px;gap:7px;align-items:center;margin:6px 0}
+.bench-row input,.bench-row select{width:100%}
+.bench-controls{display:flex;gap:8px;margin-top:8px}
+.bench-controls button{flex:1}
+.sub-btn{width:100%;margin-top:10px;background:#4a3422;border-color:#8c6646}
+.sub-panel{margin-top:12px;padding:12px;border:1px solid #6b563f;border-radius:14px;background:#17130f}
+.sub-panel select{width:100%;margin:6px 0 10px}
+.sub-note{font-size:12px;color:var(--muted);margin-top:6px}.diamond{width:165px;height:165px;border:2px solid #718196;transform:rotate(45deg);position:absolute;left:50%;top:48%;translate:-50% -50%}
 .base{position:absolute;width:62px;min-height:58px;border-radius:14px;background:var(--card2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;padding:4px;cursor:pointer}
 .base.empty{color:#718196}.base.team-brewers{border-color:var(--blue);background:rgba(47,120,196,.18)}.base.team-yankees{border-color:var(--red);background:rgba(216,74,74,.18)}
 #b2{left:50%;top:12px;transform:translateX(-50%)}#b1{right:25px;top:108px}#b3{left:25px;top:108px}#home{left:50%;bottom:5px;transform:translateX(-50%);width:48px;min-height:48px}
@@ -64,13 +83,14 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.6.0 • 2 ÉQUIPES</div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.6.3 • 2 ÉQUIPES</div></div>
 
   <section id="pregame">
     <div class="card">
       <div class="section-title">Avant-match</div>
       <h2>Créer et soumettre les alignements</h2>
       <div class="muted">Chaque entraîneur prépare son ordre au bâton et ses positions. Le marqueur officiel peut commencer quand les deux alignements sont soumis.</div>
+      <button id="returnMatchBtn" class="return-match hidden" onclick="returnToGame()">↩ RETOUR AU MATCH</button>
     </div>
 
     <div class="team-strip">
@@ -99,7 +119,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 
     <div class="card">
       <div class="section-title">Marqueur officiel</div>
-      <div id="scorerWaiting" class="muted">En attente des deux alignements…</div>
+      <div id="lineupLockNote" class="lock-note hidden">🔒 Les alignements sont verrouillés depuis le début du match.</div><div id="scorerWaiting" class="muted">En attente des deux alignements…</div>
       <div id="readyBlock" class="ready-note hidden">
         <strong>✓ Les deux alignements sont reçus.</strong><br>
         Peter Pan lancera pour les Yankees et Jonny Cash pour les Brewers.
@@ -135,6 +155,12 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 
     <div class="card">
       <div class="section-title">Diamant interactif</div>
+      <div class="outs-panel">
+        <span class="outs-label">RETRAITS</span>
+        <span class="out-ball" id="outBall1">⚾</span>
+        <span class="out-ball" id="outBall2">⚾</span>
+        <span class="out-ball" id="outBall3">⚾</span>
+      </div>
       <div class="diamond-wrap">
         <div class="diamond"></div>
         <div class="pitcher-center"><button class="player-link" id="pitcherName"></button></div>
@@ -202,6 +228,9 @@ let teams={
   Yankees:{submitted:false,lineup:originalTeams.Yankees.map((p,i)=>freshPlayer(p,i,"Y")),pitcherStats:{outs:0,h:0,k:0,bb:0,er:0}}
 };
 let coachTeam="Brewers";
+let gameStarted=false;
+let extraPlayerSeq=100;
+Object.values(teams).forEach(t=>{if(!t.bench)t.bench=[];});
 let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[]};
 let selectedBase=null;
 
@@ -242,9 +271,22 @@ function renderLineupEditor(){
       <div class="row-tools"><button onclick="movePlayer(${i},-1)" ${i===0?"disabled":""}>↑ Monter</button><button onclick="movePlayer(${i},1)" ${i===list.length-1?"disabled":""}>↓ Descendre</button></div>
     </div>`).join("");
   renderPregameStatus();
+
+  document.querySelectorAll("#pregame input,#pregame select,#pregame .lineup-controls button,#pregame .bench-controls button,#pregame .submit-lineup").forEach(el=>{
+    if(!el.closest("#substitutionPanel")) el.disabled=gameStarted;
+  });
+  const note=document.getElementById("lineupLockNote");
+  if(note) note.classList.toggle("hidden",!gameStarted);
+
+  renderBenchEditor();
+  if($("openSubBtn")) $("openSubBtn").classList.toggle("hidden",!gameStarted);
+  if($("substitutionPanel") && !gameStarted) $("substitutionPanel").classList.add("hidden");
+  if(gameStarted) refreshSubstitutionOptions();
 }
-function movePlayer(i,d){const a=teams[coachTeam].lineup,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];teams[coachTeam].submitted=false;renderLineupEditor()}
-function changePos(i,v){teams[coachTeam].lineup[i].pos=v;teams[coachTeam].submitted=false;renderPregameStatus()}
+function movePlayer(i,d){
+  if(gameStarted)return;const a=teams[coachTeam].lineup,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];teams[coachTeam].submitted=false;renderLineupEditor()}
+function changePos(i,v){
+  if(gameStarted)return;teams[coachTeam].lineup[i].pos=v;teams[coachTeam].submitted=false;renderPregameStatus()}
 function toggleActive(i,v){teams[coachTeam].lineup[i].active=v;teams[coachTeam].submitted=false;renderPregameStatus()}
 function resetLineup(){teams[coachTeam].lineup=originalTeams[coachTeam].map((p,i)=>freshPlayer(p,i,coachTeam[0]));teams[coachTeam].submitted=false;renderLineupEditor();toast("Alignement réinitialisé")}
 function submitLineup(){
@@ -259,15 +301,145 @@ function renderPregameStatus(){
     const el=$(t.toLowerCase()+"Status");el.textContent=teams[t].submitted?"✓ Alignement soumis":"Alignement non soumis";el.className="status "+(teams[t].submitted?"ok":"")
   });
   const ready=teams.Brewers.submitted&&teams.Yankees.submitted;
-  $("readyBlock").classList.toggle("hidden",!ready);$("startGameBtn").disabled=!ready;
-  $("scorerWaiting").textContent=ready?"Prêt à commencer.":"En attente des deux alignements…";
+  $("readyBlock").classList.toggle("hidden",!ready);
+  $("returnMatchBtn").classList.toggle("hidden",!gameStarted);
+  if($("lineupLockNote")) $("lineupLockNote").classList.toggle("hidden",!gameStarted);
+  $("startGameBtn").classList.toggle("hidden",gameStarted);
+  $("startGameBtn").disabled=!ready;
+  $("scorerWaiting").textContent=gameStarted?"Match en cours — vous pouvez modifier/consulter les alignements puis revenir au match.":(ready?"Prêt à commencer.":"En attente des deux alignements…");
 }
+
+
+function addBenchPlayer(teamName){
+  if(gameStarted){alert("Pendant le match, utilisez « Effectuer un remplacement ».");return;}
+  const t=teams[teamName];
+  if(!t)return;
+  extraPlayerSeq++;
+  t.bench.push({no:extraPlayerSeq,name:"Joueur du banc",pos:"DH",active:false,
+    stats:{AB:0,H:0,HR:0,RBI:0,R:0,BB:0,HBP:0,K:0,E:0}});
+  t.submitted=false;
+  renderLineupEditor();
+  updatePregameStatus();
+}
+function removeBenchPlayer(teamName){
+  if(gameStarted){alert("Le banc est verrouillé pendant le match.");return;}
+  const t=teams[teamName];
+  if(!t || !t.bench.length)return;
+  t.bench.pop();
+  t.submitted=false;
+  renderLineupEditor();
+  updatePregameStatus();
+}
+function updateBenchPlayer(idx,field,value){
+  if(gameStarted)return;
+  const t=teams[coachTeam];
+  if(!t || !t.bench[idx])return;
+  t.bench[idx][field]=value;
+  t.submitted=false;
+}
+function renderBenchEditor(){
+  const host=$("benchEditor");
+  if(!host)return;
+  const t=teams[coachTeam];
+  if(!t){host.innerHTML="";return;}
+  if(!t.bench.length){
+    host.innerHTML='<div class="muted">Aucun joueur sur le banc.</div>';
+  }else{
+    host.innerHTML=t.bench.map((p,i)=>`
+      <div class="bench-row">
+        <input value="${p.name||""}" ${gameStarted?"disabled":""} onchange="updateBenchPlayer(${i},'name',this.value)">
+        <select ${gameStarted?"disabled":""} onchange="updateBenchPlayer(${i},'pos',this.value)">
+          ${["DH","C","1B","2B","3B","SS","LF","CF","RF","L","Piton","R"].map(pos=>`<option ${p.pos===pos?"selected":""}>${pos}</option>`).join("")}
+        </select>
+        <span>🪑</span>
+      </div>`).join("");
+  }
+}
+function toggleSubstitutionPanel(){
+  if(!gameStarted)return;
+  const panel=$("substitutionPanel");
+  panel.classList.toggle("hidden");
+  if(!panel.classList.contains("hidden")) refreshSubstitutionOptions();
+}
+function refreshSubstitutionOptions(){
+  const t=teams[coachTeam];
+  if(!t)return;
+  const outSel=$("subOut"), inSel=$("subIn");
+  outSel.innerHTML=t.players.map((p,i)=>`<option value="${i}">${p.name} — ${p.pos}</option>`).join("");
+  inSel.innerHTML=t.bench.map((p,i)=>`<option value="${i}">${p.name} — ${p.pos}</option>`).join("");
+  const disabled=t.bench.length===0;
+  inSel.disabled=disabled;
+  const btn=$("substitutionPanel").querySelector("button");
+  if(btn)btn.disabled=disabled;
+}
+function confirmSubstitution(){
+  if(!gameStarted)return;
+  const t=teams[coachTeam];
+  const outIdx=Number($("subOut").value), inIdx=Number($("subIn").value);
+  if(!t || !t.players[outIdx] || !t.bench[inIdx])return;
+  const outgoing=t.players[outIdx];
+  const incoming=t.bench[inIdx];
+
+  // The incoming player takes the exact batting-order slot and defensive position
+  // of the outgoing player unless the scorer changes defensive positions later
+  // in a future advanced-defense module.
+  const outgoingToBench={...outgoing,active:false};
+  const incomingToLineup={...incoming,active:true,pos:outgoing.pos};
+
+  t.players[outIdx]=incomingToLineup;
+  t.bench[inIdx]=outgoingToBench;
+
+  $("substitutionPanel").classList.add("hidden");
+  renderLineupEditor();
+  updatePregameStatus();
+  alert(`${incomingToLineup.name} remplace ${outgoing.name}.`);
+}
+
+function addHitter(teamName){
+  if(gameStarted){alert("Les alignements sont verrouillés une fois le match commencé.");return;}
+  const t=teams[teamName];
+  if(!t || t.players.length>=15)return;
+  extraPlayerSeq++;
+  const nextNo = Math.max(...t.players.map(p=>Number(p.no)||0),0)+1;
+  t.players.push({
+    no: nextNo,
+    name: "Nouveau joueur",
+    pos: "DH",
+    active: true,
+    stats:{AB:0,H:0,HR:0,RBI:0,R:0,BB:0,HBP:0,K:0,E:0}
+  });
+  t.submitted=false;
+  renderLineupEditor();
+  updatePregameStatus();
+}
+function removeHitter(teamName){
+  if(gameStarted){alert("Les alignements sont verrouillés une fois le match commencé.");return;}
+  const t=teams[teamName];
+  if(!t || t.players.length<=7)return;
+  t.players.pop();
+  t.submitted=false;
+  renderLineupEditor();
+  updatePregameStatus();
+}
+
 function startGame(){
   if(!(teams.Brewers.submitted&&teams.Yankees.submitted))return;
   resetStatsOnly();
+  gameStarted=true;
   $("pregame").classList.add("hidden");$("game").classList.remove("hidden");renderGame()
 }
-function backToPregame(){$("game").classList.add("hidden");$("pregame").classList.remove("hidden");renderLineupEditor()}
+function backToPregame(){
+  $("game").classList.add("hidden");
+  $("pregame").classList.remove("hidden");
+  renderLineupEditor();
+  updatePregameStatus();
+}
+function returnToGame(){
+  if(!gameStarted)return;
+  $("pregame").classList.add("hidden");
+  $("game").classList.remove("hidden");
+  renderGame();
+}
 
 function resetStatsOnly(){
   Object.values(teams).forEach(t=>{t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=0});t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0}});
@@ -283,6 +455,7 @@ function renderGame(){
   $("awayTeam").classList.toggle("active",state.top);$("homeTeam").classList.toggle("active",!state.top);
   $("atBatTeam").textContent="AU BÂTON : "+currentBattingTeam().toUpperCase();
   $("outsText").textContent=state.outs+" retrait"+(state.outs>1?"s":"");
+  [1,2,3].forEach(i=>$("outBall"+i).classList.toggle("filled",state.outs>=i));
   const occ=Object.values(state.bases).filter(Boolean).length;$("basesText").textContent=occ?occ+" coureur"+(occ>1?"s":"")+" sur les buts":"Buts vides";
   const b=batter(),n=nextBatterObj();$("batterName").textContent=b.name+" • "+b.pos;$("batterName").onclick=()=>openPlayerProfile(b,currentBattingTeam());
   $("batterStats").textContent=`${b.h} en ${b.ab} • ${avg(b)} • ${b.rbi} RBI`;

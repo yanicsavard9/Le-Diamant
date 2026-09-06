@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.9.0</title>
+<title>Le Diamant v0.9.1</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -185,11 +185,21 @@ body.role-official #submitLineupBtn{
 .player-used-note{font-size:11px;font-weight:900;margin-top:2px}
 .player-used-note.brewers{color:#4f9cff}
 .player-used-note.yankees{color:#ef6a6a}
+
+.bench-row{grid-template-columns:36px minmax(0,1fr) 104px!important}
+.bench-row .danger{width:100%;min-width:0;min-height:44px;padding:8px 6px;font-size:12px;white-space:normal;line-height:1.1}
+body.role-captain #gameLogCard{display:none!important}
+.batter-team-brewers{color:#4f9cff!important;font-weight:1000!important}
+.batter-team-yankees{color:#ef6a6a!important;font-weight:1000!important}
+.bottom-tabs{position:sticky;bottom:8px;z-index:25;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:16px 0 6px;padding:7px;background:rgba(15,23,32,.96);border:1px solid #33465a;border-radius:14px;backdrop-filter:blur(10px)}
+.bottom-tabs button{min-height:46px;padding:7px 4px;font-size:12px}
+body:not(.role-official) .official-bottom-tabs{display:none!important}
+.league-tab-panel{display:none}.league-tab-panel.active{display:block}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.0 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.1 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -269,7 +279,13 @@ body.role-official #submitLineupBtn{
       </table>
       <div class="muted" style="font-size:12px;margin-top:8px">Le classement sera alimenté automatiquement lorsque les matchs seront finalisés et sauvegardés dans la future base de données.</div>
     </div>
-  </section>
+  
+    <div class="bottom-tabs">
+      <button type="button" onclick="openLeagueInfo('schedule')">📅 HORAIRE</button>
+      <button type="button" onclick="openLeagueInfo('standings')">🏆 CLASSEMENT</button>
+      <button type="button" onclick="openLeagueInfo('stats')">📊 STATISTIQUES</button>
+    </div>
+</section>
   <section id="pregame" class="hidden">
     <div class="role-topbar">
       <div><b id="workspaceRoleTitle">Espace</b><div id="workspaceRoleSub" class="muted" style="font-size:12px"></div></div>
@@ -355,6 +371,13 @@ body.role-official #submitLineupBtn{
       </div>
     </div>
 
+    
+    <div class="bottom-tabs official-bottom-tabs">
+      <button type="button" onclick="openLeagueInfo('schedule')">📅 HORAIRE</button>
+      <button type="button" onclick="openLeagueInfo('standings')">🏆 CLASSEMENT</button>
+      <button type="button" onclick="openLeagueInfo('stats')">📊 STATISTIQUES</button>
+    </div>
+
     <div class="card" id="officialPregameCard">
       <div class="section-title">Marqueur officiel</div><div class="muted" style="font-size:12px;margin-bottom:8px">Les alignements sont soumis par les capitaines. Le marqueur les consulte et peut les corriger au besoin.</div>
       <div id="lineupLockNote" class="lock-note hidden">🔒 Les alignements sont verrouillés pour les capitaines. Le marqueur peut toujours les modifier pendant le match.</div>
@@ -427,8 +450,14 @@ body.role-official #submitLineupBtn{
       </div>
     </div>
 
-    <div class="card"><div class="section-title">Journal du match</div><div class="log" id="gameLog"><div>Aucune action enregistrée.</div></div></div>
-  </section>
+    <div class="card" id="gameLogCard"><div class="section-title">Journal du match</div><div class="log" id="gameLog"><div>Aucune action enregistrée.</div></div></div>
+  
+    <div class="bottom-tabs official-bottom-tabs">
+      <button type="button" onclick="openLeagueInfo('schedule')">📅 HORAIRE</button>
+      <button type="button" onclick="openLeagueInfo('standings')">🏆 CLASSEMENT</button>
+      <button type="button" onclick="openLeagueInfo('stats')">📊 STATISTIQUES</button>
+    </div>
+</section>
 </div>
 
 <div class="modal" id="pendingModal"><div class="sheet"><h3 id="pendingTitle"></h3><p id="pendingCurrent"></p><div class="sheet-grid">
@@ -510,7 +539,15 @@ function era(ps){return ps.outs?((ps.er*27)/ps.outs).toFixed(2):"0.00"}
 function statCell(l,v){return `<div class="stat-cell"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`}
 function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400)}
 
-function showCoach(team){coachTeam=team;$("tabBrewers").classList.toggle("active",team==="Brewers");$("tabYankees").classList.toggle("active",team==="Yankees");renderLineupEditor()}
+function showCoach(team){
+  coachTeam=team;
+  selectedSubBenchIndex=null;
+  $("tabBrewers").classList.toggle("active",team==="Brewers");
+  $("tabYankees").classList.toggle("active",team==="Yankees");
+  renderLineupEditor();
+  renderBenchEditor();
+  if(gameStarted && currentRole==="official")refreshSubstitutionOptions();
+}
 
 function rosterPlayerKey(p){return String(p.id||p.name).toLowerCase()}
 function renderTeamRoster(){
@@ -840,28 +877,27 @@ function selectBenchPlayer(index,playerId){
   toast(`${incoming.name} ajouté au banc`);
 }
 
-function removeBenchSlot(index){
-  if(gameStarted && currentRole!=="official"){
-    toast("Banc verrouillé pour le capitaine pendant le match");
-    return;
-  }
 
+function removeBenchPlayerByKey(key){
+  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
   const t=teams[coachTeam];
-  if(!t || !Array.isArray(t.bench) || !t.bench[index]){
-    toast("Joueur du banc introuvable");
-    return;
-  }
-
-  const removed=t.bench[index];
-  t.bench.splice(index,1);
-
-  // Avant le match, une modification oblige le capitaine à soumettre de nouveau.
-  // Pendant le match, le marqueur peut corriger sans changer le statut de soumission.
+  if(!t || !Array.isArray(t.bench))return;
+  const idx=t.bench.findIndex(p=>rosterPlayerKey(p)===key);
+  if(idx<0){toast("Joueur du banc introuvable");return}
+  const removed=t.bench[idx];
+  t.bench.splice(idx,1);
   if(!gameStarted)t.submitted=false;
-
+  selectedSubBenchIndex=null;
   renderBenchEditor();
   renderPregameStatus();
+  if(gameStarted && currentRole==="official")refreshSubstitutionOptions();
   toast(`${removed.name} retiré du banc`);
+}
+
+function removeBenchSlot(index){
+  const t=teams[coachTeam];
+  if(!t || !Array.isArray(t.bench) || !t.bench[index])return;
+  removeBenchPlayerByKey(rosterPlayerKey(t.bench[index]));
 }
 
 function removeBenchPlayer(teamName){
@@ -983,12 +1019,10 @@ function renderBenchEditor(){
   sel.innerHTML='<option value="">— Sélectionner un joueur —</option>'+
     available.map(p=>{
       const isStarter=t.lineup.some(x=>rosterPlayerKey(x)===rosterPlayerKey(p));
-      const suffix=isStarter ? " — alignement partant" : "";
-      return `<option value="${p.id||p.name}">${p.name} — ${p.pos||"DH"}${suffix}</option>`;
+      return `<option value="${p.id||p.name}">${p.name} — ${p.pos||"DH"}${isStarter?" — alignement partant":""}</option>`;
     }).join("");
 
   sel.disabled=benchLocked || available.length===0;
-
   const addBtn=$("addBenchBtn");
   if(addBtn)addBtn.disabled=benchLocked || available.length===0;
 
@@ -1001,22 +1035,12 @@ function renderBenchEditor(){
           <div class="muted" style="font-size:12px">${p.pos||"DH"}</div>
           ${gameStarted&&p.lockedStarter?`<div class="player-used-note ${p.lockedStarterTeam==="Brewers"?"brewers":"yankees"}">DÉJÀ UTILISÉ DANS L’ALIGNEMENT</div>`:""}
         </div>
-        <button
-          type="button"
-          class="danger"
-          data-remove-bench="${i}"
-          ${benchLocked?"disabled":""}>
-          − ENLEVER
-        </button>
+        <button type="button" class="danger" data-remove-bench-key="${encodeURIComponent(rosterPlayerKey(p))}" ${benchLocked?"disabled":""}>− ENLEVER</button>
       </div>`).join("")
     : '<div class="muted" style="font-size:12px">Aucun joueur au banc.</div>';
 
-  // Liaison directe après chaque rendu : plus fiable sur Safari/iPhone.
-  host.querySelectorAll("[data-remove-bench]").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      const index=Number(btn.dataset.removeBench);
-      removeBenchSlot(index);
-    });
+  host.querySelectorAll("[data-remove-bench-key]").forEach(btn=>{
+    btn.addEventListener("click",()=>removeBenchPlayerByKey(decodeURIComponent(btn.dataset.removeBenchKey)));
   });
 }
 function toggleSubstitutionPanel(){
@@ -1032,28 +1056,19 @@ function refreshSubstitutionOptions(){
   const outSel=$("subOut");
   const choices=$("subBenchChoices");
   const confirmBtn=$("confirmSubBtn");
+  if(!outSel || !choices)return;
 
-  outSel.innerHTML=t.lineup.map((p,i)=>
-    `<option value="${i}">${p.name} — ${p.pos}</option>`
-  ).join("");
+  outSel.innerHTML=t.lineup.map((p,i)=>`<option value="${i}">${p.name} — ${p.pos}</option>`).join("");
 
-  const available=t.bench
-    .map((p,i)=>({p,i}))
-    .filter(x=>!x.p.placeholder);
-
-  if(selectedSubBenchIndex!==null && !available.some(x=>x.i===selectedSubBenchIndex)){
-    selectedSubBenchIndex=null;
-  }
+  const available=(t.bench||[]).map((p,i)=>({p,i})).filter(x=>x.p && !x.p.placeholder);
+  if(selectedSubBenchIndex!==null && !available.some(x=>x.i===selectedSubBenchIndex))selectedSubBenchIndex=null;
 
   choices.innerHTML=available.length
     ? available.map(({p,i})=>`
-        <button type="button"
-          class="sub-bench-choice ${selectedSubBenchIndex===i?"selected":""}"
-          onclick="selectSubBenchPlayer(${i})">
-          <b>${p.name}</b>
-          <div class="muted" style="font-size:12px">${p.pos||"DH"}</div>
-        </button>`).join("")
-    : '<div class="muted">Aucun joueur disponible au banc.</div>';
+      <button type="button" class="sub-bench-choice ${selectedSubBenchIndex===i?"selected":""}" onclick="selectSubBenchPlayer(${i})">
+        <b>${p.name}</b><div class="muted" style="font-size:12px">${coachTeam} • ${p.pos||"DH"}</div>
+      </button>`).join("")
+    : `<div class="muted">Aucun joueur au banc pour ${coachTeam}.</div>`;
 
   if(confirmBtn)confirmBtn.disabled=available.length===0 || selectedSubBenchIndex===null;
 }
@@ -1199,7 +1214,9 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   $("outsText").textContent=state.outs+" retrait"+(state.outs>1?"s":"");
   [1,2,3].forEach(i=>$("outBall"+i).classList.toggle("filled",state.outs>=i));
   const occ=Object.values(state.bases).filter(Boolean).length;$("basesText").textContent=occ?occ+" coureur"+(occ>1?"s":"")+" sur les buts":"Buts vides";
-  const b=batter(),n=nextBatterObj();$("batterName").textContent=b.name+" • "+b.pos;$("batterName").onclick=()=>openPlayerProfile(b,currentBattingTeam());
+  const b=batter(),n=nextBatterObj();$("batterName").textContent=b.name+" • "+b.pos;
+  $("batterName").className="batter-name player-link "+(currentBattingTeam()==="Brewers"?"batter-team-brewers":"batter-team-yankees");
+  $("batterName").onclick=()=>openPlayerProfile(b,currentBattingTeam());
   $("batterStats").textContent=`${b.h} en ${b.ab} • ${avg(b)} • ${b.rbi} RBI`;
   const p=currentPitcher(),ft=currentFieldingTeam();$("pitcherName").textContent="⚾ "+(p?p.name:"Aucun lanceur")+" • "+ft;$("pitcherName").className="player-link team-"+ft.toLowerCase();
   $("pitcherName").onclick=()=>openPitcherProfile(p,ft);$("pendingNote").classList.toggle("show",state.pending.length>0);
@@ -1297,6 +1314,16 @@ function confirmReset(){resetStatsOnly();gameStarted=false;Object.values(teams).
 
 let currentRole=null;
 let viewerSelectedTeam="Brewers";
+
+
+function openLeagueInfo(tab){
+  const map={schedule:["Horaire","leagueSchedulePanel"],standings:["Classement","leagueStandingsPanel"],stats:["Statistiques","leagueStatsPanel"]};
+  const chosen=map[tab]||map.schedule;
+  $("leagueInfoTitle").textContent=chosen[0];
+  ["leagueSchedulePanel","leagueStandingsPanel","leagueStatsPanel"].forEach(id=>$(id).classList.toggle("active",id===chosen[1]));
+  $("leagueInfoModal").classList.add("show");
+}
+function closeLeagueInfo(){ $("leagueInfoModal").classList.remove("show"); }
 
 function setRoleBadge(label){
   const badge=$("roleBadge");
@@ -1416,7 +1443,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.9.0.
+// L'accueil par rôles est l'écran initial de v0.9.1.
 
 renderLineupEditor();
 
@@ -1453,6 +1480,23 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
     <div id="benchRosterChoices"></div>
     <button id="removeSelectedBenchPlayerBtn" type="button" class="danger" style="width:100%;margin-top:10px" onclick="removeSelectedBenchPlayer()">− ENLEVER CE JOUEUR DU BANC</button>
     <button type="button" class="secondary" style="width:100%;margin-top:10px" onclick="closeBenchRosterModal()">ANNULER</button>
+  </div>
+</div>
+
+<div class="modal" id="leagueInfoModal">
+  <div class="sheet">
+    <h3 id="leagueInfoTitle">Horaire</h3>
+    <div id="leagueSchedulePanel" class="league-tab-panel active">
+      <div class="readonly-note"><b>Horaire</b><br>Les matchs à venir apparaîtront ici lorsque le calendrier de la ligue sera connecté.</div>
+    </div>
+    <div id="leagueStandingsPanel" class="league-tab-panel">
+      <table class="viewer-table"><thead><tr><th>Équipe</th><th>V</th><th>D</th><th>%</th></tr></thead>
+      <tbody><tr><td>Brewers</td><td>0</td><td>0</td><td>—</td></tr><tr><td>Yankees</td><td>0</td><td>0</td><td>—</td></tr></tbody></table>
+    </div>
+    <div id="leagueStatsPanel" class="league-tab-panel">
+      <div class="readonly-note"><b>Statistiques</b><br>Les statistiques cumulatives de la ligue apparaîtront ici.</div>
+    </div>
+    <button type="button" style="width:100%;margin-top:12px" onclick="closeLeagueInfo()">FERMER</button>
   </div>
 </div>
 </body>

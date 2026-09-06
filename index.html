@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.8.7</title>
+<title>Le Diamant v0.8.8</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -174,11 +174,16 @@ body.role-captain #game{display:none!important}
   box-shadow:0 0 16px rgba(255,255,255,.28);
   filter:brightness(1.25);
 }
+
+body.role-official #resetLineupBtn,
+body.role-official #submitLineupBtn{
+  display:none !important;
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.7 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.8 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -534,35 +539,109 @@ function addRosterPlayer(){
   toast(`${name} ajouté à la liste de ${coachTeam}`);
 }
 function openRosterForSlot(i){
-  if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}
-  
-  const t=teams[coachTeam], current=t.lineup[i];
-  if(!current)return;
-  selectedLineupSlot=i;
-  $("rosterReplaceInfo").textContent=`Remplacer ${current.name} dans la position ${i+1} de l’ordre au bâton.`;
-  const activeIds=new Set(t.lineup.map((p,idx)=>idx===i?null:rosterPlayerKey(p)).filter(Boolean));
-  const choices=t.roster.filter(p=>!activeIds.has(rosterPlayerKey(p)));
-  $("rosterChoices").innerHTML=choices.length
-    ? choices.map(p=>`<button type="button" class="roster-choice" onclick='chooseRosterPlayer(${JSON.stringify(p.id||p.name)})'><b>${p.name}</b><small>Position habituelle : ${p.pos||"DH"}</small></button>`).join("")
-    : '<div class="muted">Aucun autre joueur disponible dans la liste de cette équipe.</div>';
-  $("rosterModal").classList.add("show");
-}
-function chooseRosterPlayer(playerId){
-  if(gameStarted && currentRole!=="official")return
-  if(gameStarted||selectedLineupSlot===null)return;
-  const t=teams[coachTeam];
-  const incoming=t.roster.find(p=>(p.id||p.name)===playerId);
-  const outgoing=t.lineup[selectedLineupSlot];
-  if(!incoming||!outgoing)return;
+  if(gameStarted && currentRole!=="official"){
+    toast("Alignement verrouillé pour le capitaine pendant le match");
+    return;
+  }
 
-  // Keep the batting-order slot and current defensive position.
-  const replacement={...incoming,pos:outgoing.pos,active:true,ab:0,h:0,hr:0,rbi:0,r:0,bv:0};
+  const t=teams[coachTeam];
+  const current=t.lineup[i];
+  if(!current)return;
+
+  selectedLineupSlot=i;
+
+  const info=$("rosterReplaceInfo");
+  const choicesHost=$("rosterChoices");
+  const modal=$("rosterModal");
+  if(!choicesHost || !modal)return;
+
+  if(gameStarted && currentRole==="official"){
+    // Pendant le match, le marqueur remplace uniquement avec un joueur présentement au banc.
+    const benchChoices=(t.bench||[])
+      .map((p,idx)=>({p,idx}))
+      .filter(x=>x.p && !x.p.placeholder);
+
+    if(info)info.textContent=`Remplacer ${current.name} dans la position ${i+1} de l’ordre au bâton avec un joueur du banc.`;
+
+    choicesHost.innerHTML=benchChoices.length
+      ? benchChoices.map(({p,idx})=>`
+          <button type="button"
+            class="roster-choice"
+            onclick="chooseBenchPlayerForLineup(${idx})">
+            <b>${p.name}</b>
+            <small>Au banc • ${p.pos||"DH"}</small>
+          </button>`).join("")
+      : '<div class="muted">Aucun joueur disponible au banc pour cette équipe.</div>';
+  }else{
+    // Avant le match, le capitaine choisit parmi la liste complète de son équipe.
+    const activeIds=new Set(
+      t.lineup.map((p,idx)=>idx===i?null:rosterPlayerKey(p)).filter(Boolean)
+    );
+    const choices=(t.roster||[]).filter(p=>!activeIds.has(rosterPlayerKey(p)));
+
+    if(info)info.textContent=`Remplacer ${current.name} dans la position ${i+1} de l’ordre au bâton.`;
+
+    choicesHost.innerHTML=choices.length
+      ? choices.map(p=>`
+          <button type="button"
+            class="roster-choice"
+            onclick='chooseRosterPlayer(${JSON.stringify(p.id||p.name)})'>
+            <b>${p.name}</b>
+            <small>Position habituelle : ${p.pos||"DH"}</small>
+          </button>`).join("")
+      : '<div class="muted">Aucun autre joueur disponible dans la liste de cette équipe.</div>';
+  }
+
+  modal.classList.add("show");
+}
+
+function chooseBenchPlayerForLineup(benchIndex){
+  if(!(gameStarted && currentRole==="official"))return;
+
+  const t=teams[coachTeam];
+  if(selectedLineupSlot===null || !t || !t.lineup[selectedLineupSlot] || !t.bench[benchIndex])return;
+
+  const outgoing=t.lineup[selectedLineupSlot];
+  const incoming=t.bench[benchIndex];
+
+  if(incoming.placeholder)return;
+
+  // The incoming bench player takes the same batting-order slot and current defensive position.
+  const incomingToLineup={...incoming,active:true,pos:outgoing.pos};
+  const outgoingToBench={...outgoing,active:false};
+
+  t.lineup[selectedLineupSlot]=incomingToLineup;
+  t.bench[benchIndex]=outgoingToBench;
+
+  closeRosterModal();
+  renderLineupEditor();
+  renderPregameStatus();
+  toast(`${incomingToLineup.name} remplace ${outgoing.name}`);
+}
+
+function chooseRosterPlayer(playerId){
+  if(gameStarted && currentRole!=="official")return;
+  if(selectedLineupSlot===null)return;
+
+  const t=teams[coachTeam];
+  const incoming=(t.roster||[]).find(p=>(p.id||p.name)===playerId);
+  const outgoing=t.lineup[selectedLineupSlot];
+  if(!incoming || !outgoing)return;
+
+  const replacement={
+    ...incoming,
+    pos:outgoing.pos,
+    active:true,
+    ab:0,h:0,hr:0,rbi:0,r:0,bv:0
+  };
+
   t.lineup[selectedLineupSlot]=replacement;
 
-  // If incoming was on the bench, remove them from the bench.
-  t.bench=t.bench.filter(p=>rosterPlayerKey(p)!==rosterPlayerKey(incoming));
+  // If this player was on the bench, remove that bench copy.
+  t.bench=(t.bench||[]).filter(p=>rosterPlayerKey(p)!==rosterPlayerKey(incoming));
 
-  t.submitted=false;
+  if(!gameStarted)t.submitted=false;
+
   closeRosterModal();
   renderLineupEditor();
   renderPregameStatus();
@@ -601,8 +680,12 @@ function renderLineupEditor(){
 if($("addBenchBtn")) $("addBenchBtn").disabled=(gameStarted && currentRole!=="official");
 if($("resetLineupBtn")) $("resetLineupBtn").disabled=(gameStarted && currentRole!=="official");
   if($("submitLineupBtn")){
+    $("submitLineupBtn").style.display=currentRole==="official"?"none":"";
     $("submitLineupBtn").classList.toggle("hidden",currentRole==="official");
     $("submitLineupBtn").disabled=gameStarted && currentRole!=="official";
+  }
+  if($("resetLineupBtn")){
+    $("resetLineupBtn").style.display=currentRole==="official"?"none":"";
   }
   if(gameStarted) refreshSubstitutionOptions();
 }
@@ -1281,7 +1364,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.8.7.
+// L'accueil par rôles est l'écran initial de v0.8.8.
 
 renderLineupEditor();
 

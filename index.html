@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.10.6</title>
+<title>Diamond v0.10.7</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -301,7 +301,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.6 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.7 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1035,18 +1035,31 @@ function renderPregameStatus(){
   }
 
   const ready=teams.Brewers.submitted&&teams.Yankees.submitted;
-  $("readyBlock").classList.toggle("hidden",!ready);
-  $("returnMatchBtn").classList.toggle("hidden",!gameStarted || currentRole!=="official");
 
-  if($("lineupLockNote"))$("lineupLockNote").classList.toggle("hidden",!gameStarted);
-  if($("officialLiveEditNote"))$("officialLiveEditNote").classList.toggle("hidden",!(gameStarted&&currentRole==="official"));
+  const readyBlock=$("readyBlock");
+  if(readyBlock)readyBlock.classList.toggle("hidden",!ready);
 
-  $("startGameBtn").classList.toggle("hidden",gameStarted);
-  $("startGameBtn").disabled=!ready;
+  const returnBtn=$("returnMatchBtn");
+  if(returnBtn)returnBtn.classList.toggle("hidden",!gameStarted || currentRole!=="official");
 
-  $("scorerWaiting").textContent=gameStarted
-    ?"Match en cours — alignements verrouillés pour les capitaines."
-    :(ready?"Prêt à commencer.":"En attente des deux alignements…");
+  const lockNote=$("lineupLockNote");
+  if(lockNote)lockNote.classList.toggle("hidden",!gameStarted);
+
+  const liveNote=$("officialLiveEditNote");
+  if(liveNote)liveNote.classList.toggle("hidden",!(gameStarted&&currentRole==="official"));
+
+  const startBtn=$("startGameBtn");
+  if(startBtn){
+    startBtn.classList.toggle("hidden",gameStarted);
+    startBtn.disabled=!ready;
+  }
+
+  const waiting=$("scorerWaiting");
+  if(waiting){
+    waiting.textContent=gameStarted
+      ?"Match en cours — alignements verrouillés pour les capitaines."
+      :(ready?"Prêt à commencer.":"En attente des deux alignements…");
+  }
 }
 
 
@@ -2023,14 +2036,6 @@ function endHalfIfNeeded(){
 }
 function blockIfPending(){if(state.pending.length){toast("Confirmez d’abord les coureurs");return true}return false}
 
-function flashScoringTap(label){
-  const card=$("plateAppearanceCard");
-  if(card){
-    card.dataset.lastTap=label;
-  }
-  toast("Sélection : "+label);
-}
-
 function beginHitLike(dest,label,isHit=true){
   if(blockIfPending())return;saveHistory();const b=batter(),bt=currentBattingTeam();b.ab++;if(isHit){b.h++;pitcherStats().h++}
   const pending=[];[3,2,1].forEach(base=>{if(state.bases[base])pending.push({runner:state.bases[base],origin:base,batterDest:dest})});
@@ -2038,11 +2043,10 @@ function beginHitLike(dest,label,isHit=true){
   if(state.pending.length)showPending();else nextBatter();renderGame()
 }
 function recordHit(n){
-  flashScoringTap(n===1?"SIMPLE":n===2?"DOUBLE":"TRIPLE");
   if(blockIfGameOver())return;
   beginHitLike(n,n===1?"simple":n===2?"double":"triple",true);
 }
-function recordError(){flashScoringTap("ERREUR");if(blockIfGameOver())return;beginHitLike(1,"erreur défensive",false)}
+function recordError(){if(blockIfGameOver())return;beginHitLike(1,"erreur défensive",false)}
 function showPending(){
   if(!state.pending.length){nextBatter();renderGame();return}
   const item=state.pending[0],r=item.runner;$("pendingTitle").textContent=r.name;$("pendingCurrent").textContent=`Était au ${item.origin===1?"1er":item.origin+"e"} but — où termine-t-il?`;
@@ -2055,11 +2059,11 @@ function resolvePending(dest){if(blockIfGameOver())return;
   else{if(state.bases[dest]){toast("Ce but est déjà occupé");state.pending.unshift(item);return}state.bases[dest]=r;addLog(`${r.name} avance au ${dest===2?"2e":"3e"} but`)}
   $("pendingModal").classList.remove("show");endHalfIfNeeded();if(state.outs<3&&state.pending.length)showPending();else if(state.outs<3&&!state.pending.length)nextBatter();renderGame()
 }
-function recordHR(){flashScoringTap("CIRCUIT");if(blockIfGameOver())return;
+function recordHR(){if(blockIfGameOver())return;
   if(blockIfPending())return;saveHistory();const b=batter(),bt=currentBattingTeam();b.ab++;b.h++;b.hr++;pitcherStats().h++;
   [3,2,1].forEach(i=>{if(state.bases[i])scoreRunner(state.bases[i],true)});scoreRunner(runnerRef(b,bt),true);state.bases={1:null,2:null,3:null};addLog(`${b.name} — circuit`);nextBatter();renderGame()
 }
-function recordStrikeout(){flashScoringTap("K");if(blockIfGameOver())return;
+function recordStrikeout(){if(blockIfGameOver())return;
   if(blockIfPending())return;
   if(!gameStarted){toast("Le match n’est pas commencé");return}
 
@@ -2081,7 +2085,7 @@ function recordStrikeout(){flashScoringTap("K");if(blockIfGameOver())return;
 
   renderGame();
 }
-function recordOut(){flashScoringTap("RETRAIT");if(blockIfGameOver())return;
+function recordOut(){if(blockIfGameOver())return;
   if(blockIfPending())return;
   if(!gameStarted){toast("Le match n’est pas commencé");return}
 
@@ -2108,8 +2112,8 @@ function forcedToFirst(label){
   if(state.bases[1]){if(state.bases[2]){if(state.bases[3])scoreRunner(state.bases[3],true);state.bases[3]=state.bases[2]}state.bases[2]=state.bases[1]}
   state.bases[1]=runnerRef(b,bt);addLog(`${b.name} — ${label}`);nextBatter();renderGame()
 }
-function recordWalk(){flashScoringTap("BB");if(blockIfGameOver())return;pitcherStats().bb++;forcedToFirst("but sur balles")}
-function recordHBP(){flashScoringTap("HBP");if(blockIfGameOver())return;forcedToFirst("atteint par un lancer")}
+function recordWalk(){if(blockIfGameOver())return;pitcherStats().bb++;forcedToFirst("but sur balles")}
+function recordHBP(){if(blockIfGameOver())return;forcedToFirst("atteint par un lancer")}
 
 function openRunnerControls(base){
   if(state.pending.length){toast("Terminez d’abord la confirmation des coureurs");return}
@@ -2171,6 +2175,13 @@ function confirmReset(){resetStatsOnly();gameStarted=false;Object.values(teams).
 
 let currentRole=null;
 let viewerSelectedTeam="Brewers";
+let pendingGameOver=null;
+let completedGames=[];
+let standings={
+  Brewers:{W:0,L:0,RF:0,RA:0},
+  Yankees:{W:0,L:0,RF:0,RA:0}
+};
+let selectedCompletedGameId=null;
 
 
 function openLeagueInfo(tab){
@@ -2409,7 +2420,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.10.6.
+// L'accueil par rôles est l'écran initial de v0.10.7.
 
 renderLineupEditor();
 

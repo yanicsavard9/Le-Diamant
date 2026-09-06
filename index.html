@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.8.6</title>
+<title>Le Diamant v0.8.7</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -163,11 +163,22 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 body:not(.role-official) .scorer-only{display:none!important}
 body.role-viewer #game{display:none!important}
 body.role-captain #game{display:none!important}
+
+.sub-bench-list{display:grid;gap:8px;margin:8px 0 12px}
+.sub-bench-choice{
+  width:100%;min-height:48px;text-align:left;padding:10px 12px;
+  border:1px solid #51677d;border-radius:12px;background:#17222d;color:inherit;
+}
+.sub-bench-choice.selected{
+  outline:3px solid #fff;outline-offset:2px;
+  box-shadow:0 0 16px rgba(255,255,255,.28);
+  filter:brightness(1.25);
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.6 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.7 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -318,9 +329,14 @@ body.role-captain #game{display:none!important}
       <div id="substitutionPanel" class="sub-panel hidden">
         <b>REMPLACEMENT</b>
         <div class="sub-note">Le joueur entrant prend la place du joueur remplacé dans l’ordre au bâton.</div>
-        <label>Joueur qui sort</label><select id="subOut"></select>
-        <label>Joueur du banc qui entre</label><select id="subIn"></select>
-        <button onclick="confirmSubstitution()">CONFIRMER LE REMPLACEMENT</button>
+
+        <label>Joueur qui sort</label>
+        <select id="subOut"></select>
+
+        <label style="display:block;margin-top:8px">Joueur du banc qui entre</label>
+        <div id="subBenchChoices" class="sub-bench-list"></div>
+
+        <button id="confirmSubBtn" type="button" onclick="confirmSubstitution()">CONFIRMER LE REMPLACEMENT</button>
       </div>
       <div class="submit-bar">
         <button id="resetLineupBtn" onclick="resetLineup()">RÉINITIALISER</button>
@@ -329,7 +345,7 @@ body.role-captain #game{display:none!important}
     </div>
 
     <div class="card" id="officialPregameCard">
-      <div class="section-title">Marqueur officiel</div>
+      <div class="section-title">Marqueur officiel</div><div class="muted" style="font-size:12px;margin-bottom:8px">Les alignements sont soumis par les capitaines. Le marqueur les consulte et peut les corriger au besoin.</div>
       <div id="lineupLockNote" class="lock-note hidden">🔒 Les alignements sont verrouillés pour les capitaines. Le marqueur peut toujours les modifier pendant le match.</div>
       <div id="officialLiveEditNote" class="lock-note hidden" style="margin-top:8px">
         ✏️ Mode marqueur : vous pouvez modifier les alignements et le banc même pendant le match.
@@ -456,6 +472,7 @@ let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0
 let selectedBase=null;
 let selectedLineupSlot=null;
 let selectedBenchSlot=null;
+let selectedSubBenchIndex=null;
 
 const $=id=>document.getElementById(id);
 $("pregameBrewersLogo").src=BREWERS_LOGO;$("pregameYankeesLogo").src=YANKEES_LOGO;
@@ -572,7 +589,7 @@ function renderLineupEditor(){
   document.querySelectorAll("#pregame input,#pregame select,#pregame .lineup-controls button,#pregame .submit-lineup").forEach(el=>{
     if(!el.closest("#substitutionPanel")) el.disabled=lineupLocked;
   });
-  document.querySelectorAll("#lineupEditor button").forEach(b=>b.disabled=gameStarted);
+  document.querySelectorAll("#lineupEditor button").forEach(b=>b.disabled=(gameStarted && currentRole!=="official"));
   const note=document.getElementById("lineupLockNote");
   if(note) note.classList.toggle("hidden",!gameStarted);
 
@@ -580,10 +597,13 @@ function renderLineupEditor(){
   renderBenchEditor();
   if($("openSubBtn")) $("openSubBtn").classList.toggle("hidden",!gameStarted);
   if($("substitutionPanel") && !gameStarted) $("substitutionPanel").classList.add("hidden");
-  if($("lineupControls")) $("lineupControls").querySelectorAll("button").forEach(b=>b.disabled=gameStarted);
-if($("addBenchBtn")) $("addBenchBtn").disabled=!!gameStarted;
-if($("resetLineupBtn")) $("resetLineupBtn").disabled=gameStarted;
-  if($("submitLineupBtn")) $("submitLineupBtn").disabled=gameStarted;
+  if($("lineupControls")) $("lineupControls").querySelectorAll("button").forEach(b=>b.disabled=(gameStarted && currentRole!=="official"));
+if($("addBenchBtn")) $("addBenchBtn").disabled=(gameStarted && currentRole!=="official");
+if($("resetLineupBtn")) $("resetLineupBtn").disabled=(gameStarted && currentRole!=="official");
+  if($("submitLineupBtn")){
+    $("submitLineupBtn").classList.toggle("hidden",currentRole==="official");
+    $("submitLineupBtn").disabled=gameStarted && currentRole!=="official";
+  }
   if(gameStarted) refreshSubstitutionOptions();
 }
 function movePlayer(i,d){
@@ -880,35 +900,71 @@ function toggleSubstitutionPanel(){
 function refreshSubstitutionOptions(){
   const t=teams[coachTeam];
   if(!t)return;
-  const outSel=$("subOut"), inSel=$("subIn");
-  outSel.innerHTML=t.lineup.map((p,i)=>`<option value="${i}">${p.name} — ${p.pos}</option>`).join("");
-  inSel.innerHTML=t.bench.map((p,i)=>({p,i})).filter(x=>!x.p.placeholder).map(x=>`<option value="${x.i}">${x.p.name} — ${x.p.pos}</option>`).join("");
-  const disabled=t.bench.filter(p=>!p.placeholder).length===0;
-  inSel.disabled=disabled;
-  const btn=$("substitutionPanel").querySelector("button");
-  if(btn)btn.disabled=disabled;
+
+  const outSel=$("subOut");
+  const choices=$("subBenchChoices");
+  const confirmBtn=$("confirmSubBtn");
+
+  outSel.innerHTML=t.lineup.map((p,i)=>
+    `<option value="${i}">${p.name} — ${p.pos}</option>`
+  ).join("");
+
+  const available=t.bench
+    .map((p,i)=>({p,i}))
+    .filter(x=>!x.p.placeholder);
+
+  if(selectedSubBenchIndex!==null && !available.some(x=>x.i===selectedSubBenchIndex)){
+    selectedSubBenchIndex=null;
+  }
+
+  choices.innerHTML=available.length
+    ? available.map(({p,i})=>`
+        <button type="button"
+          class="sub-bench-choice ${selectedSubBenchIndex===i?"selected":""}"
+          onclick="selectSubBenchPlayer(${i})">
+          <b>${p.name}</b>
+          <div class="muted" style="font-size:12px">${p.pos||"DH"}</div>
+        </button>`).join("")
+    : '<div class="muted">Aucun joueur disponible au banc.</div>';
+
+  if(confirmBtn)confirmBtn.disabled=available.length===0 || selectedSubBenchIndex===null;
 }
-function confirmSubstitution(){
-  if(!gameStarted)return;
+
+function selectSubBenchPlayer(index){
   const t=teams[coachTeam];
-  const outIdx=Number($("subOut").value), inIdx=Number($("subIn").value);
-  if(!t || !t.lineup[outIdx] || !t.bench[inIdx])return;
+  if(!t || !t.bench[index] || t.bench[index].placeholder)return;
+  selectedSubBenchIndex=index;
+  refreshSubstitutionOptions();
+  toast(`${t.bench[index].name} sélectionné`);
+}
+
+function confirmSubstitution(){
+  if(!gameStarted || currentRole!=="official")return;
+
+  const t=teams[coachTeam];
+  const outIdx=Number($("subOut").value);
+  const inIdx=selectedSubBenchIndex;
+
+  if(inIdx===null || !t || !t.lineup[outIdx] || !t.bench[inIdx]){
+    toast("Sélectionnez un joueur du banc");
+    return;
+  }
+
   const outgoing=t.lineup[outIdx];
   const incoming=t.bench[inIdx];
 
-  // The incoming player takes the exact batting-order slot and defensive position
-  // of the outgoing player unless the scorer changes defensive positions later
-  // in a future advanced-defense module.
   const outgoingToBench={...outgoing,active:false};
   const incomingToLineup={...incoming,active:true,pos:outgoing.pos};
 
   t.lineup[outIdx]=incomingToLineup;
   t.bench[inIdx]=outgoingToBench;
 
+  selectedSubBenchIndex=null;
   $("substitutionPanel").classList.add("hidden");
+
   renderLineupEditor();
   renderPregameStatus();
-  alert(`${incomingToLineup.name} remplace ${outgoing.name}.`);
+  toast(`${incomingToLineup.name} remplace ${outgoing.name}`);
 }
 
 function addHitter(teamName){
@@ -1225,7 +1281,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.8.6.
+// L'accueil par rôles est l'écran initial de v0.8.7.
 
 renderLineupEditor();
 

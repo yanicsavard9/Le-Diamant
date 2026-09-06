@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.10.0</title>
+<title>Diamond v0.10.2</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -297,7 +297,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.0 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.2 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -371,7 +371,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
     </div>
 
     <div class="card">
-      <div class="section-title">Classement</div>
+      <div class="section-title">Classement</div><div id="viewerStandings" style="margin-top:10px"></div>
       <table class="viewer-table">
         <thead><tr><th>Équipe</th><th>V</th><th>D</th><th>%</th></tr></thead>
         <tbody>
@@ -603,12 +603,51 @@ body:not(.role-official) #gameLogCard{display:none!important}
 
 <div class="modal" id="resetModal"><div class="sheet"><h3>⚠️ Nouvelle partie?</h3><p><b>Êtes-vous certain que c’est bien ce que vous voulez faire?</b></p><p>Le pointage et les statistiques de la partie en cours seront remis à zéro. Les alignements seront déverrouillés et devront être soumis de nouveau.</p><div class="sheet-grid"><button onclick="closeReset()">ANNULER</button><button class="warn" onclick="confirmReset()">OUI, NOUVELLE PARTIE</button></div></div></div>
 
+
 <div class="modal" id="gameOverModal">
   <div class="sheet">
-    <h3>🏁 FIN DU MATCH</h3>
+    <h3>🏁 FIN DU MATCH DÉTECTÉE</h3>
     <p id="gameOverMessage"></p>
     <div class="readonly-note" id="gameOverDetail"></div>
-    <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="closeGameOverModal()">VOIR LE MATCH TERMINÉ</button>
+
+    <div id="gameOverInningAdjust" class="hidden" style="margin-top:12px">
+      <div class="section-title">Continuer le match</div>
+      <div class="muted" style="font-size:12px">
+        Le marqueur peut modifier le nombre de manches réglementaires ou ajouter une prolongation.
+      </div>
+      <div class="inning-format" style="margin-top:8px">
+        <button type="button" onclick="setLiveRegulationInnings(5)">5 MANCHES</button>
+        <button type="button" onclick="setLiveRegulationInnings(7)">7 MANCHES</button>
+        <button type="button" onclick="setLiveRegulationInnings(9)">9 MANCHES</button>
+      </div>
+      <button type="button" style="width:100%;margin-top:8px" onclick="continueWithExtraInning()">＋ AJOUTER UNE MANCHE</button>
+      <div id="liveInningFormatStatus" class="readonly-note" style="margin-top:8px"></div>
+    </div>
+
+    <div class="sheet-grid" style="margin-top:12px">
+      <button type="button" onclick="continueGameFromEndPrompt()">CONTINUER LE MATCH</button>
+      <button type="button" class="primary" onclick="confirmGameOver()">CONFIRMER LA FIN</button>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal" id="matchDetailModal">
+  <div class="sheet">
+    <h3>⚾ RÉSUMÉ DU MATCH</h3>
+    <div id="matchDetailHeader" class="readonly-note"></div>
+    <div id="matchDetailLineScore" style="margin-top:12px"></div>
+
+    <div class="team-tabs" style="margin-top:12px">
+      <button id="matchStatsBrewersTab" class="active" type="button" onclick="showCompletedGameTeam('Brewers')">BREWERS</button>
+      <button id="matchStatsYankeesTab" type="button" onclick="showCompletedGameTeam('Yankees')">YANKEES</button>
+    </div>
+
+    <div id="matchBattingStats" style="margin-top:10px"></div>
+    <div id="matchPitchingStats" style="margin-top:12px"></div>
+
+    <button type="button" style="width:100%;margin-top:14px" onclick="closeMatchDetail()">FERMER</button>
   </div>
 </div>
 
@@ -647,7 +686,7 @@ Object.entries(teams).forEach(([teamName,t])=>{
   t.roster=t.lineup.map(p=>({...p}));
 });
 let regulationInnings=7; let displayedInnings=7;
-let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}},gameOver:false,winner:null,gameOverReason:""};
+let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}},gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};
 let selectedBase=null;
 let selectedLineupSlot=null;
 let selectedBenchSlot=null;
@@ -1456,7 +1495,7 @@ function resetStatsOnly(){
     bases:{1:null,2:null,3:null},
     history:[],log:[],pending:[],
     inningRuns:{Brewers:{},Yankees:{}},
-    gameOver:false,winner:null,gameOverReason:""
+    gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false
   };
 }
 function serializableState(){
@@ -1523,6 +1562,8 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   });
   $("gameLog").innerHTML=state.log.length?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join(""):"<div>Aucune action enregistrée.</div>";
   keepLiveGameLocked();
+  renderSchedule();
+  renderStandings();
 
   if(state.gameOver){
     const banner=$("atBatTeam");
@@ -1547,28 +1588,333 @@ function isFinalOrExtraInning(){
 }
 
 function declareGameOver(winner,reason){
+  // On ne termine plus automatiquement : on demande toujours confirmation au marqueur.
+  proposeGameOver(winner,reason);
+}
+
+
+
+function clonePlain(obj){
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function getTeamRuns(teamName){
+  return teamName==="Brewers" ? state.awayRuns : state.homeRuns;
+}
+
+function getOpponent(teamName){
+  return teamName==="Brewers" ? "Yankees" : "Brewers";
+}
+
+function makeCompletedGameSnapshot(){
+  const id="game-"+Date.now();
+  const winner=state.winner;
+  const loser=getOpponent(winner);
+
+  return {
+    id,
+    dateLabel:"Aujourd’hui",
+    status:"FINAL",
+    winner,
+    loser,
+    awayTeam:"Brewers",
+    homeTeam:"Yankees",
+    awayRuns:state.awayRuns,
+    homeRuns:state.homeRuns,
+    regulationInnings,
+    inningRuns:clonePlain(state.inningRuns||{Brewers:{},Yankees:{}}),
+    teams:clonePlain(teams),
+    finalizedAt:Date.now()
+  };
+}
+
+function updateStandingsFromGame(game){
+  const b=game.awayRuns;
+  const y=game.homeRuns;
+
+  standings.Brewers.RF+=b;
+  standings.Brewers.RA+=y;
+  standings.Yankees.RF+=y;
+  standings.Yankees.RA+=b;
+
+  if(b>y){
+    standings.Brewers.W++;
+    standings.Yankees.L++;
+  }else if(y>b){
+    standings.Yankees.W++;
+    standings.Brewers.L++;
+  }
+}
+
+function saveFinalGameToLocalSeason(){
+  if(state._finalGameSaved)return;
+
+  const game=makeCompletedGameSnapshot();
+  completedGames.unshift(game);
+  selectedCompletedGameId=game.id;
+  updateStandingsFromGame(game);
+  state._finalGameSaved=true;
+
+  renderSchedule();
+  renderStandings();
+}
+
+function renderSchedule(){
+  const candidates=[
+    $("viewerSchedule"),
+    $("officialSchedule"),
+    $("scheduleList"),
+    $("scheduleContent")
+  ].filter(Boolean);
+
+  const html=completedGames.length
+    ? completedGames.map(game=>{
+        return `<button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:8px" onclick="openCompletedGame('${game.id}')">
+          <strong>${game.awayTeam} ${game.awayRuns} – ${game.homeTeam} ${game.homeRuns}</strong><br>
+          <span class="muted">FINAL • Touchez pour voir les statistiques du match</span>
+        </button>`;
+      }).join("")
+    : `<div class="readonly-note">Aucun match terminé pour le moment.</div>`;
+
+  candidates.forEach(el=>el.innerHTML=html);
+}
+
+function renderStandings(){
+  const candidates=[
+    $("viewerStandings"),
+    $("officialStandings"),
+    $("standingsTable"),
+    $("standingsContent")
+  ].filter(Boolean);
+
+  const rows=["Brewers","Yankees"].map(team=>{
+    const s=standings[team];
+    const pct=(s.W+s.L)?(s.W/(s.W+s.L)).toFixed(3).replace(/^0/,""):"—";
+    return `<tr><td>${team}</td><td>${s.W}</td><td>${s.L}</td><td>${pct}</td><td>${s.RF}</td><td>${s.RA}</td></tr>`;
+  }).join("");
+
+  const html=`<div class="table-scroll"><table><thead><tr><th>Équipe</th><th>V</th><th>D</th><th>PCT</th><th>PP</th><th>PC</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  candidates.forEach(el=>el.innerHTML=html);
+}
+
+function openCompletedGame(gameId){
+  const game=completedGames.find(g=>g.id===gameId);
+  if(!game)return;
+
+  selectedCompletedGameId=gameId;
+
+  const hdr=$("matchDetailHeader");
+  if(hdr){
+    hdr.innerHTML=`<strong>${game.awayTeam} ${game.awayRuns} – ${game.homeTeam} ${game.homeRuns}</strong><br>
+      FINAL • ${game.regulationInnings} manches prévues`;
+  }
+
+  renderCompletedGameLineScore(game);
+  showCompletedGameTeam("Brewers");
+
+  const modal=$("matchDetailModal");
+  if(modal)modal.classList.add("show");
+}
+
+function closeMatchDetail(){
+  const modal=$("matchDetailModal");
+  if(modal)modal.classList.remove("show");
+}
+
+function renderCompletedGameLineScore(game){
+  const el=$("matchDetailLineScore");
+  if(!el)return;
+
+  const maxInning=Math.max(
+    game.regulationInnings||0,
+    ...Object.keys(game.inningRuns?.Brewers||{}).map(Number),
+    ...Object.keys(game.inningRuns?.Yankees||{}).map(Number)
+  );
+
+  const headers=Array.from({length:maxInning},(_,i)=>`<th>${i+1}</th>`).join("");
+  const row=(team,total)=>{
+    const cells=Array.from({length:maxInning},(_,i)=>{
+      const v=game.inningRuns?.[team]?.[i+1];
+      return `<td>${v==null?"":v}</td>`;
+    }).join("");
+    return `<tr><td>${team}</td>${cells}<td><strong>${total}</strong></td></tr>`;
+  };
+
+  el.innerHTML=`<div class="table-scroll"><table>
+    <thead><tr><th>Équipe</th>${headers}<th>R</th></tr></thead>
+    <tbody>${row("Brewers",game.awayRuns)}${row("Yankees",game.homeRuns)}</tbody>
+  </table></div>`;
+}
+
+function showCompletedGameTeam(teamName){
+  const game=completedGames.find(g=>g.id===selectedCompletedGameId);
+  if(!game)return;
+
+  const btab=$("matchStatsBrewersTab"), ytab=$("matchStatsYankeesTab");
+  if(btab)btab.classList.toggle("active",teamName==="Brewers");
+  if(ytab)ytab.classList.toggle("active",teamName==="Yankees");
+
+  const t=game.teams?.[teamName];
+  if(!t)return;
+
+  renderCompletedBattingStats(t,teamName);
+  renderCompletedPitchingStats(t,teamName);
+}
+
+function statValue(player,key){
+  const stats=player?.stats||player?.offense||player?.batting||{};
+  const val=stats[key];
+  return val==null?0:val;
+}
+
+function renderCompletedBattingStats(teamData,teamName){
+  const el=$("matchBattingStats");
+  if(!el)return;
+
+  const players=(teamData.roster||teamData.lineup||[]).filter((p,i,arr)=>{
+    const name=p?.name||p;
+    return name && arr.findIndex(x=>(x?.name||x)===name)===i;
+  });
+
+  const rows=players.map(p=>{
+    const name=p?.name||p;
+    return `<tr>
+      <td>${name}</td>
+      <td>${statValue(p,"AB")}</td>
+      <td>${statValue(p,"H")}</td>
+      <td>${statValue(p,"HR")}</td>
+      <td>${statValue(p,"RBI")}</td>
+      <td>${statValue(p,"R")}</td>
+      <td>${statValue(p,"BB")}</td>
+      <td>${statValue(p,"K")}</td>
+    </tr>`;
+  }).join("");
+
+  el.innerHTML=`<div class="section-title">STATISTIQUES AU BÂTON — ${teamName.toUpperCase()}</div>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Joueur</th><th>AB</th><th>H</th><th>HR</th><th>RBI</th><th>R</th><th>BB</th><th>K</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="8">Aucune statistique.</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+function renderCompletedPitchingStats(teamData,teamName){
+  const el=$("matchPitchingStats");
+  if(!el)return;
+
+  const players=(teamData.roster||teamData.lineup||[]).filter(p=>{
+    const pos=(p?.pos||p?.position||"").toUpperCase();
+    return pos==="L" || statValue(p,"IP") || statValue(p,"PK") || statValue(p,"pitchK");
+  });
+
+  const rows=players.map(p=>{
+    const name=p?.name||p;
+    const ip=statValue(p,"IP");
+    const k=statValue(p,"pitchK")||statValue(p,"Kp")||statValue(p,"K");
+    const bb=statValue(p,"pitchBB")||statValue(p,"BBp")||statValue(p,"BB");
+    const era=(p?.stats?.ERA ?? p?.pitching?.ERA ?? p?.ERA ?? 0);
+    return `<tr><td>${name}</td><td>${ip}</td><td>${k}</td><td>${bb}</td><td>${era}</td></tr>`;
+  }).join("");
+
+  el.innerHTML=`<div class="section-title">LANCEURS — ${teamName.toUpperCase()}</div>
+  <div class="table-scroll"><table>
+    <thead><tr><th>Lanceur</th><th>IP</th><th>K</th><th>BB</th><th>ERA</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="5">Aucune statistique de lanceur.</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+function proposeGameOver(winner,reason){
   if(state.gameOver)return;
 
+  pendingGameOver={winner,reason:reason||""};
+
+  const msg=$("gameOverMessage");
+  const detail=$("gameOverDetail");
+  if(msg)msg.textContent=`Fin potentielle : ${winner} mène ${state.awayRuns} - ${state.homeRuns}.`;
+  if(detail)detail.textContent=reason||"Le match semble terminé selon le format choisi.";
+
+  const adjust=$("gameOverInningAdjust");
+  if(adjust)adjust.classList.add("hidden");
+
+  updateLiveInningFormatStatus();
+
+  const modal=$("gameOverModal");
+  if(modal)modal.classList.add("show");
+}
+
+function confirmGameOver(){
+  if(!pendingGameOver)return;
+
   state.gameOver=true;
-  state.winner=winner;
-  state.gameOverReason=reason||"";
+  state.winner=pendingGameOver.winner;
+  state.gameOverReason=pendingGameOver.reason||"";
   gameStarted=true;
   teams.Brewers.submitted=true;
   teams.Yankees.submitted=true;
 
-  const msg=$("gameOverMessage");
-  const detail=$("gameOverDetail");
-  if(msg){
-    msg.textContent=`${winner} remporte le match ${state.awayRuns} - ${state.homeRuns}.`;
-  }
-  if(detail){
-    detail.textContent=reason||"Le match est terminé.";
-  }
+  addLog(`FIN DU MATCH • ${state.winner} gagnent ${state.awayRuns}-${state.homeRuns}`);
 
-  const modal=$("gameOverModal");
-  if(modal)modal.classList.add("show");
+  saveFinalGameToLocalSeason();
 
+  pendingGameOver=null;
+  closeGameOverModal();
   renderGame();
+  toast("Fin du match confirmée");
+}
+
+function continueGameFromEndPrompt(){
+  if(currentRole!=="official"){
+    toast("Seul le marqueur peut continuer le match");
+    return;
+  }
+
+  const adjust=$("gameOverInningAdjust");
+  if(adjust)adjust.classList.remove("hidden");
+  updateLiveInningFormatStatus();
+}
+
+function setLiveRegulationInnings(n){
+  if(currentRole!=="official"){
+    toast("Seul le marqueur peut modifier le nombre de manches");
+    return;
+  }
+  if(![5,7,9].includes(n))return;
+
+  if(n<state.inning){
+    toast(`Impossible : le match est déjà rendu à la ${state.inning}e manche`);
+    return;
+  }
+
+  regulationInnings=n;
+  displayedInnings=Math.max(displayedInnings,n,state.inning);
+  pendingGameOver=null;
+
+  closeGameOverModal();
+  renderLineScores();
+  renderGame();
+  toast(`Match prolongé à ${n} manches`);
+}
+
+function continueWithExtraInning(){
+  if(currentRole!=="official"){
+    toast("Seul le marqueur peut ajouter une manche");
+    return;
+  }
+
+  displayedInnings=Math.max(displayedInnings,state.inning,regulationInnings)+1;
+  regulationInnings=Math.max(regulationInnings,displayedInnings);
+  pendingGameOver=null;
+
+  closeGameOverModal();
+  renderLineScores();
+  renderGame();
+  toast(`Match prolongé à ${regulationInnings} manches`);
+}
+
+function updateLiveInningFormatStatus(){
+  const el=$("liveInningFormatStatus");
+  if(el){
+    el.textContent=`Format actuel : ${regulationInnings} manches • Manche en cours : ${state.inning}`;
+  }
 }
 
 function closeGameOverModal(){
@@ -1579,9 +1925,23 @@ function closeGameOverModal(){
 function checkWalkOff(){
   if(state.gameOver)return true;
 
-  // Yankees = équipe locale, donc elle frappe en bas de manche.
   if(!state.top && isFinalOrExtraInning() && state.homeRuns>state.awayRuns){
-    declareGameOver("Yankees","Victoire de fin de match : les Yankees ont pris l’avance en fin de manche.");
+    if(!pendingGameOver){
+      proposeGameOver(
+        "Yankees",
+        "Les Yankees ont pris l’avance en fin de la dernière manche. Confirmez la fin du match ou continuez la rencontre."
+      );
+    }
+    return false;
+  }
+  return false;
+}
+
+function blockIfEndDecisionPending(){
+  if(pendingGameOver){
+    const modal=$("gameOverModal");
+    if(modal)modal.classList.add("show");
+    toast("Confirmez la fin du match ou choisissez de continuer");
     return true;
   }
   return false;
@@ -1592,6 +1952,7 @@ function blockIfGameOver(){
     toast("Le match est terminé");
     return true;
   }
+  if(blockIfEndDecisionPending())return true;
   return false;
 }
 
@@ -1618,25 +1979,33 @@ function endHalfIfNeeded(){
   const endingTop=state.top;
   const inningJustPlayed=state.inning;
 
+  // Haut de dernière manche : local mène -> proposer fin, sans changer de manche.
+  if(endingTop && inningJustPlayed>=regulationInnings && state.homeRuns>state.awayRuns){
+    state.outs=0;
+    state.bases={1:null,2:null,3:null};
+    state.pending=[];
+    proposeGameOver(
+      "Yankees",
+      "Les Yankees mènent après le haut de la dernière manche. Confirmez la fin du match ou modifiez le nombre de manches."
+    );
+    return;
+  }
+
+  // Bas de dernière manche : visiteurs mènent -> proposer fin.
+  if(!endingTop && inningJustPlayed>=regulationInnings && state.awayRuns>state.homeRuns){
+    state.outs=0;
+    state.bases={1:null,2:null,3:null};
+    state.pending=[];
+    proposeGameOver(
+      "Brewers",
+      "Les Brewers mènent après la fin de la manche prévue. Confirmez la fin du match ou continuez la rencontre."
+    );
+    return;
+  }
+
   state.outs=0;
   state.bases={1:null,2:null,3:null};
   state.pending=[];
-
-  // Après le haut de la dernière manche (ou d'une prolongation),
-  // si l'équipe locale mène déjà, elle n'a pas besoin de frapper.
-  if(endingTop && inningJustPlayed>=regulationInnings && state.homeRuns>state.awayRuns){
-    declareGameOver("Yankees","Les Yankees menaient après le haut de la dernière manche : leur dernier tour au bâton n’était pas nécessaire.");
-    return;
-  }
-
-  // Après le bas de la dernière manche (ou d'une prolongation),
-  // si l'équipe visiteuse mène, la partie est terminée.
-  if(!endingTop && inningJustPlayed>=regulationInnings && state.awayRuns>state.homeRuns){
-    declareGameOver("Brewers","Les Brewers mènent après la fin de la manche réglementaire.");
-    return;
-  }
-
-  // Si égalité après le bas de la dernière manche, on poursuit.
   state.top=!state.top;
 
   if(state.top){
@@ -2026,7 +2395,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.10.0.
+// L'accueil par rôles est l'écran initial de v0.10.2.
 
 renderLineupEditor();
 
@@ -2068,7 +2437,7 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
 
 <div class="modal" id="leagueInfoModal">
   <div class="sheet">
-    <h3 id="leagueInfoTitle">Horaire</h3>
+    <h3 id="leagueInfoTitle">Horaire</h3><div id="viewerSchedule" style="margin-top:10px"></div>
     <div id="leagueSchedulePanel" class="league-tab-panel active">
       <div class="readonly-note"><b>Horaire</b><br>Les matchs à venir apparaîtront ici lorsque le calendrier de la ligue sera connecté.</div>
     </div>

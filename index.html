@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.9.6</title>
+<title>Diamond v0.9.7</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -297,7 +297,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.6 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.7 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -671,24 +671,34 @@ function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show")
 function showCoach(teamName){
   if(!teams[teamName])return;
 
+  $("tabBrewers").classList.toggle("active",teamName==="Brewers");
+  $("tabYankees").classList.toggle("active",teamName==="Yankees");
+
   coachTeam=teamName;
   selectedSubBenchIndex=null;
   selectedLineupSlot=null;
   selectedBenchSlot=null;
 
-  $("tabBrewers").classList.toggle("active",teamName==="Brewers");
-  $("tabYankees").classList.toggle("active",teamName==="Yankees");
-
   if($("substitutionPanel"))$("substitutionPanel").classList.add("hidden");
 
   renderLineupEditor();
-  renderBenchEditor(teamName);
+  renderBenchEditor();
 
   if(gameStarted && currentRole==="official"){
-    refreshSubstitutionOptions(teamName);
+    refreshSubstitutionOptions();
   }
+
+  renderPregameStatus();
 }
 
+
+
+function selectedEditorTeam(){
+  const b=$("tabBrewers"), y=$("tabYankees");
+  if(b && b.classList.contains("active"))return "Brewers";
+  if(y && y.classList.contains("active"))return "Yankees";
+  return coachTeam || "Brewers";
+}
 
 function teamBench(teamName){
   const t=teams[teamName];
@@ -724,7 +734,7 @@ function addRosterPlayer(){
   // Rafraîchir immédiatement toutes les zones qui utilisent la liste d'équipe,
   // surtout le menu BANC sur Safari/iPhone.
   renderTeamRoster();
-  renderBenchEditor(coachTeam);
+  renderBenchEditor();
   renderPregameStatus();
 
   toast(`${name} ajouté à la liste de ${coachTeam}`);
@@ -879,7 +889,7 @@ function renderLineupEditor(){
   if(note) note.classList.toggle("hidden",!gameStarted);
 
   renderTeamRoster();
-  renderBenchEditor(coachTeam);
+  renderBenchEditor();
   if($("openSubBtn")) $("openSubBtn").classList.toggle("hidden",!gameStarted);
   if($("substitutionPanel") && !gameStarted) $("substitutionPanel").classList.add("hidden");
   if($("lineupControls")) $("lineupControls").querySelectorAll("button").forEach(b=>b.disabled=(gameStarted && currentRole!=="official"));
@@ -893,7 +903,7 @@ if($("resetLineupBtn")) $("resetLineupBtn").disabled=(gameStarted && currentRole
   if($("resetLineupBtn")){
     $("resetLineupBtn").style.display=currentRole==="official"?"none":"";
   }
-  if(gameStarted) refreshSubstitutionOptions(coachTeam);
+  if(gameStarted) refreshSubstitutionOptions();
 }
 function movePlayer(i,d){
   if(gameStarted)return;const a=teams[coachTeam].lineup,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];teams[coachTeam].submitted=false;renderLineupEditor()}
@@ -909,7 +919,10 @@ function submitLineup(){
     return;
   }
 
-  const act=activeLineup(coachTeam);
+  const teamName=selectedEditorTeam();
+  coachTeam=teamName;
+
+  const act=activeLineup(teamName);
   if(!act.length){toast("Ajoutez au moins un joueur actif");return}
 
   const pitchers=act.filter(p=>p.pos==="L");
@@ -918,60 +931,62 @@ function submitLineup(){
     return;
   }
 
-  teams[coachTeam].submitted=true;
+  teams[teamName].submitted=true;
   renderPregameStatus();
 
   const note=$("submitStatusNote");
-  if(note && currentRole!=="official"){
-    note.textContent=`✅ ALIGNEMENT ${coachTeam.toUpperCase()} SOUMIS`;
+  if(note){
+    note.textContent=`✅ ALIGNEMENT ${teamName.toUpperCase()} SOUMIS AVEC SUCCÈS`;
     note.classList.remove("hidden");
   }
 
-  toast("Alignement "+coachTeam+" soumis");
+  const btn=$("submitLineupBtn");
+  if(btn){
+    btn.textContent="✓ SOUMIS";
+  }
+
+  toast("Alignement "+teamName+" soumis");
 }
 function renderPregameStatus(){
   ["Brewers","Yankees"].forEach(t=>{
     const el=$(t.toLowerCase()+"Status");
-    el.textContent=teams[t].submitted?"✅ Alignement soumis":"⏳ Alignement non soumis";
-    el.className="status "+(teams[t].submitted?"ok":"");
+    if(el){
+      el.textContent=teams[t].submitted?"✅ Alignement soumis":"⏳ Alignement non soumis";
+      el.className="status "+(teams[t].submitted?"ok":"");
+    }
   });
+
+  const teamName=selectedEditorTeam();
+  coachTeam=teamName;
+
+  const submitNote=$("submitStatusNote");
+  const submitBtn=$("submitLineupBtn");
+  const submitted=!!teams[teamName]?.submitted;
+
+  if(submitNote){
+    submitNote.textContent=submitted
+      ? `✅ ALIGNEMENT ${teamName.toUpperCase()} SOUMIS AVEC SUCCÈS`
+      : "";
+    submitNote.classList.toggle("hidden",!submitted);
+  }
+
+  if(submitBtn && currentRole!=="official"){
+    submitBtn.textContent=submitted?"✓ SOUMIS":"SOUMETTRE";
+  }
 
   const ready=teams.Brewers.submitted&&teams.Yankees.submitted;
   $("readyBlock").classList.toggle("hidden",!ready);
   $("returnMatchBtn").classList.toggle("hidden",!gameStarted || currentRole!=="official");
+
   if($("lineupLockNote")) $("lineupLockNote").classList.toggle("hidden",!gameStarted);
   if($("officialLiveEditNote")) $("officialLiveEditNote").classList.toggle("hidden",!(gameStarted && currentRole==="official"));
+
   $("startGameBtn").classList.toggle("hidden",gameStarted);
   $("startGameBtn").disabled=!ready;
+
   $("scorerWaiting").textContent=gameStarted
     ?"Match en cours — le marqueur peut modifier les alignements puis revenir au match."
     :(ready?"Prêt à commencer.":"En attente des deux alignements…");
-
-  if($("openSubBtn")) $("openSubBtn").classList.toggle("hidden",!gameStarted);
-  if($("substitutionPanel") && !gameStarted) $("substitutionPanel").classList.add("hidden");
-  if($("lineupControls")) $("lineupControls").querySelectorAll("button").forEach(b=>b.disabled=(gameStarted && currentRole!=="official"));
-  if($("addBenchBtn")) $("addBenchBtn").disabled=(gameStarted && currentRole!=="official");
-  if($("resetLineupBtn")) $("resetLineupBtn").disabled=(gameStarted && currentRole!=="official");
-
-  if($("submitLineupBtn")){
-    $("submitLineupBtn").style.display=currentRole==="official"?"none":"";
-    $("submitLineupBtn").classList.toggle("hidden",currentRole==="official");
-    $("submitLineupBtn").disabled=gameStarted && currentRole!=="official";
-  }
-  if($("resetLineupBtn")){
-    $("resetLineupBtn").style.display=currentRole==="official"?"none":"";
-  }
-
-  const submitNote=$("submitStatusNote");
-  if(submitNote){
-    const showNote=currentRole!=="official" && !!teams[coachTeam]?.submitted;
-    submitNote.classList.toggle("hidden", !showNote);
-    submitNote.textContent=showNote
-      ? `✅ Alignement de ${coachTeam} soumis avec succès`
-      : "";
-  }
-
-  if(gameStarted) refreshSubstitutionOptions(coachTeam);
 }
 
 
@@ -1010,9 +1025,9 @@ function addSelectedPlayerToBench(){
     return;
   }
 
-  const sel=$("benchAddSelect");
-  const teamName=(sel && sel.dataset.team) || coachTeam;
+  const teamName=selectedEditorTeam();
   const t=teams[teamName];
+  const sel=$("benchAddSelect");
   const bench=teamBench(teamName);
 
   if(!t || !sel || !sel.value){
@@ -1026,17 +1041,16 @@ function addSelectedPlayerToBench(){
   const key=rosterPlayerKey(incoming);
   if(bench.some(p=>rosterPlayerKey(p)===key)){
     toast("Ce joueur est déjà au banc de "+teamName);
-    renderBenchEditor(teamName);
+    renderBenchEditor();
     return;
   }
 
   bench.push({...incoming,active:false,placeholder:false,ab:0,h:0,hr:0,rbi:0,r:0,bv:0});
-
   if(!gameStarted)t.submitted=false;
-  coachTeam=teamName;
-  renderBenchEditor(teamName);
-  renderPregameStatus();
 
+  coachTeam=teamName;
+  renderBenchEditor();
+  renderPregameStatus();
   toast(`${incoming.name} ajouté au banc de ${teamName}`);
 }
 
@@ -1052,7 +1066,7 @@ function selectBenchPlayer(index,playerId){
       placeholder:true
     };
     t.submitted=false;
-    renderBenchEditor(coachTeam);
+    renderBenchEditor();
     return;
   }
 
@@ -1093,10 +1107,10 @@ function removeBenchPlayerByKey(key,teamName){
   selectedSubBenchIndex=null;
 
   coachTeam=teamName;
-  renderBenchEditor(teamName);
+  renderBenchEditor();
   renderPregameStatus();
 
-  if(gameStarted && currentRole==="official")refreshSubstitutionOptions(teamName);
+  if(gameStarted && currentRole==="official")refreshSubstitutionOptions();
 
   toast(`${removed.name} retiré du banc de ${teamName}`);
 }
@@ -1210,8 +1224,8 @@ function closeBenchRosterModal(){
   selectedBenchSlot=null;
 }
 
-function renderBenchEditor(teamName){
-  teamName=teamName||coachTeam;
+function renderBenchEditor(){
+  const teamName=selectedEditorTeam();
   const t=teams[teamName];
   const host=$("benchList");
   const sel=$("benchAddSelect");
@@ -1219,10 +1233,10 @@ function renderBenchEditor(teamName){
   const benchLocked=gameStarted && currentRole!=="official";
   if(!t || !host || !sel)return;
 
+  coachTeam=teamName;
   const bench=teamBench(teamName);
   if(!Array.isArray(t.roster))t.roster=t.lineup.map(p=>({...p}));
 
-  // Marque explicitement quelle équipe est actuellement affichée.
   host.dataset.team=teamName;
   sel.dataset.team=teamName;
   if(title)title.textContent=`🪑 BANC — ${teamName.toUpperCase()}`;
@@ -1246,15 +1260,14 @@ function renderBenchEditor(teamName){
 
   host.innerHTML=bench.length
     ? bench.map((p,i)=>`
-      <div class="lineup-row bench-row" data-team="${teamName}">
+      <div class="lineup-row bench-row">
         <div class="order">${i+1}</div>
         <div>
           <b class="${gameStarted&&p.lockedStarter?(p.lockedStarterTeam==="Brewers"?"player-used-brewers":"player-used-yankees"):""}">${p.name}</b>
           <div class="muted" style="font-size:12px">${p.pos||"DH"}</div>
           ${gameStarted&&p.lockedStarter?`<div class="player-used-note ${p.lockedStarterTeam==="Brewers"?"brewers":"yankees"}">DÉJÀ UTILISÉ DANS L’ALIGNEMENT</div>`:""}
         </div>
-        <button type="button"
-          class="danger"
+        <button type="button" class="danger"
           data-team="${teamName}"
           data-key="${encodeURIComponent(rosterPlayerKey(p))}"
           ${benchLocked?"disabled":""}>− ENLEVER</button>
@@ -1272,10 +1285,10 @@ function toggleSubstitutionPanel(){
   if(!gameStarted)return;
   const panel=$("substitutionPanel");
   panel.classList.toggle("hidden");
-  if(!panel.classList.contains("hidden")) refreshSubstitutionOptions(coachTeam);
+  if(!panel.classList.contains("hidden")) refreshSubstitutionOptions();
 }
-function refreshSubstitutionOptions(teamName){
-  teamName=teamName||coachTeam;
+function refreshSubstitutionOptions(){
+  const teamName=selectedEditorTeam();
   const t=teams[teamName];
   if(!t)return;
 
@@ -1293,15 +1306,13 @@ function refreshSubstitutionOptions(teamName){
   outSel.innerHTML=t.lineup.map((p,i)=>`<option value="${i}">${p.name} — ${p.pos}</option>`).join("");
 
   const available=bench.map((p,i)=>({p,i})).filter(x=>x.p && !x.p.placeholder);
-
   if(selectedSubBenchIndex!==null && !available.some(x=>x.i===selectedSubBenchIndex)){
     selectedSubBenchIndex=null;
   }
 
   choices.innerHTML=available.length
     ? available.map(({p,i})=>`
-      <button type="button"
-        class="sub-bench-choice ${selectedSubBenchIndex===i?"selected":""}"
+      <button type="button" class="sub-bench-choice ${selectedSubBenchIndex===i?"selected":""}"
         onclick="selectSubBenchPlayer(${i})">
         <b>${p.name}</b>
         <div class="muted" style="font-size:12px">${teamName} • ${p.pos||"DH"}</div>
@@ -1318,7 +1329,7 @@ function selectSubBenchPlayer(index){
   const t=teams[coachTeam];
   if(!t || !t.bench[index] || t.bench[index].placeholder)return;
   selectedSubBenchIndex=index;
-  refreshSubstitutionOptions(coachTeam);
+  refreshSubstitutionOptions();
   toast(`${t.bench[index].name} sélectionné`);
 }
 
@@ -1830,7 +1841,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.9.6.
+// L'accueil par rôles est l'écran initial de v0.9.7.
 
 renderLineupEditor();
 

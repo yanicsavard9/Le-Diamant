@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.7.8</title>
+<title>Le Diamant v0.8.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -110,13 +110,95 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .action-btn{
   transition:transform .12s ease,filter .12s ease,box-shadow .12s ease,outline .12s ease;
 }
+
+.role-grid{display:grid;gap:12px;margin-top:14px}
+.role-card{width:100%;text-align:left;padding:16px;border:1px solid #33465a;border-radius:16px;background:#111b24;color:inherit}
+.role-card strong{display:block;font-size:18px;margin-bottom:5px}
+.role-card small{display:block;color:var(--muted);line-height:1.4}
+.role-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;border:1px solid #40566b;font-size:12px;font-weight:900}
+.role-topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.viewer-score{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center}
+.viewer-team{padding:14px 8px;border:1px solid #33465a;border-radius:14px}
+.viewer-team b{display:block;font-size:14px}
+.viewer-team strong{display:block;font-size:34px;line-height:1;margin-top:5px}
+.viewer-center{font-size:12px;color:var(--muted)}
+.viewer-table{width:100%;border-collapse:collapse;font-size:13px}
+.viewer-table th,.viewer-table td{padding:8px 6px;border-bottom:1px solid #263849;text-align:right}
+.viewer-table th:first-child,.viewer-table td:first-child{text-align:left}
+.viewer-table th{color:var(--muted);font-size:11px}
+.readonly-note{padding:10px;border:1px solid #33465a;border-radius:12px;background:#0d151c;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.7.8 • 2 ÉQUIPES</div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.0 • 2 ÉQUIPES</div></div></div>
 
-  <section id="pregame">
+
+  <section id="roleHome">
+    <div class="card">
+      <div class="section-title">Bienvenue dans Le Diamant</div>
+      <h2>Choisissez votre accès</h2>
+      <div class="muted">Une seule application, trois expériences adaptées au rôle de chacun.</div>
+      <div class="role-grid">
+        <button class="role-card" type="button" onclick="selectRole('viewer')">
+          <strong>👤 Joueur / Spectateur</strong>
+          <small>Match en direct, statistiques des joueurs, résultats et classement.</small>
+        </button>
+        <button class="role-card" type="button" onclick="selectRole('captain')">
+          <strong>🧢 Capitaine / Entraîneur</strong>
+          <small>Liste de joueurs, alignement, positions, banc et soumission de l’alignement.</small>
+        </button>
+        <button class="role-card" type="button" onclick="selectRole('official')">
+          <strong>📋 Marqueur / Gestionnaire</strong>
+          <small>Approbation, verrouillage, pointage en direct, fin et sauvegarde du match.</small>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewerView" class="hidden">
+    <div class="role-topbar">
+      <div><b>👤 Joueur / Spectateur</b><div class="muted" style="font-size:12px">Consultation seulement</div></div>
+      <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Match en direct</div>
+      <div class="viewer-score">
+        <div class="viewer-team brewers"><b>BREWERS</b><strong id="viewerAwayRuns">0</strong></div>
+        <div class="viewer-center"><div id="viewerHalf">Haut</div><b id="viewerInning">1re</b><div id="viewerOuts">0 retrait</div></div>
+        <div class="viewer-team yankees"><b>YANKEES</b><strong id="viewerHomeRuns">0</strong></div>
+      </div>
+      <div id="viewerStatus" class="readonly-note" style="margin-top:10px">Match à venir.</div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Statistiques des joueurs</div>
+      <div style="overflow:auto">
+        <table class="viewer-table">
+          <thead><tr><th>Joueur</th><th>Équipe</th><th>MOY</th><th>H</th><th>HR</th><th>RBI</th><th>R</th></tr></thead>
+          <tbody id="viewerStatsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Classement</div>
+      <table class="viewer-table">
+        <thead><tr><th>Équipe</th><th>V</th><th>D</th><th>%</th></tr></thead>
+        <tbody>
+          <tr><td>Brewers</td><td>0</td><td>0</td><td>—</td></tr>
+          <tr><td>Yankees</td><td>0</td><td>0</td><td>—</td></tr>
+        </tbody>
+      </table>
+      <div class="muted" style="font-size:12px;margin-top:8px">Le classement sera alimenté automatiquement lorsque les matchs seront finalisés et sauvegardés dans la future base de données.</div>
+    </div>
+  </section>
+  <section id="pregame" class="hidden">
+    <div class="role-topbar">
+      <div><b id="workspaceRoleTitle">Espace</b><div id="workspaceRoleSub" class="muted" style="font-size:12px"></div></div>
+      <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
+    </div>
     <div class="card">
       <div class="section-title">Avant-match</div>
       <h2>Créer et soumettre les alignements</h2>
@@ -192,7 +274,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="officialPregameCard">
       <div class="section-title">Marqueur officiel</div>
       <div id="lineupLockNote" class="lock-note hidden">🔒 Les alignements sont verrouillés depuis le début du match.</div>
       <div id="readyBlock" class="ready-note hidden">
@@ -205,6 +287,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 
   <section id="game" class="hidden">
     <div class="top-actions">
+      <button onclick="backToRoleHome()">RÔLES</button>
       <button onclick="backToPregame()">ALIGNEMENTS</button>
       <button onclick="undo()">↶ ANNULER</button>
       <button class="warn" onclick="askReset()">NOUVEAU MATCH</button>
@@ -758,13 +841,13 @@ function removeHitter(teamName){
   renderPregameStatus();
 }
 
-function startGame(){
+function startGame(){if(currentRole!=="official"){toast("Seul le marqueur peut commencer le match");return}
   if(!(teams.Brewers.submitted&&teams.Yankees.submitted))return;
   resetStatsOnly();
   gameStarted=true;
   $("pregame").classList.add("hidden");$("game").classList.remove("hidden");renderGame()
 }
-function backToPregame(){
+function backToPregame(){if(currentRole!=="official")currentRole="official";
   $("game").classList.add("hidden");
   $("pregame").classList.remove("hidden");
   renderLineupEditor();
@@ -786,7 +869,7 @@ function saveHistory(){state.history.push(serializableState());if(state.history.
 function getPlayer(ref){return teams[ref.team].lineup.find(p=>p.id===ref.id)}
 function runnerRef(p,team){return {id:p.id,name:p.name,team}}
 
-function renderGame(){
+function renderGame(){if(!$("viewerView").classList.contains("hidden"))renderViewer();
   $("awayRuns").textContent=state.awayRuns;$("homeRuns").textContent=state.homeRuns;$("half").textContent=state.top?"Haut":"Bas";$("inning").textContent=ordinal(state.inning);
   $("awayTeam").classList.toggle("active",state.top);$("homeTeam").classList.toggle("active",!state.top);
   $("atBatTeam").textContent="AU BÂTON : "+currentBattingTeam().toUpperCase();
@@ -888,6 +971,80 @@ function undo(){
 function askReset(){$("resetModal").classList.add("show")}function closeReset(){$("resetModal").classList.remove("show")}
 function confirmReset(){resetStatsOnly();gameStarted=false;Object.values(teams).forEach(t=>t.submitted=false);closeReset();showPregame();renderPregameStatus();renderLineupEditor();toast("Nouvelle partie : alignements déverrouillés")}
 
+
+let currentRole=null;
+
+function setRoleBadge(label){
+  const badge=$("roleBadge");
+  if(!badge)return;
+  if(!label){badge.classList.add("hidden");badge.textContent="";return}
+  badge.textContent=label;
+  badge.classList.remove("hidden");
+}
+
+function selectRole(role){
+  currentRole=role;
+  $("roleHome").classList.add("hidden");
+  $("viewerView").classList.add("hidden");
+  $("pregame").classList.add("hidden");
+  $("game").classList.add("hidden");
+
+  if(role==="viewer"){
+    setRoleBadge("JOUEUR");
+    renderViewer();
+    $("viewerView").classList.remove("hidden");
+    return;
+  }
+
+  $("pregame").classList.remove("hidden");
+  if(role==="captain"){
+    setRoleBadge("CAPITAINE");
+    $("workspaceRoleTitle").textContent="🧢 Capitaine / Entraîneur";
+    $("workspaceRoleSub").textContent="Préparer et soumettre l’alignement de votre équipe.";
+    $("officialPregameCard").classList.add("hidden");
+  }else{
+    setRoleBadge("MARQUEUR");
+    $("workspaceRoleTitle").textContent="📋 Marqueur / Gestionnaire";
+    $("workspaceRoleSub").textContent="Approuver les alignements et gérer le match.";
+    $("officialPregameCard").classList.remove("hidden");
+  }
+  renderLineupEditor();
+  renderPregameStatus();
+}
+
+function backToRoleHome(){
+  currentRole=null;
+  setRoleBadge("");
+  $("viewerView").classList.add("hidden");
+  $("pregame").classList.add("hidden");
+  $("game").classList.add("hidden");
+  $("roleHome").classList.remove("hidden");
+}
+
+function renderViewer(){
+  const st=state;
+  $("viewerAwayRuns").textContent=st.awayRuns;
+  $("viewerHomeRuns").textContent=st.homeRuns;
+  $("viewerHalf").textContent=st.top?"Haut":"Bas";
+  $("viewerInning").textContent=ordinal(st.inning);
+  $("viewerOuts").textContent=st.outs+" retrait"+(st.outs>1?"s":"");
+  $("viewerStatus").textContent=gameStarted
+    ? `Match en cours • ${currentBattingTeam()} au bâton`
+    : "Match à venir • les alignements ne sont pas encore verrouillés.";
+
+  const rows=[];
+  Object.entries(teams).forEach(([team,t])=>{
+    t.lineup.forEach(p=>rows.push(`
+      <tr>
+        <td>${p.name}</td><td>${team}</td><td>${avg(p)}</td>
+        <td>${p.h||0}</td><td>${p.hr||0}</td><td>${p.rbi||0}</td><td>${p.r||0}</td>
+      </tr>`));
+  });
+  $("viewerStatsBody").innerHTML=rows.join("");
+}
+
+// L'accueil par rôles est l'écran initial de v0.8.0.
+
 renderLineupEditor();
 
 let lastActionButton=null;
@@ -898,7 +1055,7 @@ function highlightActionButton(btn){
     lastActionButton=btn;
     setTimeout(()=>{
       if(lastActionButton===btn) btn.classList.remove("active-action");
-    },900);
+    },1400);
   }
 }
 document.querySelectorAll(".action-btn").forEach(btn=>{

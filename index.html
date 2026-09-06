@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.10.2</title>
+<title>Diamond v0.10.3</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -297,7 +297,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.2 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.3 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -536,9 +536,8 @@ body:not(.role-official) #gameLogCard{display:none!important}
 
     <div class="card">
       <div class="section-title">Frappeur</div>
-      <button class="batter-name player-link" id="batterName"></button>
+      <button type="button" class="batter-name player-link" id="batterName"></button>
       <div class="batter-sub" id="batterStats"></div>
-      </div>
       <div class="pending-note" id="pendingNote">Confirmez d’abord l’avancement des coureurs.</div>
     </div>
 
@@ -568,13 +567,13 @@ body:not(.role-official) #gameLogCard{display:none!important}
     </div>
 
     <div class="card scorer-only" id="plateAppearanceCard">
-      <div class="section-title">Résultat de la présence</div>
+      <div class="section-title">Résultat de la présence</div><div class="muted" id="scoringControlsStatus" style="margin-bottom:8px">Sélectionnez le résultat de la présence.</div>
       <div class="actions">
-        <button class="action-btn" onclick="recordHit(1)">SIMPLE</button><button class="action-btn" onclick="recordHit(2)">DOUBLE</button>
-        <button class="action-btn" onclick="recordHit(3)">TRIPLE</button><button class="action-btn" onclick="recordHR()">CIRCUIT</button>
-        <button class="action-btn" onclick="recordOut()">RETRAIT</button><button class="kbtn" onclick="recordStrikeout()">K • RETRAIT AU BÂTON</button>
-        <button class="action-btn" onclick="recordWalk()">BB</button><button class="action-btn" onclick="recordHBP()">HBP</button>
-        <button class="action-btn" onclick="recordError()">ERREUR</button>
+        <button type="button" class="action-btn" onclick="recordHit(1)">SIMPLE</button><button type="button" class="action-btn" onclick="recordHit(2)">DOUBLE</button>
+        <button type="button" class="action-btn" onclick="recordHit(3)">TRIPLE</button><button type="button" class="action-btn" onclick="recordHR()">CIRCUIT</button>
+        <button type="button" class="action-btn" onclick="recordOut()">RETRAIT</button><button type="button" class="kbtn" onclick="recordStrikeout()">K • RETRAIT AU BÂTON</button>
+        <button type="button" class="action-btn" onclick="recordWalk()">BB</button><button type="button" class="action-btn" onclick="recordHBP()">HBP</button>
+        <button type="button" class="action-btn" onclick="recordError()">ERREUR</button>
       </div>
     </div>
 
@@ -1544,6 +1543,12 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
     homeBatter.onclick=()=>openPlayerProfile(b,currentBattingTeam());
   }
   $("batterStats").textContent=`${b.h} en ${b.ab} • ${avg(b)} • ${b.rbi} RBI`;
+  const scoringStatus=$("scoringControlsStatus");
+  if(scoringStatus){
+    scoringStatus.textContent=state.gameOver
+      ?"Match terminé"
+      :(pendingGameOver?"Décision de fin de match requise":"Sélectionnez le résultat de la présence.");
+  }
   const p=currentPitcher(),ft=currentFieldingTeam();$("pitcherName").textContent="⚾ "+(p?p.name:"Aucun lanceur")+" • "+ft;$("pitcherName").className="player-link team-"+ft.toLowerCase();
   $("pitcherName").onclick=()=>openPitcherProfile(p,ft);$("pendingNote").classList.toggle("show",state.pending.length>0);
   [1,2,3].forEach(base=>{
@@ -1568,10 +1573,13 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   if(state.gameOver){
     const banner=$("atBatTeam");
     if(banner)banner.textContent=`MATCH TERMINÉ • ${state.winner.toUpperCase()} GAGNENT`;
-    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=true);
-  }else{
-    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=false);
   }
+
+  // Les contrôles du marqueur restent cliquables pendant un match actif.
+  // Les fonctions record... gèrent elles-mêmes les blocages de fin de match.
+  document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>{
+    btn.disabled=false;
+  });
 }
 function addLog(t){state.log.push(`${state.top?"▲":"▼"} ${ordinal(state.inning)} — ${t}`)}
 function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batterIndex[t]=(state.batterIndex[t]+1)%a.length}
@@ -1953,6 +1961,10 @@ function blockIfGameOver(){
     return true;
   }
   if(blockIfEndDecisionPending())return true;
+  if(!gameStarted){
+    toast("Débutez le match avant d’enregistrer une présence");
+    return true;
+  }
   return false;
 }
 
@@ -2395,7 +2407,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.10.2.
+// L'accueil par rôles est l'écran initial de v0.10.3.
 
 renderLineupEditor();
 

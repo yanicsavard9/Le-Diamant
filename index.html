@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.7.3</title>
+<title>Le Diamant v0.7.6</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -100,7 +100,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.7.3 • 2 ÉQUIPES</div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.7.6 • 2 ÉQUIPES</div></div>
 
   <section id="pregame">
     <div class="card">
@@ -155,12 +155,14 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
       </div>
       <div class="bench-box">
         <div class="bench-title">🪑 BANC</div>
-        <div id="benchList"></div>
-        <div id="benchEditor"></div>
-        <div class="bench-controls" id="benchControls">
-          <button id="addBenchBtn" type="button" onclick="addBenchPlayer(coachTeam)">＋ JOUEUR AU BANC</button>
-          <button id="removeBenchBtn" type="button" onclick="removeBenchPlayer(coachTeam)">− JOUEUR AU BANC</button>
+        <div class="muted" style="font-size:12px;margin:6px 0 10px">
+          Choisissez directement un joueur enregistré dans la liste de cette équipe.
         </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px">
+          <select id="benchAddSelect" style="min-height:46px;font-size:16px"></select>
+          <button id="addBenchBtn" type="button" onclick="addSelectedPlayerToBench()">＋ AJOUTER</button>
+        </div>
+        <div id="benchList" style="margin-top:10px"></div>
       </div>
       <button id="openSubBtn" class="sub-btn hidden" onclick="toggleSubstitutionPanel()">⇄ EFFECTUER UN REMPLACEMENT</button>
       <div id="substitutionPanel" class="sub-panel hidden">
@@ -260,7 +262,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 
 <div class="modal" id="profileModal"><div class="sheet"><h3 id="profileTitle"></h3><p id="profileSub"></p><div class="stats-grid" id="profileStats"></div><div class="muted" id="profileNote"></div><button style="width:100%;margin-top:10px" onclick="closeProfile()">FERMER</button></div></div>
 
-<div class="modal" id="resetModal"><div class="sheet"><h3>Nouveau match?</h3><p>Le pointage et les statistiques du match seront remis à zéro. Les alignements resteront disponibles.</p><div class="sheet-grid"><button onclick="closeReset()">ANNULER</button><button class="warn" onclick="confirmReset()">CONFIRMER</button></div></div></div>
+<div class="modal" id="resetModal"><div class="sheet"><h3>⚠️ Nouvelle partie?</h3><p><b>Êtes-vous certain que c’est bien ce que vous voulez faire?</b></p><p>Le pointage et les statistiques de la partie en cours seront remis à zéro. Les alignements seront déverrouillés et devront être soumis de nouveau.</p><div class="sheet-grid"><button onclick="closeReset()">ANNULER</button><button class="warn" onclick="confirmReset()">OUI, NOUVELLE PARTIE</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -403,7 +405,7 @@ function renderLineupEditor(){
     </div>`).join("");
   renderPregameStatus();
 
-  document.querySelectorAll("#pregame input,#pregame select,#pregame .lineup-controls button,#pregame .bench-controls button,#pregame .submit-lineup").forEach(el=>{
+  document.querySelectorAll("#pregame input,#pregame select,#pregame .lineup-controls button,#pregame .submit-lineup").forEach(el=>{
     if(!el.closest("#substitutionPanel")) el.disabled=gameStarted;
   });
   document.querySelectorAll("#lineupEditor button").forEach(b=>b.disabled=gameStarted);
@@ -415,10 +417,8 @@ function renderLineupEditor(){
   if($("openSubBtn")) $("openSubBtn").classList.toggle("hidden",!gameStarted);
   if($("substitutionPanel") && !gameStarted) $("substitutionPanel").classList.add("hidden");
   if($("lineupControls")) $("lineupControls").querySelectorAll("button").forEach(b=>b.disabled=gameStarted);
-  if($("benchControls")) $("benchControls").querySelectorAll("button").forEach(b=>b.disabled=!!gameStarted);
-  if($("addBenchBtn")) $("addBenchBtn").disabled=!!gameStarted;
-  if($("removeBenchBtn")) $("removeBenchBtn").disabled=!!gameStarted;
-  if($("resetLineupBtn")) $("resetLineupBtn").disabled=gameStarted;
+if($("addBenchBtn")) $("addBenchBtn").disabled=!!gameStarted;
+if($("resetLineupBtn")) $("resetLineupBtn").disabled=gameStarted;
   if($("submitLineupBtn")) $("submitLineupBtn").disabled=gameStarted;
   if(gameStarted) refreshSubstitutionOptions();
 }
@@ -476,6 +476,26 @@ function addBenchPlayer(teamName){
     const last=selects[selects.length-1];
     if(last){ last.focus(); }
   },50);
+}
+
+function addSelectedPlayerToBench(){
+  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
+  const t=teams[coachTeam];
+  const sel=$("benchAddSelect");
+  if(!t || !sel || !sel.value){toast("Sélectionnez un joueur");return}
+
+  const incoming=(t.roster||[]).find(p=>String(p.id||p.name)===String(sel.value));
+  if(!incoming){toast("Joueur introuvable");return}
+
+  const key=rosterPlayerKey(incoming);
+  const already=t.lineup.some(p=>rosterPlayerKey(p)===key) || t.bench.some(p=>rosterPlayerKey(p)===key);
+  if(already){toast("Ce joueur est déjà utilisé");renderBenchEditor();return}
+
+  t.bench.push({...incoming,active:false,placeholder:false,ab:0,h:0,hr:0,rbi:0,r:0,bv:0});
+  t.submitted=false;
+  renderBenchEditor();
+  renderPregameStatus();
+  toast(`${incoming.name} ajouté au banc`);
 }
 
 function selectBenchPlayer(index,playerId){
@@ -621,45 +641,35 @@ function closeBenchRosterModal(){
 }
 
 function renderBenchEditor(){
-  const host=$("benchList");
-  if(!host)return;
   const t=teams[coachTeam];
+  const host=$("benchList");
+  const sel=$("benchAddSelect");
+  if(!t || !host || !sel)return;
   if(!Array.isArray(t.bench))t.bench=[];
   if(!Array.isArray(t.roster))t.roster=t.lineup.map(p=>({...p}));
 
-  if(!t.bench.length){
-    host.innerHTML='<div class="muted" style="font-size:12px;margin-top:8px">Aucun joueur au banc.</div>';
-    return;
-  }
+  const used=new Set([
+    ...t.lineup.map(p=>rosterPlayerKey(p)),
+    ...t.bench.map(p=>rosterPlayerKey(p))
+  ]);
 
-  host.innerHTML=t.bench.map((p,i)=>{
-    const used=new Set([
-      ...t.lineup.map(x=>rosterPlayerKey(x)),
-      ...t.bench.map((x,idx)=>idx===i || x.placeholder ? null : rosterPlayerKey(x))
-    ].filter(Boolean));
+  const available=t.roster.filter(p=>!used.has(rosterPlayerKey(p)));
 
-    const choices=t.roster.filter(x=>{
-      const key=rosterPlayerKey(x);
-      return !used.has(key) || (!p.placeholder && key===rosterPlayerKey(p));
-    });
+  sel.innerHTML='<option value="">— Sélectionner un joueur —</option>'+
+    available.map(p=>`<option value="${p.id||p.name}">${p.name} — ${p.pos||"DH"}</option>`).join("");
+  sel.disabled=gameStarted || available.length===0;
 
-    const options=[
-      `<option value="">— Choisir un joueur —</option>`,
-      ...choices.map(x=>`<option value="${x.id||x.name}" ${!p.placeholder && rosterPlayerKey(x)===rosterPlayerKey(p)?"selected":""}>${x.name} — ${x.pos||"DH"}</option>`)
-    ].join("");
+  const addBtn=$("addBenchBtn");
+  if(addBtn)addBtn.disabled=gameStarted || available.length===0;
 
-    return `
+  host.innerHTML=t.bench.length
+    ? t.bench.map((p,i)=>`
       <div class="lineup-row bench-row">
         <div class="order">${i+1}</div>
-        <div style="min-width:0">
-          <select class="bench-player-select" ${gameStarted?"disabled":""} onchange="selectBenchPlayer(${i},this.value)">
-            ${options}
-          </select>
-          <div class="muted" style="font-size:12px;margin-top:4px">Sélectionnez un joueur enregistré de ${coachTeam}.</div>
-        </div>
-        <button type="button" class="danger" ${gameStarted?"disabled":""} onclick="removeBenchSlot(${i})">−</button>
-      </div>`;
-  }).join("");
+        <div><b>${p.name}</b><div class="muted" style="font-size:12px">${p.pos||"DH"}</div></div>
+        <button type="button" class="danger" ${gameStarted?"disabled":""} onclick="removeBenchSlot(${i})">− ENLEVER</button>
+      </div>`).join("")
+    : '<div class="muted" style="font-size:12px">Aucun joueur au banc.</div>';
 }
 function toggleSubstitutionPanel(){
   if(!gameStarted)return;
@@ -856,7 +866,7 @@ function undo(){
   $("pendingModal").classList.remove("show");$("runnerModal").classList.remove("show");$("profileModal").classList.remove("show");renderGame();toast("Dernière action annulée")
 }
 function askReset(){$("resetModal").classList.add("show")}function closeReset(){$("resetModal").classList.remove("show")}
-function confirmReset(){resetStatsOnly();closeReset();renderGame();toast("Nouveau match prêt")}
+function confirmReset(){resetStatsOnly();gameStarted=false;Object.values(teams).forEach(t=>t.submitted=false);closeReset();showPregame();renderPregameStatus();renderLineupEditor();toast("Nouvelle partie : alignements déverrouillés")}
 
 renderLineupEditor();
 

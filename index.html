@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.10.4</title>
+<title>Diamond v0.10.5</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -95,9 +95,6 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .pitcher-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3}.pitcher-center .player-link{border:1px solid;border-radius:999px;padding:9px 12px;text-decoration:none;font-size:12px;white-space:nowrap}
 .pitcher-center .team-yankees{border-color:var(--red);background:rgba(216,74,74,.24)}.pitcher-center .team-brewers{border-color:var(--blue);background:rgba(47,120,196,.24)}
 .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.kbtn{border-color:#6a5bb0;background:#302a50}
-#plateAppearanceCard{position:relative;z-index:5;pointer-events:auto}
-#plateAppearanceCard .score-action{pointer-events:auto;touch-action:manipulation;position:relative;z-index:6;-webkit-tap-highlight-color:rgba(255,255,255,.15)}
-.modal:not(.show){pointer-events:none}
 .log{max-height:180px;overflow:auto;background:#101820;border-radius:12px;padding:10px;font-size:13px;color:var(--muted)}.log div{padding:5px 0;border-bottom:1px solid #24313e}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.64);display:none;align-items:flex-end;justify-content:center;z-index:20}.modal.show{display:flex}
 .sheet{width:min(560px,100%);background:#17212b;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
@@ -300,7 +297,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.4 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.5 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -539,8 +536,9 @@ body:not(.role-official) #gameLogCard{display:none!important}
 
     <div class="card">
       <div class="section-title">Frappeur</div>
-      <button type="button" class="batter-name player-link" id="batterName"></button>
+      <button class="batter-name player-link" id="batterName"></button>
       <div class="batter-sub" id="batterStats"></div>
+      </div>
       <div class="pending-note" id="pendingNote">Confirmez d’abord l’avancement des coureurs.</div>
     </div>
 
@@ -570,13 +568,17 @@ body:not(.role-official) #gameLogCard{display:none!important}
     </div>
 
     <div class="card scorer-only" id="plateAppearanceCard">
-      <div class="section-title">Résultat de la présence</div><div class="muted" id="scoringControlsStatus" style="margin-bottom:8px">Sélectionnez le résultat de la présence.</div>
+      <div class="section-title">Résultat de la présence</div>
       <div class="actions">
-        <button type="button" id="scoreSimple" class="action-btn score-action" data-score-action="simple">SIMPLE</button><button type="button" id="scoreDouble" class="action-btn score-action" data-score-action="double">DOUBLE</button>
-        <button type="button" id="scoreTriple" class="action-btn score-action" data-score-action="triple">TRIPLE</button><button type="button" id="scoreHR" class="action-btn score-action" data-score-action="hr">CIRCUIT</button>
-        <button type="button" id="scoreOut" class="action-btn score-action" data-score-action="out">RETRAIT</button><button type="button" id="scoreK" class="kbtn score-action" data-score-action="k">K • RETRAIT AU BÂTON</button>
-        <button type="button" id="scoreBB" class="action-btn score-action" data-score-action="bb">BB</button><button type="button" id="scoreHBP" class="action-btn score-action" data-score-action="hbp">HBP</button>
-        <button type="button" id="scoreError" class="action-btn score-action" data-score-action="error">ERREUR</button>
+        <button type="button" class="action-btn" onclick="recordHit(1)">SIMPLE</button>
+        <button type="button" class="action-btn" onclick="recordHit(2)">DOUBLE</button>
+        <button type="button" class="action-btn" onclick="recordHit(3)">TRIPLE</button>
+        <button type="button" class="action-btn" onclick="recordHR()">CIRCUIT</button>
+        <button type="button" class="action-btn" onclick="recordOut()">RETRAIT</button>
+        <button type="button" class="kbtn" onclick="recordStrikeout()">K • RETRAIT AU BÂTON</button>
+        <button type="button" class="action-btn" onclick="recordWalk()">BB</button>
+        <button type="button" class="action-btn" onclick="recordHBP()">HBP</button>
+        <button type="button" class="action-btn" onclick="recordError()">ERREUR</button>
       </div>
     </div>
 
@@ -1523,7 +1525,6 @@ function getPlayer(ref){return teams[ref.team].lineup.find(p=>p.id===ref.id)}
 function runnerRef(p,team){return {id:p.id,name:p.name,team}}
 
 function renderGame(){
-  bindScoringControls();
   const batting=currentBattingTeam();
   const sb=$("scoreTeamBrewers"), sy=$("scoreTeamYankees");
   if(sb){sb.classList.toggle("team-at-bat",batting==="Brewers");sb.classList.toggle("team-defense",batting!=="Brewers");}
@@ -1547,12 +1548,6 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
     homeBatter.onclick=()=>openPlayerProfile(b,currentBattingTeam());
   }
   $("batterStats").textContent=`${b.h} en ${b.ab} • ${avg(b)} • ${b.rbi} RBI`;
-  const scoringStatus=$("scoringControlsStatus");
-  if(scoringStatus){
-    scoringStatus.textContent=state.gameOver
-      ?"Match terminé"
-      :(pendingGameOver?"Décision de fin de match requise":"Sélectionnez le résultat de la présence.");
-  }
   const p=currentPitcher(),ft=currentFieldingTeam();$("pitcherName").textContent="⚾ "+(p?p.name:"Aucun lanceur")+" • "+ft;$("pitcherName").className="player-link team-"+ft.toLowerCase();
   $("pitcherName").onclick=()=>openPitcherProfile(p,ft);$("pendingNote").classList.toggle("show",state.pending.length>0);
   [1,2,3].forEach(base=>{
@@ -1571,19 +1566,14 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   });
   $("gameLog").innerHTML=state.log.length?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join(""):"<div>Aucune action enregistrée.</div>";
   keepLiveGameLocked();
-  renderSchedule();
-  renderStandings();
 
   if(state.gameOver){
     const banner=$("atBatTeam");
     if(banner)banner.textContent=`MATCH TERMINÉ • ${state.winner.toUpperCase()} GAGNENT`;
+    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=true);
+  }else{
+    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=false);
   }
-
-  // Les contrôles du marqueur restent cliquables pendant un match actif.
-  // Les fonctions record... gèrent elles-mêmes les blocages de fin de match.
-  document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>{
-    btn.disabled=false;
-  });
 }
 function addLog(t){state.log.push(`${state.top?"▲":"▼"} ${ordinal(state.inning)} — ${t}`)}
 function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batterIndex[t]=(state.batterIndex[t]+1)%a.length}
@@ -1674,9 +1664,7 @@ function saveFinalGameToLocalSeason(){
 function renderSchedule(){
   const candidates=[
     $("viewerSchedule"),
-    $("officialSchedule"),
-    $("scheduleList"),
-    $("scheduleContent")
+    $("officialSchedule")
   ].filter(Boolean);
 
   const html=completedGames.length
@@ -1694,9 +1682,7 @@ function renderSchedule(){
 function renderStandings(){
   const candidates=[
     $("viewerStandings"),
-    $("officialStandings"),
-    $("standingsTable"),
-    $("standingsContent")
+    $("officialStandings")
   ].filter(Boolean);
 
   const rows=["Brewers","Yankees"].map(team=>{
@@ -2292,33 +2278,6 @@ function setRoleBadge(label){
   badge.classList.remove("hidden");
 }
 
-
-function bindScoringControls(){
-  const handlers={
-    simple:()=>recordHit(1),
-    double:()=>recordHit(2),
-    triple:()=>recordHit(3),
-    hr:()=>recordHR(),
-    out:()=>recordOut(),
-    k:()=>recordStrikeout(),
-    bb:()=>recordWalk(),
-    hbp:()=>recordHBP(),
-    error:()=>recordError()
-  };
-
-  document.querySelectorAll('[data-score-action]').forEach(btn=>{
-    if(btn.dataset.boundScore==='1')return;
-    btn.dataset.boundScore='1';
-    btn.disabled=false;
-    btn.addEventListener('click',e=>{
-      e.preventDefault();
-      e.stopPropagation();
-      const fn=handlers[btn.dataset.scoreAction];
-      if(fn)fn();
-    });
-  });
-}
-
 function selectRole(role){
   currentRole=role;
 
@@ -2434,7 +2393,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.10.4.
+// L'accueil par rôles est l'écran initial de v0.10.5.
 
 renderLineupEditor();
 
@@ -2453,8 +2412,6 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
   btn.addEventListener("click",()=>highlightActionButton(btn));
 });
 
-
-bindScoringControls();
 </script>
 
 <div id="rosterModal" class="modal">

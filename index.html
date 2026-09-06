@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.9.1</title>
+<title>Diamond v0.9.2</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -191,20 +191,41 @@ body.role-official #submitLineupBtn{
 body.role-captain #gameLogCard{display:none!important}
 .batter-team-brewers{color:#4f9cff!important;font-weight:1000!important}
 .batter-team-yankees{color:#ef6a6a!important;font-weight:1000!important}
-.bottom-tabs{position:sticky;bottom:8px;z-index:25;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:16px 0 6px;padding:7px;background:rgba(15,23,32,.96);border:1px solid #33465a;border-radius:14px;backdrop-filter:blur(10px)}
+.bottom-tabs{position:static;z-index:25;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:16px 0 6px;padding:7px;background:rgba(15,23,32,.96);border:1px solid #33465a;border-radius:14px;backdrop-filter:blur(10px)}
 .bottom-tabs button{min-height:46px;padding:7px 4px;font-size:12px}
 body:not(.role-official) .official-bottom-tabs{display:none!important}
 .league-tab-panel{display:none}.league-tab-panel.active{display:block}
+
+#home{
+  width:92px!important;
+  min-height:58px!important;
+  padding:5px!important;
+  cursor:default!important;
+}
+#homeBatterName{
+  width:100%;
+  border:0;
+  background:transparent;
+  padding:2px 3px;
+  min-height:44px;
+  font-size:11px;
+  line-height:1.15;
+  font-weight:1000;
+  text-align:center;
+}
+#homeBatterName.brewers{color:#4f9cff!important}
+#homeBatterName.yankees{color:#ef6a6a!important}
+#homeBatterLabel{display:block;font-size:9px;color:var(--muted);margin-bottom:2px}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.1 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.2 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
     <div class="card">
-      <div class="section-title">Bienvenue dans Le Diamant</div>
+      <div class="section-title">Bienvenue dans Diamond</div>
       <h2>Choisissez votre accès</h2>
       <div class="muted">Une seule application, trois expériences adaptées au rôle de chacun.</div>
       <div class="role-grid">
@@ -434,7 +455,12 @@ body:not(.role-official) .official-bottom-tabs{display:none!important}
         <div class="base empty" id="b2" data-base="2">2e</div>
         <div class="base empty" id="b1" data-base="1">1er</div>
         <div class="base empty" id="b3" data-base="3">3e</div>
-        <div class="base empty" id="home">MARBRE</div>
+        <div class="base empty" id="home">
+          <div style="width:100%">
+            <span id="homeBatterLabel">MARBRE</span>
+            <button type="button" id="homeBatterName" class="player-link"></button>
+          </div>
+        </div>
       </div>
       <div class="footer-note">Le lanceur change automatiquement à chaque demi-manche selon le joueur en position L.</div>
     </div>
@@ -1217,6 +1243,13 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   const b=batter(),n=nextBatterObj();$("batterName").textContent=b.name+" • "+b.pos;
   $("batterName").className="batter-name player-link "+(currentBattingTeam()==="Brewers"?"batter-team-brewers":"batter-team-yankees");
   $("batterName").onclick=()=>openPlayerProfile(b,currentBattingTeam());
+
+  const homeBatter=$("homeBatterName");
+  if(homeBatter){
+    homeBatter.textContent=b.name;
+    homeBatter.className="player-link "+(currentBattingTeam()==="Brewers"?"brewers":"yankees");
+    homeBatter.onclick=()=>openPlayerProfile(b,currentBattingTeam());
+  }
   $("batterStats").textContent=`${b.h} en ${b.ab} • ${avg(b)} • ${b.rbi} RBI`;
   const p=currentPitcher(),ft=currentFieldingTeam();$("pitcherName").textContent="⚾ "+(p?p.name:"Aucun lanceur")+" • "+ft;$("pitcherName").className="player-link team-"+ft.toLowerCase();
   $("pitcherName").onclick=()=>openPitcherProfile(p,ft);$("pendingNote").classList.toggle("show",state.pending.length>0);
@@ -1443,7 +1476,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.9.1.
+// L'accueil par rôles est l'écran initial de v0.9.2.
 
 renderLineupEditor();
 

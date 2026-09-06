@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.10.5</title>
+<title>Diamond v0.10.6</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -95,6 +95,10 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .pitcher-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3}.pitcher-center .player-link{border:1px solid;border-radius:999px;padding:9px 12px;text-decoration:none;font-size:12px;white-space:nowrap}
 .pitcher-center .team-yankees{border-color:var(--red);background:rgba(216,74,74,.24)}.pitcher-center .team-brewers{border-color:var(--blue);background:rgba(47,120,196,.24)}
 .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.kbtn{border-color:#6a5bb0;background:#302a50}
+#plateAppearanceCard{position:relative;z-index:10;pointer-events:auto!important}
+#plateAppearanceCard .actions{position:relative;z-index:11;pointer-events:auto!important}
+#plateAppearanceCard button{position:relative;z-index:12;pointer-events:auto!important;touch-action:manipulation}
+.modal:not(.show){display:none!important;pointer-events:none!important}
 .log{max-height:180px;overflow:auto;background:#101820;border-radius:12px;padding:10px;font-size:13px;color:var(--muted)}.log div{padding:5px 0;border-bottom:1px solid #24313e}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.64);display:none;align-items:flex-end;justify-content:center;z-index:20}.modal.show{display:flex}
 .sheet{width:min(560px,100%);background:#17212b;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom))}
@@ -297,7 +301,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.5 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.6 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -536,9 +540,8 @@ body:not(.role-official) #gameLogCard{display:none!important}
 
     <div class="card">
       <div class="section-title">Frappeur</div>
-      <button class="batter-name player-link" id="batterName"></button>
+      <button type="button" class="batter-name player-link" id="batterName"></button>
       <div class="batter-sub" id="batterStats"></div>
-      </div>
       <div class="pending-note" id="pendingNote">Confirmez d’abord l’avancement des coureurs.</div>
     </div>
 
@@ -1570,10 +1573,14 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   if(state.gameOver){
     const banner=$("atBatTeam");
     if(banner)banner.textContent=`MATCH TERMINÉ • ${state.winner.toUpperCase()} GAGNENT`;
-    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=true);
-  }else{
-    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=false);
   }
+
+  // Les boutons restent physiquement cliquables.
+  // Les fonctions de pointage décident elles-mêmes si une action est permise.
+  document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>{
+    btn.disabled=false;
+    btn.style.pointerEvents="auto";
+  });
 }
 function addLog(t){state.log.push(`${state.top?"▲":"▼"} ${ordinal(state.inning)} — ${t}`)}
 function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batterIndex[t]=(state.batterIndex[t]+1)%a.length}
@@ -2016,6 +2023,14 @@ function endHalfIfNeeded(){
 }
 function blockIfPending(){if(state.pending.length){toast("Confirmez d’abord les coureurs");return true}return false}
 
+function flashScoringTap(label){
+  const card=$("plateAppearanceCard");
+  if(card){
+    card.dataset.lastTap=label;
+  }
+  toast("Sélection : "+label);
+}
+
 function beginHitLike(dest,label,isHit=true){
   if(blockIfPending())return;saveHistory();const b=batter(),bt=currentBattingTeam();b.ab++;if(isHit){b.h++;pitcherStats().h++}
   const pending=[];[3,2,1].forEach(base=>{if(state.bases[base])pending.push({runner:state.bases[base],origin:base,batterDest:dest})});
@@ -2023,10 +2038,11 @@ function beginHitLike(dest,label,isHit=true){
   if(state.pending.length)showPending();else nextBatter();renderGame()
 }
 function recordHit(n){
+  flashScoringTap(n===1?"SIMPLE":n===2?"DOUBLE":"TRIPLE");
   if(blockIfGameOver())return;
   beginHitLike(n,n===1?"simple":n===2?"double":"triple",true);
 }
-function recordError(){if(blockIfGameOver())return;beginHitLike(1,"erreur défensive",false)}
+function recordError(){flashScoringTap("ERREUR");if(blockIfGameOver())return;beginHitLike(1,"erreur défensive",false)}
 function showPending(){
   if(!state.pending.length){nextBatter();renderGame();return}
   const item=state.pending[0],r=item.runner;$("pendingTitle").textContent=r.name;$("pendingCurrent").textContent=`Était au ${item.origin===1?"1er":item.origin+"e"} but — où termine-t-il?`;
@@ -2039,11 +2055,11 @@ function resolvePending(dest){if(blockIfGameOver())return;
   else{if(state.bases[dest]){toast("Ce but est déjà occupé");state.pending.unshift(item);return}state.bases[dest]=r;addLog(`${r.name} avance au ${dest===2?"2e":"3e"} but`)}
   $("pendingModal").classList.remove("show");endHalfIfNeeded();if(state.outs<3&&state.pending.length)showPending();else if(state.outs<3&&!state.pending.length)nextBatter();renderGame()
 }
-function recordHR(){if(blockIfGameOver())return;
+function recordHR(){flashScoringTap("CIRCUIT");if(blockIfGameOver())return;
   if(blockIfPending())return;saveHistory();const b=batter(),bt=currentBattingTeam();b.ab++;b.h++;b.hr++;pitcherStats().h++;
   [3,2,1].forEach(i=>{if(state.bases[i])scoreRunner(state.bases[i],true)});scoreRunner(runnerRef(b,bt),true);state.bases={1:null,2:null,3:null};addLog(`${b.name} — circuit`);nextBatter();renderGame()
 }
-function recordStrikeout(){if(blockIfGameOver())return;
+function recordStrikeout(){flashScoringTap("K");if(blockIfGameOver())return;
   if(blockIfPending())return;
   if(!gameStarted){toast("Le match n’est pas commencé");return}
 
@@ -2065,7 +2081,7 @@ function recordStrikeout(){if(blockIfGameOver())return;
 
   renderGame();
 }
-function recordOut(){if(blockIfGameOver())return;
+function recordOut(){flashScoringTap("RETRAIT");if(blockIfGameOver())return;
   if(blockIfPending())return;
   if(!gameStarted){toast("Le match n’est pas commencé");return}
 
@@ -2092,8 +2108,8 @@ function forcedToFirst(label){
   if(state.bases[1]){if(state.bases[2]){if(state.bases[3])scoreRunner(state.bases[3],true);state.bases[3]=state.bases[2]}state.bases[2]=state.bases[1]}
   state.bases[1]=runnerRef(b,bt);addLog(`${b.name} — ${label}`);nextBatter();renderGame()
 }
-function recordWalk(){if(blockIfGameOver())return;pitcherStats().bb++;forcedToFirst("but sur balles")}
-function recordHBP(){if(blockIfGameOver())return;forcedToFirst("atteint par un lancer")}
+function recordWalk(){flashScoringTap("BB");if(blockIfGameOver())return;pitcherStats().bb++;forcedToFirst("but sur balles")}
+function recordHBP(){flashScoringTap("HBP");if(blockIfGameOver())return;forcedToFirst("atteint par un lancer")}
 
 function openRunnerControls(base){
   if(state.pending.length){toast("Terminez d’abord la confirmation des coureurs");return}
@@ -2393,7 +2409,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.10.5.
+// L'accueil par rôles est l'écran initial de v0.10.6.
 
 renderLineupEditor();
 

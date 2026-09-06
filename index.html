@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.9.2</title>
+<title>Diamond v0.9.3</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -216,11 +216,67 @@ body:not(.role-official) .official-bottom-tabs{display:none!important}
 #homeBatterName.brewers{color:#4f9cff!important}
 #homeBatterName.yankees{color:#ef6a6a!important}
 #homeBatterLabel{display:block;font-size:9px;color:var(--muted);margin-bottom:2px}
+
+.inning-format{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:10px;
+}
+.inning-format button{min-height:46px;font-weight:900}
+.inning-format button.active{
+  outline:3px solid #fff;
+  outline-offset:1px;
+  filter:brightness(1.2);
+}
+.linescore-wrap{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  margin-top:12px;
+}
+.linescore{
+  width:max-content;
+  min-width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+.linescore th,.linescore td{
+  min-width:38px;
+  padding:8px 6px;
+  text-align:center;
+  border-bottom:1px solid #263849;
+}
+.linescore th:first-child,.linescore td:first-child{
+  position:sticky;
+  left:0;
+  z-index:2;
+  min-width:88px;
+  text-align:left;
+  background:#111b24;
+  font-weight:900;
+}
+.linescore th:last-child,.linescore td:last-child{
+  font-weight:1000;
+  border-left:2px solid #40566b;
+}
+.linescore .current-inning{
+  background:rgba(255,255,255,.08);
+  font-weight:1000;
+}
+.extra-inning-controls{
+  margin-top:10px;
+  display:flex;
+  justify-content:flex-end;
+}
+.extra-inning-controls button{
+  width:100%;
+  max-width:280px;
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.2 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.3 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -265,6 +321,10 @@ body:not(.role-official) .official-bottom-tabs{display:none!important}
         </div>
       </div>
       <div id="viewerStatus" class="readonly-note" style="margin-top:10px">Match à venir.</div>
+      <div class="linescore-wrap">
+        <table class="linescore" id="viewerLineScore"></table>
+      </div>
+
     </div>
 
     <div class="card">
@@ -410,7 +470,17 @@ body:not(.role-official) .official-bottom-tabs{display:none!important}
         <strong>✓ Les deux alignements sont reçus.</strong><br>
         Peter Pan lancera pour les Yankees et Jonny Cash pour les Brewers.
       </div>
-      <button id="startGameBtn" class="primary" style="width:100%;margin-top:10px" disabled onclick="startGame()">DÉBUTER LE MATCH</button>
+      
+      <div id="inningFormatBlock" style="margin-top:14px">
+        <div class="section-title">Nombre de manches réglementaires</div>
+        <div class="muted" style="font-size:12px">Choisi par le marqueur avant le début du match.</div>
+        <div class="inning-format">
+          <button type="button" id="innings5Btn" onclick="setRegulationInnings(5)">5 MANCHES</button>
+          <button type="button" id="innings7Btn" onclick="setRegulationInnings(7)" class="active">7 MANCHES</button>
+          <button type="button" id="innings9Btn" onclick="setRegulationInnings(9)">9 MANCHES</button>
+        </div>
+      </div>
+<button id="startGameBtn" class="primary" style="width:100%;margin-top:10px" disabled onclick="startGame()">DÉBUTER LE MATCH</button>
     </div>
   </section>
 
@@ -430,6 +500,13 @@ body:not(.role-official) .official-bottom-tabs{display:none!important}
       </div>
       <div class="atbat-banner" id="atBatTeam">AU BÂTON : BREWERS</div>
       <div class="meta"><span id="outsText">0 retrait</span><span id="basesText">Buts vides</span></div>
+      <div class="linescore-wrap">
+        <table class="linescore" id="officialLineScore"></table>
+      </div>
+      <div class="extra-inning-controls scorer-only">
+        <button type="button" id="addExtraInningBtn" onclick="addExtraInning()">＋ MANCHE DE PROLONGATION</button>
+      </div>
+
     </div>
 
     <div class="card">
@@ -534,7 +611,8 @@ Object.entries(teams).forEach(([teamName,t])=>{
   // Master list of players registered to this team.
   t.roster=t.lineup.map(p=>({...p}));
 });
-let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[]};
+let regulationInnings=7; let displayedInnings=7;
+let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}}};
 let selectedBase=null;
 let selectedLineupSlot=null;
 let selectedBenchSlot=null;
@@ -1177,15 +1255,15 @@ function startGame(){
   }
 
   const ok=confirm(
-    "Voulez-vous débuter la rencontre ?\n\n"+
+    `Voulez-vous débuter la rencontre de ${regulationInnings} manches ?\n\n`+
     "Les alignements seront verrouillés pour les capitaines dès le début du match.\n\n"+
     "Le marqueur pourra toujours retourner consulter et corriger les alignements."
   );
   if(!ok)return;
 
   resetStatsOnly();
+  displayedInnings=regulationInnings;
 
-  // Mémorise les joueurs présents dans l'alignement au moment du verrouillage.
   Object.entries(teams).forEach(([teamName,t])=>{
     t.lineup.forEach(p=>{
       p.lockedStarter=true;
@@ -1199,7 +1277,7 @@ function startGame(){
   $("pregame").classList.add("hidden");
   $("game").classList.remove("hidden");
   renderGame();
-  toast("Match débuté — alignements verrouillés");
+  toast(`Match de ${regulationInnings} manches débuté`);
 }
 function backToPregame(){
   if(currentRole!=="official"){
@@ -1220,8 +1298,18 @@ function returnToGame(){
 }
 
 function resetStatsOnly(){
-  Object.values(teams).forEach(t=>{t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=0});t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0}});
-  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[]}
+  Object.values(teams).forEach(t=>{
+    t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=0});
+    t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0};
+  });
+  displayedInnings=regulationInnings;
+  state={
+    awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,
+    batterIndex:{Brewers:0,Yankees:0},
+    bases:{1:null,2:null,3:null},
+    history:[],log:[],pending:[],
+    inningRuns:{Brewers:{},Yankees:{}}
+  };
 }
 function serializableState(){return JSON.parse(JSON.stringify({state,teams}))}
 function saveHistory(){state.history.push(serializableState());if(state.history.length>80)state.history.shift()}
@@ -1235,6 +1323,7 @@ function renderGame(){
   if(sy){sy.classList.toggle("team-at-bat",batting==="Yankees");sy.classList.toggle("team-defense",batting!=="Yankees");}
 if(!$("viewerView").classList.contains("hidden"))renderViewer();
   $("awayRuns").textContent=state.awayRuns;$("homeRuns").textContent=state.homeRuns;$("half").textContent=state.top?"Haut":"Bas";$("inning").textContent=ordinal(state.inning);
+  renderLineScores();
   $("awayTeam").classList.toggle("active",state.top);$("homeTeam").classList.toggle("active",!state.top);
   $("atBatTeam").textContent="AU BÂTON : "+currentBattingTeam().toUpperCase();
   $("outsText").textContent=state.outs+" retrait"+(state.outs>1?"s":"");
@@ -1271,9 +1360,28 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
 }
 function addLog(t){state.log.push(`${state.top?"▲":"▼"} ${ordinal(state.inning)} — ${t}`)}
 function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batterIndex[t]=(state.batterIndex[t]+1)%a.length}
-function currentTeamRunsAdd(){state.top?state.awayRuns++:state.homeRuns++}
+function currentTeamRunsAdd(){
+  const team=currentBattingTeam();
+  if(!state.inningRuns)state.inningRuns={Brewers:{},Yankees:{}};
+  if(!state.inningRuns[team])state.inningRuns[team]={};
+  state.inningRuns[team][state.inning]=(state.inningRuns[team][state.inning]||0)+1;
+  if(state.top)state.awayRuns++;else state.homeRuns++;
+}
 function scoreRunner(r,rbi=true){currentTeamRunsAdd();const p=getPlayer(r);if(p)p.r++;if(rbi)batter().rbi++;addLog(`${r.name} marque${rbi?" • RBI à "+batter().name:""}`)}
-function endHalfIfNeeded(){if(state.outs>=3){state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];state.top=!state.top;if(state.top)state.inning++;addLog("Changement de demi-manche • "+currentPitcher().name+" au monticule")}}
+function endHalfIfNeeded(){
+  if(state.outs>=3){
+    state.outs=0;
+    state.bases={1:null,2:null,3:null};
+    state.pending=[];
+    state.top=!state.top;
+    if(state.top){
+      state.inning++;
+      if(state.inning>displayedInnings)displayedInnings=state.inning;
+    }
+    const p=currentPitcher();
+    addLog("Changement de demi-manche • "+(p?p.name:"Aucun lanceur")+" au monticule");
+  }
+}
 function blockIfPending(){if(state.pending.length){toast("Confirmez d’abord les coureurs");return true}return false}
 
 function beginHitLike(dest,label,isHit=true){
@@ -1358,6 +1466,64 @@ function openLeagueInfo(tab){
 }
 function closeLeagueInfo(){ $("leagueInfoModal").classList.remove("show"); }
 
+
+function setRegulationInnings(n){
+  if(gameStarted){toast("Le nombre de manches est verrouillé pendant le match");return}
+  if(![5,7,9].includes(n))return;
+  regulationInnings=n;
+  displayedInnings=n;
+  [5,7,9].forEach(v=>{
+    const btn=$("innings"+v+"Btn");
+    if(btn)btn.classList.toggle("active",v===n);
+  });
+}
+
+function addExtraInning(){
+  if(currentRole!=="official"){toast("Seul le marqueur peut ajouter une prolongation");return}
+  if(!gameStarted){toast("Débutez d’abord le match");return}
+  displayedInnings=Math.max(displayedInnings,state.inning,regulationInnings)+1;
+  renderLineScores();
+  toast(`${displayedInnings}e manche ajoutée`);
+}
+
+function inningRuns(team,inning){
+  return Number(state.inningRuns?.[team]?.[inning]||0);
+}
+
+function renderLineScoreInto(id){
+  const table=$(id);
+  if(!table)return;
+
+  const last=Math.max(displayedInnings,regulationInnings,state.inning);
+  const innings=Array.from({length:last},(_,i)=>i+1);
+
+  const head=innings.map(i=>`<th class="${i===state.inning?"current-inning":""}">${i}</th>`).join("");
+  const row=(team,total)=>`
+    <tr>
+      <td class="${team==="Brewers"?"batter-team-brewers":"batter-team-yankees"}">${team}</td>
+      ${innings.map(i=>`<td class="${i===state.inning?"current-inning":""}">${inningRuns(team,i)}</td>`).join("")}
+      <td>${total}</td>
+    </tr>`;
+
+  table.innerHTML=`
+    <thead><tr><th>Équipe</th>${head}<th>R</th></tr></thead>
+    <tbody>
+      ${row("Brewers",state.awayRuns)}
+      ${row("Yankees",state.homeRuns)}
+    </tbody>`;
+}
+
+function renderLineScores(){
+  renderLineScoreInto("officialLineScore");
+  renderLineScoreInto("viewerLineScore");
+
+  const btn=$("addExtraInningBtn");
+  if(btn){
+    btn.classList.toggle("hidden",currentRole!=="official" || !gameStarted);
+    btn.textContent=`＋ AJOUTER LA ${Math.max(displayedInnings,regulationInnings,state.inning)+1}e MANCHE`;
+  }
+}
+
 function setRoleBadge(label){
   const badge=$("roleBadge");
   if(!badge)return;
@@ -1399,6 +1565,7 @@ function selectRole(role){
     $("workspaceRoleTitle").textContent="📋 Marqueur / Gestionnaire";
     $("workspaceRoleSub").textContent="Approuver les alignements et gérer le match.";
     if($("officialPregameCard"))$("officialPregameCard").classList.remove("hidden");
+    setRegulationInnings(regulationInnings);
   }
 
   renderLineupEditor();
@@ -1442,6 +1609,7 @@ function renderViewer(){
   $("viewerHalf").textContent=st.top?"Haut":"Bas";
   $("viewerInning").textContent=ordinal(st.inning);
   $("viewerOuts").textContent=st.outs+" retrait"+(st.outs>1?"s":"");
+  renderLineScores();
   $("viewerStatus").textContent=gameStarted
     ? `Match en cours • ${currentBattingTeam()} au bâton`
     : "Match à venir.";
@@ -1476,7 +1644,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.9.2.
+// L'accueil par rôles est l'écran initial de v0.9.3.
 
 renderLineupEditor();
 

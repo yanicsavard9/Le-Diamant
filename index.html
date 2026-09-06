@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.9.8</title>
+<title>Diamond v0.9.9</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -297,7 +297,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.8 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.9 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1448,8 +1448,25 @@ function resetStatsOnly(){
     inningRuns:{Brewers:{},Yankees:{}}
   };
 }
-function serializableState(){return JSON.parse(JSON.stringify({state,teams}))}
-function saveHistory(){state.history.push(serializableState());if(state.history.length>80)state.history.shift()}
+function serializableState(){
+  const stateWithoutHistory={
+    ...state,
+    history:[]
+  };
+  return JSON.parse(JSON.stringify({
+    state:stateWithoutHistory,
+    teams
+  }));
+}
+function saveHistory(){
+  if(!Array.isArray(state.history))state.history=[];
+  state.history.push(serializableState());
+
+  // Keep enough undo depth without allowing memory to grow indefinitely.
+  if(state.history.length>40){
+    state.history.splice(0,state.history.length-40);
+  }
+}
 function getPlayer(ref){return teams[ref.team].lineup.find(p=>p.id===ref.id)}
 function runnerRef(p,team){return {id:p.id,name:p.name,team}}
 
@@ -1493,10 +1510,18 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
       el.textContent=base===1?"1er":base+"e";
     }
   });
-  $("gameLog").innerHTML=state.log.length?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join(""):"<div>Aucune action enregistrée.</div>"
+  $("gameLog").innerHTML=state.log.length?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join(""):"<div>Aucune action enregistrée.</div>";
+  keepLiveGameLocked();
 }
 function addLog(t){state.log.push(`${state.top?"▲":"▼"} ${ordinal(state.inning)} — ${t}`)}
 function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batterIndex[t]=(state.batterIndex[t]+1)%a.length}
+
+function keepLiveGameLocked(){
+  if(!gameStarted)return;
+  teams.Brewers.submitted=true;
+  teams.Yankees.submitted=true;
+}
+
 function currentTeamRunsAdd(){
   const team=currentBattingTeam();
   if(!state.inningRuns)state.inningRuns={Brewers:{},Yankees:{}};
@@ -1631,9 +1656,32 @@ function openPitcherProfile(p,team){const ps=teams[team].pitcherStats;$("profile
 function closeProfile(){$("profileModal").classList.remove("show")}
 
 function undo(){
-  if(!state.history.length){toast("Rien à annuler");return}
-  const snap=state.history.pop(),hist=state.history;state=snap.state;teams=snap.teams;state.history=hist;
-  $("pendingModal").classList.remove("show");$("runnerModal").classList.remove("show");$("profileModal").classList.remove("show");renderGame();toast("Dernière action annulée")
+  if(!state.history || !state.history.length){
+    toast("Rien à annuler");
+    return;
+  }
+
+  const snap=state.history.pop();
+  const remainingHistory=state.history;
+
+  state=snap.state;
+  teams=snap.teams;
+
+  // Never restore nested snapshot histories.
+  state.history=remainingHistory;
+
+  $("pendingModal").classList.remove("show");
+  $("runnerModal").classList.remove("show");
+  $("profileModal").classList.remove("show");
+
+  // Undo during a live game must not unlock submitted lineups.
+  if(gameStarted){
+    teams.Brewers.submitted=true;
+    teams.Yankees.submitted=true;
+  }
+
+  renderGame();
+  toast("Dernière action annulée");
 }
 function askReset(){$("resetModal").classList.add("show")}function closeReset(){$("resetModal").classList.remove("show")}
 function confirmReset(){resetStatsOnly();gameStarted=false;Object.values(teams).forEach(t=>t.submitted=false);closeReset();showPregame();renderPregameStatus();renderLineupEditor();toast("Nouvelle partie : alignements déverrouillés")}
@@ -1879,7 +1927,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.9.8.
+// L'accueil par rôles est l'écran initial de v0.9.9.
 
 renderLineupEditor();
 

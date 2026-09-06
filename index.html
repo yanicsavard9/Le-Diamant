@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.8.9</title>
+<title>Le Diamant v0.9.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -189,7 +189,7 @@ body.role-official #submitLineupBtn{
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.9 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.0 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -841,16 +841,27 @@ function selectBenchPlayer(index,playerId){
 }
 
 function removeBenchSlot(index){
-  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
-  
+  if(gameStarted && currentRole!=="official"){
+    toast("Banc verrouillé pour le capitaine pendant le match");
+    return;
+  }
+
   const t=teams[coachTeam];
-  if(!t || !t.bench[index])return;
+  if(!t || !Array.isArray(t.bench) || !t.bench[index]){
+    toast("Joueur du banc introuvable");
+    return;
+  }
+
   const removed=t.bench[index];
   t.bench.splice(index,1);
-  t.submitted=false;
-  renderLineupEditor();
+
+  // Avant le match, une modification oblige le capitaine à soumettre de nouveau.
+  // Pendant le match, le marqueur peut corriger sans changer le statut de soumission.
+  if(!gameStarted)t.submitted=false;
+
+  renderBenchEditor();
   renderPregameStatus();
-  toast(removed && !removed.placeholder ? `${removed.name} retiré du banc` : "Place retirée du banc");
+  toast(`${removed.name} retiré du banc`);
 }
 
 function removeBenchPlayer(teamName){
@@ -966,8 +977,6 @@ function renderBenchEditor(){
   if(!Array.isArray(t.bench))t.bench=[];
   if(!Array.isArray(t.roster))t.roster=t.lineup.map(p=>({...p}));
 
-  // Tous les joueurs inscrits à cette équipe sont disponibles dans le menu BANC.
-  // On retire seulement ceux qui sont déjà au banc pour éviter un doublon au banc.
   const benchUsed=new Set(t.bench.map(p=>rosterPlayerKey(p)));
   const available=t.roster.filter(p=>!benchUsed.has(rosterPlayerKey(p)));
 
@@ -992,9 +1001,23 @@ function renderBenchEditor(){
           <div class="muted" style="font-size:12px">${p.pos||"DH"}</div>
           ${gameStarted&&p.lockedStarter?`<div class="player-used-note ${p.lockedStarterTeam==="Brewers"?"brewers":"yankees"}">DÉJÀ UTILISÉ DANS L’ALIGNEMENT</div>`:""}
         </div>
-        <button type="button" class="danger" ${benchLocked?"disabled":""} onclick="removeBenchSlot(${i})">− ENLEVER</button>
+        <button
+          type="button"
+          class="danger"
+          data-remove-bench="${i}"
+          ${benchLocked?"disabled":""}>
+          − ENLEVER
+        </button>
       </div>`).join("")
     : '<div class="muted" style="font-size:12px">Aucun joueur au banc.</div>';
+
+  // Liaison directe après chaque rendu : plus fiable sur Safari/iPhone.
+  host.querySelectorAll("[data-remove-bench]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const index=Number(btn.dataset.removeBench);
+      removeBenchSlot(index);
+    });
+  });
 }
 function toggleSubstitutionPanel(){
   if(!gameStarted)return;
@@ -1393,7 +1416,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.8.9.
+// L'accueil par rôles est l'écran initial de v0.9.0.
 
 renderLineupEditor();
 

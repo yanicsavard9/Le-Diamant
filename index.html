@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.8.4</title>
+<title>Le Diamant v0.8.5</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -159,11 +159,15 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
   opacity:.68;
   filter:saturate(.75) brightness(.9);
 }
+
+body:not(.role-official) .scorer-only{display:none!important}
+body.role-viewer #game{display:none!important}
+body.role-captain #game{display:none!important}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.4 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.5 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -331,7 +335,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
         <strong>✓ Les deux alignements sont reçus.</strong><br>
         Peter Pan lancera pour les Yankees et Jonny Cash pour les Brewers.
       </div>
-      <button id="startGameBtn" class="primary" style="width:100%;margin-top:10px" disabled onclick="startGame()">COMMENCER LE MATCH</button>
+      <button id="startGameBtn" class="primary" style="width:100%;margin-top:10px" disabled onclick="startGame()">DÉBUTER LE MATCH</button>
     </div>
   </section>
 
@@ -361,7 +365,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
       <div class="pending-note" id="pendingNote">Confirmez d’abord l’avancement des coureurs.</div>
     </div>
 
-    <div class="card">
+    <div class="card scorer-only" id="interactiveDiamondCard">
       <div class="section-title">Diamant interactif</div>
       <div class="outs-panel">
         <span class="outs-label">RETRAITS</span>
@@ -381,7 +385,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
       <div class="footer-note">Le lanceur change automatiquement à chaque demi-manche selon le joueur en position L.</div>
     </div>
 
-    <div class="card">
+    <div class="card scorer-only" id="plateAppearanceCard">
       <div class="section-title">Résultat de la présence</div>
       <div class="actions">
         <button class="action-btn" onclick="recordHit(1)">SIMPLE</button><button class="action-btn" onclick="recordHit(2)">DOUBLE</button>
@@ -595,7 +599,7 @@ function renderPregameStatus(){
   });
   const ready=teams.Brewers.submitted&&teams.Yankees.submitted;
   $("readyBlock").classList.toggle("hidden",!ready);
-  $("returnMatchBtn").classList.toggle("hidden",!gameStarted);
+  $("returnMatchBtn").classList.toggle("hidden",!gameStarted || currentRole!=="official");
   if($("lineupLockNote")) $("lineupLockNote").classList.toggle("hidden",!gameStarted);
   $("startGameBtn").classList.toggle("hidden",gameStarted);
   $("startGameBtn").disabled=!ready;
@@ -914,15 +918,43 @@ function removeHitter(teamName){
   renderPregameStatus();
 }
 
-function startGame(){if(currentRole!=="official"){toast("Seul le marqueur peut commencer le match");return}
-  if(!(teams.Brewers.submitted&&teams.Yankees.submitted))return;
+function startGame(){
+  if(currentRole!=="official"){
+    toast("Seul le marqueur peut débuter le match");
+    return;
+  }
+
+  if(!(teams.Brewers.submitted&&teams.Yankees.submitted)){
+    toast("Les deux alignements doivent être soumis");
+    return;
+  }
+
+  const ok=confirm(
+    "Voulez-vous débuter la rencontre ?\n\n"+
+    "Les alignements seront verrouillés pour les capitaines dès le début du match.\n\n"+
+    "Le marqueur pourra toujours retourner consulter les alignements."
+  );
+  if(!ok)return;
+
   resetStatsOnly();
   gameStarted=true;
-  $("pregame").classList.add("hidden");$("game").classList.remove("hidden");renderGame()
+
+  // Une fois le match commencé, les alignements soumis deviennent lecture seule pour les capitaines.
+  Object.values(teams).forEach(t=>t.submitted=true);
+
+  $("pregame").classList.add("hidden");
+  $("game").classList.remove("hidden");
+  renderGame();
+  toast("Match débuté — alignements verrouillés");
 }
-function backToPregame(){if(currentRole!=="official")currentRole="official";
+function backToPregame(){
+  if(currentRole!=="official"){
+    selectRole(currentRole==="viewer"?"viewer":"captain");
+    return;
+  }
   $("game").classList.add("hidden");
   $("pregame").classList.remove("hidden");
+  if($("officialPregameCard"))$("officialPregameCard").classList.remove("hidden");
   renderLineupEditor();
   renderPregameStatus();
 }
@@ -1064,6 +1096,9 @@ function setRoleBadge(label){
 function selectRole(role){
   currentRole=role;
 
+  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.add("role-"+role);
+
   $("roleHome").classList.add("hidden");
   $("viewerView").classList.add("hidden");
   $("pregame").classList.add("hidden");
@@ -1071,7 +1106,7 @@ function selectRole(role){
 
   if(role==="viewer"){
     setRoleBadge("JOUEUR");
-    viewerSelectedTeam="Brewers";
+    if(typeof viewerSelectedTeam!=="undefined")viewerSelectedTeam="Brewers";
     renderViewer();
     $("viewerView").classList.remove("hidden");
     return;
@@ -1084,6 +1119,8 @@ function selectRole(role){
     $("workspaceRoleTitle").textContent="🧢 Capitaine / Entraîneur";
     $("workspaceRoleSub").textContent="Préparer et soumettre l’alignement de votre équipe.";
     if($("officialPregameCard"))$("officialPregameCard").classList.add("hidden");
+    // Le capitaine n'a jamais accès au diamant interactif ni au pointage.
+    if($("returnMatchBtn"))$("returnMatchBtn").classList.add("hidden");
   }else{
     setRoleBadge("MARQUEUR");
     $("workspaceRoleTitle").textContent="📋 Marqueur / Gestionnaire";
@@ -1097,6 +1134,7 @@ function selectRole(role){
 
 function backToRoleHome(){
   currentRole=null;
+  document.body.classList.remove("role-viewer","role-captain","role-official");
   setRoleBadge("");
   $("viewerView").classList.add("hidden");
   $("pregame").classList.add("hidden");
@@ -1165,7 +1203,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.8.4.
+// L'accueil par rôles est l'écran initial de v0.8.5.
 
 renderLineupEditor();
 

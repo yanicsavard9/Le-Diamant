@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.8.5</title>
+<title>Le Diamant v0.8.6</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -167,7 +167,7 @@ body.role-captain #game{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.5 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.6 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -330,7 +330,11 @@ body.role-captain #game{display:none!important}
 
     <div class="card" id="officialPregameCard">
       <div class="section-title">Marqueur officiel</div>
-      <div id="lineupLockNote" class="lock-note hidden">🔒 Les alignements sont verrouillés depuis le début du match.</div>
+      <div id="lineupLockNote" class="lock-note hidden">🔒 Les alignements sont verrouillés pour les capitaines. Le marqueur peut toujours les modifier pendant le match.</div>
+      <div id="officialLiveEditNote" class="lock-note hidden" style="margin-top:8px">
+        ✏️ Mode marqueur : vous pouvez modifier les alignements et le banc même pendant le match.
+      </div>
+
       <div id="readyBlock" class="ready-note hidden">
         <strong>✓ Les deux alignements sont reçus.</strong><br>
         Peter Pan lancera pour les Yankees et Jonny Cash pour les Brewers.
@@ -513,7 +517,8 @@ function addRosterPlayer(){
   toast(`${name} ajouté à la liste de ${coachTeam}`);
 }
 function openRosterForSlot(i){
-  if(gameStarted){toast("Alignement verrouillé");return}
+  if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}
+  
   const t=teams[coachTeam], current=t.lineup[i];
   if(!current)return;
   selectedLineupSlot=i;
@@ -526,6 +531,7 @@ function openRosterForSlot(i){
   $("rosterModal").classList.add("show");
 }
 function chooseRosterPlayer(playerId){
+  if(gameStarted && currentRole!=="official")return
   if(gameStarted||selectedLineupSlot===null)return;
   const t=teams[coachTeam];
   const incoming=t.roster.find(p=>(p.id||p.name)===playerId);
@@ -551,19 +557,20 @@ function closeRosterModal(){
 }
 
 function renderLineupEditor(){
+  const lineupLocked = gameStarted && currentRole!=="official";
   $("coachTitle").textContent="Alignement "+coachTeam;
   const list=teams[coachTeam].lineup;
   $("lineupEditor").innerHTML=list.map((p,i)=>`
     <div class="lineup-row">
       <div class="order">${i+1}</div>
-      <div><button type="button" class="lineup-player-btn" onclick="openRosterForSlot(${i})" title="Choisir un joueur pour cette place dans l’alignement" ${gameStarted?"disabled":""}>${p.name}</button><label class="muted" style="font-size:12px"><input type="checkbox" ${p.active?"checked":""} onchange="toggleActive(${i},this.checked)"> Actif</label></div>
+      <div><button type="button" class="lineup-player-btn" onclick="openRosterForSlot(${i})" title="Choisir un joueur pour cette place dans l’alignement" ${lineupLocked?"disabled":""}>${p.name}</button><label class="muted" style="font-size:12px"><input type="checkbox" ${p.active?"checked":""} onchange="toggleActive(${i},this.checked)"> Actif</label></div>
       <select class="pos-select" onchange="changePos(${i},this.value)">${POSITIONS.map(pos=>`<option ${pos===p.pos?"selected":""}>${pos}</option>`).join("")}</select>
       <div class="row-tools"><button onclick="movePlayer(${i},-1)" ${i===0?"disabled":""}>↑ Monter</button><button onclick="movePlayer(${i},1)" ${i===list.length-1?"disabled":""}>↓ Descendre</button></div>
     </div>`).join("");
   renderPregameStatus();
 
   document.querySelectorAll("#pregame input,#pregame select,#pregame .lineup-controls button,#pregame .submit-lineup").forEach(el=>{
-    if(!el.closest("#substitutionPanel")) el.disabled=gameStarted;
+    if(!el.closest("#substitutionPanel")) el.disabled=lineupLocked;
   });
   document.querySelectorAll("#lineupEditor button").forEach(b=>b.disabled=gameStarted);
   const note=document.getElementById("lineupLockNote");
@@ -583,10 +590,13 @@ function movePlayer(i,d){
   if(gameStarted)return;const a=teams[coachTeam].lineup,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];teams[coachTeam].submitted=false;renderLineupEditor()}
 function changePos(i,v){
   if(gameStarted)return;teams[coachTeam].lineup[i].pos=v;teams[coachTeam].submitted=false;renderPregameStatus()}
-function toggleActive(i,v){if(gameStarted)return;teams[coachTeam].lineup[i].active=v;teams[coachTeam].submitted=false;renderPregameStatus()}
-function resetLineup(){if(gameStarted){toast("Alignement verrouillé");return}teams[coachTeam].lineup=originalTeams[coachTeam].map((p,i)=>freshPlayer(p,i,coachTeam[0]));teams[coachTeam].submitted=false;renderLineupEditor();toast("Alignement réinitialisé")}
+function toggleActive(i,v){
+  if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}if(gameStarted)return;teams[coachTeam].lineup[i].active=v;teams[coachTeam].submitted=false;renderPregameStatus()}
+function resetLineup(){
+  if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}teams[coachTeam].lineup=originalTeams[coachTeam].map((p,i)=>freshPlayer(p,i,coachTeam[0]));teams[coachTeam].submitted=false;renderLineupEditor();toast("Alignement réinitialisé")}
 function submitLineup(){
-  if(gameStarted){toast("Alignement verrouillé");return}
+  if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}
+  
   const act=activeLineup(coachTeam);
   if(!act.length){toast("Ajoutez au moins un joueur actif");return}
   const pitchers=act.filter(p=>p.pos==="L");
@@ -601,14 +611,16 @@ function renderPregameStatus(){
   $("readyBlock").classList.toggle("hidden",!ready);
   $("returnMatchBtn").classList.toggle("hidden",!gameStarted || currentRole!=="official");
   if($("lineupLockNote")) $("lineupLockNote").classList.toggle("hidden",!gameStarted);
+  if($("officialLiveEditNote")) $("officialLiveEditNote").classList.toggle("hidden",!(gameStarted && currentRole==="official"));
   $("startGameBtn").classList.toggle("hidden",gameStarted);
   $("startGameBtn").disabled=!ready;
-  $("scorerWaiting").textContent=gameStarted?"Match en cours — vous pouvez modifier/consulter les alignements puis revenir au match.":(ready?"Prêt à commencer.":"En attente des deux alignements…");
+  $("scorerWaiting").textContent=gameStarted?"Match en cours — le marqueur peut modifier les alignements puis revenir au match.":(ready?"Prêt à commencer.":"En attente des deux alignements…");
 }
 
 
 function addBenchPlayer(teamName){
-  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
+  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
+  
   const t=teams[teamName];
   if(!t){toast("Équipe introuvable");return}
   if(!Array.isArray(t.bench))t.bench=[];
@@ -636,7 +648,8 @@ function addBenchPlayer(teamName){
 }
 
 function addSelectedPlayerToBench(){
-  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
+  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
+  
 
   const t=teams[coachTeam];
   const sel=$("benchAddSelect");
@@ -704,7 +717,8 @@ function selectBenchPlayer(index,playerId){
 }
 
 function removeBenchSlot(index){
-  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
+  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
+  
   const t=teams[coachTeam];
   if(!t || !t.bench[index])return;
   const removed=t.bench[index];
@@ -716,7 +730,8 @@ function removeBenchSlot(index){
 }
 
 function removeBenchPlayer(teamName){
-  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
+  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
+  
   const t=teams[teamName];
   if(!t || !Array.isArray(t.bench) || !t.bench.length){
     toast("Aucun joueur à retirer du banc");
@@ -729,6 +744,7 @@ function removeBenchPlayer(teamName){
   toast(removed && !removed.placeholder ? `${removed.name} retiré du banc` : "Place retirée du banc");
 }
 function updateBenchPlayer(idx,field,value){
+  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
   if(gameStarted)return;
   const t=teams[coachTeam];
   if(!t || !t.bench[idx])return;
@@ -737,7 +753,8 @@ function updateBenchPlayer(idx,field,value){
 }
 
 function openRosterForBench(i){
-  if(gameStarted){toast("Le banc est verrouillé pendant le match");return}
+  if(gameStarted && currentRole!=="official"){toast("Banc verrouillé pour le capitaine pendant le match");return}
+  
   const t=teams[coachTeam];
   if(!t || !Array.isArray(t.bench) || !t.bench[i])return;
 
@@ -772,6 +789,7 @@ function openRosterForBench(i){
 
 
 function removeSelectedBenchPlayer(){
+  if(gameStarted && currentRole!=="official")return
   if(gameStarted || selectedBenchSlot===null)return;
   const t=teams[coachTeam];
   if(!t || !t.bench[selectedBenchSlot])return;
@@ -786,6 +804,7 @@ function removeSelectedBenchPlayer(){
 }
 
 function chooseRosterPlayerForBench(playerId){
+  if(gameStarted && currentRole!=="official")return
   if(gameStarted || selectedBenchSlot===null)return;
   const t=teams[coachTeam];
   if(!t || !t.bench[selectedBenchSlot])return;
@@ -814,6 +833,7 @@ function closeBenchRosterModal(){
 }
 
 function renderBenchEditor(){
+  const benchLocked = gameStarted && currentRole!=="official";
   const t=teams[coachTeam];
   const host=$("benchList");
   const sel=$("benchAddSelect");
@@ -834,10 +854,10 @@ function renderBenchEditor(){
       return `<option value="${p.id||p.name}">${p.name} — ${p.pos||"DH"}${suffix}</option>`;
     }).join("");
 
-  sel.disabled=gameStarted || available.length===0;
+  sel.disabled=benchLocked || available.length===0;
 
   const addBtn=$("addBenchBtn");
-  if(addBtn)addBtn.disabled=gameStarted || available.length===0;
+  if(addBtn)addBtn.disabled=benchLocked || available.length===0;
 
   host.innerHTML=t.bench.length
     ? t.bench.map((p,i)=>`
@@ -847,7 +867,7 @@ function renderBenchEditor(){
           <b>${p.name}</b>
           <div class="muted" style="font-size:12px">${p.pos||"DH"}</div>
         </div>
-        <button type="button" class="danger" ${gameStarted?"disabled":""} onclick="removeBenchSlot(${i})">− ENLEVER</button>
+        <button type="button" class="danger" ${benchLocked?"disabled":""} onclick="removeBenchSlot(${i})">− ENLEVER</button>
       </div>`).join("")
     : '<div class="muted" style="font-size:12px">Aucun joueur au banc.</div>';
 }
@@ -892,6 +912,7 @@ function confirmSubstitution(){
 }
 
 function addHitter(teamName){
+  if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}
   if(gameStarted){alert("Les alignements sont verrouillés une fois le match commencé.");return;}
   const t=teams[teamName];
   if(!t || t.lineup.length>=15)return;
@@ -909,6 +930,7 @@ function addHitter(teamName){
   renderPregameStatus();
 }
 function removeHitter(teamName){
+  if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}
   if(gameStarted){alert("Les alignements sont verrouillés une fois le match commencé.");return;}
   const t=teams[teamName];
   if(!t || t.lineup.length<=7)return;
@@ -1203,7 +1225,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.8.5.
+// L'accueil par rôles est l'écran initial de v0.8.6.
 
 renderLineupEditor();
 

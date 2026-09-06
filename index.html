@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.8.8</title>
+<title>Le Diamant v0.8.9</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -179,11 +179,17 @@ body.role-official #resetLineupBtn,
 body.role-official #submitLineupBtn{
   display:none !important;
 }
+
+.player-used-brewers{color:#4f9cff !important;font-weight:1000 !important}
+.player-used-yankees{color:#ef6a6a !important;font-weight:1000 !important}
+.player-used-note{font-size:11px;font-weight:900;margin-top:2px}
+.player-used-note.brewers{color:#4f9cff}
+.player-used-note.yankees{color:#ef6a6a}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.8 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.8.9 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -568,8 +574,9 @@ function openRosterForSlot(i){
           <button type="button"
             class="roster-choice"
             onclick="chooseBenchPlayerForLineup(${idx})">
-            <b>${p.name}</b>
+            <b class="${p.lockedStarter?(p.lockedStarterTeam==="Brewers"?"player-used-brewers":"player-used-yankees"):""}">${p.name}</b>
             <small>Au banc • ${p.pos||"DH"}</small>
+            ${p.lockedStarter?`<div class="player-used-note ${p.lockedStarterTeam==="Brewers"?"brewers":"yankees"}">⚠️ DÉJÀ UTILISÉ DANS L’ALIGNEMENT</div>`:""}
           </button>`).join("")
       : '<div class="muted">Aucun joueur disponible au banc pour cette équipe.</div>';
   }else{
@@ -603,10 +610,16 @@ function chooseBenchPlayerForLineup(benchIndex){
 
   const outgoing=t.lineup[selectedLineupSlot];
   const incoming=t.bench[benchIndex];
-
   if(incoming.placeholder)return;
 
-  // The incoming bench player takes the same batting-order slot and current defensive position.
+  if(incoming.lockedStarter){
+    const ok=confirm(
+      `${incoming.name} faisait partie de l’alignement verrouillé au début du match.\n\n`+
+      "Vous tentez de le réinsérer dans l’alignement. Voulez-vous continuer ?"
+    );
+    if(!ok)return;
+  }
+
   const incomingToLineup={...incoming,active:true,pos:outgoing.pos};
   const outgoingToBench={...outgoing,active:false};
 
@@ -659,7 +672,15 @@ function renderLineupEditor(){
   $("lineupEditor").innerHTML=list.map((p,i)=>`
     <div class="lineup-row">
       <div class="order">${i+1}</div>
-      <div><button type="button" class="lineup-player-btn" onclick="openRosterForSlot(${i})" title="Choisir un joueur pour cette place dans l’alignement" ${lineupLocked?"disabled":""}>${p.name}</button><label class="muted" style="font-size:12px"><input type="checkbox" ${p.active?"checked":""} onchange="toggleActive(${i},this.checked)"> Actif</label></div>
+      <div>
+        <button type="button"
+          class="lineup-player-btn ${gameStarted&&p.lockedStarter?(p.lockedStarterTeam==="Brewers"?"player-used-brewers":"player-used-yankees"):""}"
+          onclick="openRosterForSlot(${i})"
+          title="Choisir un joueur pour cette place dans l’alignement"
+          ${lineupLocked?"disabled":""}>${p.name}</button>
+        <label class="muted" style="font-size:12px"><input type="checkbox" ${p.active?"checked":""} onchange="toggleActive(${i},this.checked)"> Actif</label>
+        ${gameStarted&&p.lockedStarter?`<div class="player-used-note ${p.lockedStarterTeam==="Brewers"?"brewers":"yankees"}">ALIGNEMENT VERROUILLÉ</div>`:""}
+      </div>
       <select class="pos-select" onchange="changePos(${i},this.value)">${POSITIONS.map(pos=>`<option ${pos===p.pos?"selected":""}>${pos}</option>`).join("")}</select>
       <div class="row-tools"><button onclick="movePlayer(${i},-1)" ${i===0?"disabled":""}>↑ Monter</button><button onclick="movePlayer(${i},1)" ${i===list.length-1?"disabled":""}>↓ Descendre</button></div>
     </div>`).join("");
@@ -967,8 +988,9 @@ function renderBenchEditor(){
       <div class="lineup-row bench-row">
         <div class="order">${i+1}</div>
         <div>
-          <b>${p.name}</b>
+          <b class="${gameStarted&&p.lockedStarter?(p.lockedStarterTeam==="Brewers"?"player-used-brewers":"player-used-yankees"):""}">${p.name}</b>
           <div class="muted" style="font-size:12px">${p.pos||"DH"}</div>
+          ${gameStarted&&p.lockedStarter?`<div class="player-used-note ${p.lockedStarterTeam==="Brewers"?"brewers":"yankees"}">DÉJÀ UTILISÉ DANS L’ALIGNEMENT</div>`:""}
         </div>
         <button type="button" class="danger" ${benchLocked?"disabled":""} onclick="removeBenchSlot(${i})">− ENLEVER</button>
       </div>`).join("")
@@ -1093,14 +1115,21 @@ function startGame(){
   const ok=confirm(
     "Voulez-vous débuter la rencontre ?\n\n"+
     "Les alignements seront verrouillés pour les capitaines dès le début du match.\n\n"+
-    "Le marqueur pourra toujours retourner consulter les alignements."
+    "Le marqueur pourra toujours retourner consulter et corriger les alignements."
   );
   if(!ok)return;
 
   resetStatsOnly();
-  gameStarted=true;
 
-  // Une fois le match commencé, les alignements soumis deviennent lecture seule pour les capitaines.
+  // Mémorise les joueurs présents dans l'alignement au moment du verrouillage.
+  Object.entries(teams).forEach(([teamName,t])=>{
+    t.lineup.forEach(p=>{
+      p.lockedStarter=true;
+      p.lockedStarterTeam=teamName;
+    });
+  });
+
+  gameStarted=true;
   Object.values(teams).forEach(t=>t.submitted=true);
 
   $("pregame").classList.add("hidden");
@@ -1364,7 +1393,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.8.8.
+// L'accueil par rôles est l'écran initial de v0.8.9.
 
 renderLineupEditor();
 

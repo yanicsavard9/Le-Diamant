@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Le Diamant v0.7.6</title>
+<title>Le Diamant v0.7.8</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -66,7 +66,17 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .sub-panel{margin-top:12px;padding:12px;border:1px solid #6b563f;border-radius:14px;background:#17130f}
 .sub-panel select{width:100%;margin:6px 0 10px}
 .sub-note{font-size:12px;color:var(--muted);margin-top:6px}
-.action-btn.active-action{outline:3px solid #f4f7fb;box-shadow:0 0 0 4px rgba(244,247,251,.14);transform:translateY(-1px)}
+.action-btn.active-action{
+  outline:4px solid #fff !important;
+  outline-offset:3px;
+  box-shadow:
+    0 0 0 4px rgba(255,255,255,.22),
+    0 0 22px 8px rgba(255,255,255,.38) !important;
+  transform:scale(1.07) translateY(-2px) !important;
+  filter:brightness(1.45) saturate(1.25) !important;
+  font-weight:1000 !important;
+  z-index:3;
+}
 .batter-highlight{border:2px solid #f4f7fb;background:#202b38;box-shadow:0 0 0 3px rgba(244,247,251,.08)}
 .batter-highlight .player-link{font-size:1.16em;font-weight:900}
 .lineup-player-btn{appearance:none;border:0;background:transparent;color:inherit;padding:0;text-align:left;font:inherit;font-weight:900;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px;min-height:44px}
@@ -96,11 +106,15 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .bench-player-select{width:100%;min-height:46px;font-size:16px;border-radius:10px}
 .bench-row{grid-template-columns:36px minmax(0,1fr) 46px}
 .bench-row .danger{min-width:44px;min-height:44px;padding:8px}
+
+.action-btn{
+  transition:transform .12s ease,filter .12s ease,box-shadow .12s ease,outline .12s ease;
+}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.7.6 • 2 ÉQUIPES</div></div>
+  <div class="header"><div class="brand">⚾ LE DIAMANT</div><div class="badge">v0.7.8 • 2 ÉQUIPES</div></div>
 
   <section id="pregame">
     <div class="card">
@@ -352,8 +366,14 @@ function addRosterPlayer(){
   t.roster.push(p);
   $("newRosterName").value="";
   t.submitted=false;
+
+  // Rafraîchir immédiatement toutes les zones qui utilisent la liste d'équipe,
+  // surtout le menu BANC sur Safari/iPhone.
   renderTeamRoster();
+  renderBenchEditor();
   renderPregameStatus();
+
+  toast(`${name} ajouté à la liste de ${coachTeam}`);
 }
 function openRosterForSlot(i){
   if(gameStarted){toast("Alignement verrouillé");return}

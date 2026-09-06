@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.9.9</title>
+<title>Diamond v0.10.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -297,7 +297,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.9.9 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.0 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -602,6 +602,16 @@ body:not(.role-official) #gameLogCard{display:none!important}
 <div class="modal" id="profileModal"><div class="sheet"><h3 id="profileTitle"></h3><p id="profileSub"></p><div class="stats-grid" id="profileStats"></div><div class="muted" id="profileNote"></div><button style="width:100%;margin-top:10px" onclick="closeProfile()">FERMER</button></div></div>
 
 <div class="modal" id="resetModal"><div class="sheet"><h3>⚠️ Nouvelle partie?</h3><p><b>Êtes-vous certain que c’est bien ce que vous voulez faire?</b></p><p>Le pointage et les statistiques de la partie en cours seront remis à zéro. Les alignements seront déverrouillés et devront être soumis de nouveau.</p><div class="sheet-grid"><button onclick="closeReset()">ANNULER</button><button class="warn" onclick="confirmReset()">OUI, NOUVELLE PARTIE</button></div></div></div>
+
+<div class="modal" id="gameOverModal">
+  <div class="sheet">
+    <h3>🏁 FIN DU MATCH</h3>
+    <p id="gameOverMessage"></p>
+    <div class="readonly-note" id="gameOverDetail"></div>
+    <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="closeGameOverModal()">VOIR LE MATCH TERMINÉ</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -637,7 +647,7 @@ Object.entries(teams).forEach(([teamName,t])=>{
   t.roster=t.lineup.map(p=>({...p}));
 });
 let regulationInnings=7; let displayedInnings=7;
-let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}}};
+let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}},gameOver:false,winner:null,gameOverReason:""};
 let selectedBase=null;
 let selectedLineupSlot=null;
 let selectedBenchSlot=null;
@@ -1445,7 +1455,8 @@ function resetStatsOnly(){
     batterIndex:{Brewers:0,Yankees:0},
     bases:{1:null,2:null,3:null},
     history:[],log:[],pending:[],
-    inningRuns:{Brewers:{},Yankees:{}}
+    inningRuns:{Brewers:{},Yankees:{}},
+    gameOver:false,winner:null,gameOverReason:""
   };
 }
 function serializableState(){
@@ -1512,6 +1523,14 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   });
   $("gameLog").innerHTML=state.log.length?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join(""):"<div>Aucune action enregistrée.</div>";
   keepLiveGameLocked();
+
+  if(state.gameOver){
+    const banner=$("atBatTeam");
+    if(banner)banner.textContent=`MATCH TERMINÉ • ${state.winner.toUpperCase()} GAGNENT`;
+    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=true);
+  }else{
+    document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>btn.disabled=false);
+  }
 }
 function addLog(t){state.log.push(`${state.top?"▲":"▼"} ${ordinal(state.inning)} — ${t}`)}
 function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batterIndex[t]=(state.batterIndex[t]+1)%a.length}
@@ -1522,25 +1541,102 @@ function keepLiveGameLocked(){
   teams.Yankees.submitted=true;
 }
 
-function currentTeamRunsAdd(){
-  const team=currentBattingTeam();
-  if(!state.inningRuns)state.inningRuns={Brewers:{},Yankees:{}};
-  if(!state.inningRuns[team])state.inningRuns[team]={};
-  state.inningRuns[team][state.inning]=(state.inningRuns[team][state.inning]||0)+1;
-  if(state.top)state.awayRuns++;else state.homeRuns++;
-}
-function scoreRunner(r,rbi=true){currentTeamRunsAdd();const p=getPlayer(r);if(p)p.r++;if(rbi)batter().rbi++;addLog(`${r.name} marque${rbi?" • RBI à "+batter().name:""}`)}
-function endHalfIfNeeded(){
-  if(state.outs<3)return;
 
-  // Une fin de demi-manche ne doit JAMAIS réinitialiser le match.
+function isFinalOrExtraInning(){
+  return state.inning>=regulationInnings;
+}
+
+function declareGameOver(winner,reason){
+  if(state.gameOver)return;
+
+  state.gameOver=true;
+  state.winner=winner;
+  state.gameOverReason=reason||"";
   gameStarted=true;
   teams.Brewers.submitted=true;
   teams.Yankees.submitted=true;
 
+  const msg=$("gameOverMessage");
+  const detail=$("gameOverDetail");
+  if(msg){
+    msg.textContent=`${winner} remporte le match ${state.awayRuns} - ${state.homeRuns}.`;
+  }
+  if(detail){
+    detail.textContent=reason||"Le match est terminé.";
+  }
+
+  const modal=$("gameOverModal");
+  if(modal)modal.classList.add("show");
+
+  renderGame();
+}
+
+function closeGameOverModal(){
+  const modal=$("gameOverModal");
+  if(modal)modal.classList.remove("show");
+}
+
+function checkWalkOff(){
+  if(state.gameOver)return true;
+
+  // Yankees = équipe locale, donc elle frappe en bas de manche.
+  if(!state.top && isFinalOrExtraInning() && state.homeRuns>state.awayRuns){
+    declareGameOver("Yankees","Victoire de fin de match : les Yankees ont pris l’avance en fin de manche.");
+    return true;
+  }
+  return false;
+}
+
+function blockIfGameOver(){
+  if(state.gameOver){
+    toast("Le match est terminé");
+    return true;
+  }
+  return false;
+}
+
+function currentTeamRunsAdd(){
+  const team=currentBattingTeam();
+  if(!state.inningRuns)state.inningRuns={Brewers:{},Yankees:{}};
+  if(!state.inningRuns[team])state.inningRuns[team]={};
+
+  state.inningRuns[team][state.inning]=(state.inningRuns[team][state.inning]||0)+1;
+
+  if(state.top)state.awayRuns++;
+  else state.homeRuns++;
+
+  // En bas de la dernière manche ou d'une prolongation,
+  // le match se termine dès que l'équipe locale prend l'avance.
+  if(!state.top && isFinalOrExtraInning() && state.homeRuns>state.awayRuns){
+    checkWalkOff();
+  }
+}
+function scoreRunner(r,rbi=true){currentTeamRunsAdd();const p=getPlayer(r);if(p)p.r++;if(rbi)batter().rbi++;addLog(`${r.name} marque${rbi?" • RBI à "+batter().name:""}`)}
+function endHalfIfNeeded(){
+  if(state.outs<3 || state.gameOver)return;
+
+  const endingTop=state.top;
+  const inningJustPlayed=state.inning;
+
   state.outs=0;
   state.bases={1:null,2:null,3:null};
   state.pending=[];
+
+  // Après le haut de la dernière manche (ou d'une prolongation),
+  // si l'équipe locale mène déjà, elle n'a pas besoin de frapper.
+  if(endingTop && inningJustPlayed>=regulationInnings && state.homeRuns>state.awayRuns){
+    declareGameOver("Yankees","Les Yankees menaient après le haut de la dernière manche : leur dernier tour au bâton n’était pas nécessaire.");
+    return;
+  }
+
+  // Après le bas de la dernière manche (ou d'une prolongation),
+  // si l'équipe visiteuse mène, la partie est terminée.
+  if(!endingTop && inningJustPlayed>=regulationInnings && state.awayRuns>state.homeRuns){
+    declareGameOver("Brewers","Les Brewers mènent après la fin de la manche réglementaire.");
+    return;
+  }
+
+  // Si égalité après le bas de la dernière manche, on poursuit.
   state.top=!state.top;
 
   if(state.top){
@@ -1559,25 +1655,28 @@ function beginHitLike(dest,label,isHit=true){
   state.bases={1:null,2:null,3:null};state.bases[dest]=runnerRef(b,bt);state.pending=pending;addLog(`${b.name} — ${label}`);
   if(state.pending.length)showPending();else nextBatter();renderGame()
 }
-function recordHit(n){beginHitLike(n,n===1?"simple":n===2?"double":"triple",true)}
-function recordError(){beginHitLike(1,"erreur défensive",false)}
+function recordHit(n){
+  if(blockIfGameOver())return;
+  beginHitLike(n,n===1?"simple":n===2?"double":"triple",true);
+}
+function recordError(){if(blockIfGameOver())return;beginHitLike(1,"erreur défensive",false)}
 function showPending(){
   if(!state.pending.length){nextBatter();renderGame();return}
   const item=state.pending[0],r=item.runner;$("pendingTitle").textContent=r.name;$("pendingCurrent").textContent=`Était au ${item.origin===1?"1er":item.origin+"e"} but — où termine-t-il?`;
   const bd=item.batterDest||1;$("p2").disabled=!!state.bases[2]||2<item.origin||2<=bd;$("p3").disabled=!!state.bases[3]||3<item.origin||3<=bd;$("pendingModal").classList.add("show")
 }
-function resolvePending(dest){
+function resolvePending(dest){if(blockIfGameOver())return;
   const item=state.pending.shift(),r=item.runner;
   if(dest===0){state.outs++;pitcherStats().outs++;addLog(`${r.name} est retiré sur les buts`)}
   else if(dest===4)scoreRunner(r,true);
   else{if(state.bases[dest]){toast("Ce but est déjà occupé");state.pending.unshift(item);return}state.bases[dest]=r;addLog(`${r.name} avance au ${dest===2?"2e":"3e"} but`)}
   $("pendingModal").classList.remove("show");endHalfIfNeeded();if(state.outs<3&&state.pending.length)showPending();else if(state.outs<3&&!state.pending.length)nextBatter();renderGame()
 }
-function recordHR(){
+function recordHR(){if(blockIfGameOver())return;
   if(blockIfPending())return;saveHistory();const b=batter(),bt=currentBattingTeam();b.ab++;b.h++;b.hr++;pitcherStats().h++;
   [3,2,1].forEach(i=>{if(state.bases[i])scoreRunner(state.bases[i],true)});scoreRunner(runnerRef(b,bt),true);state.bases={1:null,2:null,3:null};addLog(`${b.name} — circuit`);nextBatter();renderGame()
 }
-function recordStrikeout(){
+function recordStrikeout(){if(blockIfGameOver())return;
   if(blockIfPending())return;
   if(!gameStarted){toast("Le match n’est pas commencé");return}
 
@@ -1599,7 +1698,7 @@ function recordStrikeout(){
 
   renderGame();
 }
-function recordOut(){
+function recordOut(){if(blockIfGameOver())return;
   if(blockIfPending())return;
   if(!gameStarted){toast("Le match n’est pas commencé");return}
 
@@ -1626,8 +1725,8 @@ function forcedToFirst(label){
   if(state.bases[1]){if(state.bases[2]){if(state.bases[3])scoreRunner(state.bases[3],true);state.bases[3]=state.bases[2]}state.bases[2]=state.bases[1]}
   state.bases[1]=runnerRef(b,bt);addLog(`${b.name} — ${label}`);nextBatter();renderGame()
 }
-function recordWalk(){pitcherStats().bb++;forcedToFirst("but sur balles")}
-function recordHBP(){forcedToFirst("atteint par un lancer")}
+function recordWalk(){if(blockIfGameOver())return;pitcherStats().bb++;forcedToFirst("but sur balles")}
+function recordHBP(){if(blockIfGameOver())return;forcedToFirst("atteint par un lancer")}
 
 function openRunnerControls(base){
   if(state.pending.length){toast("Terminez d’abord la confirmation des coureurs");return}
@@ -1646,10 +1745,10 @@ document.querySelectorAll(".base[data-base]").forEach(el=>el.addEventListener("c
   openRunnerControls(Number(el.dataset.base));
 }));
 function closeRunnerModal(){$("runnerModal").classList.remove("show");selectedBase=null}
-function moveSelectedRunner(dest){if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];if(state.bases[dest]){toast("Ce but est déjà occupé");return}state.bases[selectedBase]=null;state.bases[dest]=r;addLog(`${r.name} est placé au ${dest===1?"1er":dest+"e"} but`);closeRunnerModal();renderGame()}
-function stealSelectedRunner(){if(!selectedBase||selectedBase>=3)return;const dest=selectedBase+1;if(state.bases[dest]){toast("Le but suivant est occupé");return}saveHistory();const r=state.bases[selectedBase],p=getPlayer(r);state.bases[selectedBase]=null;state.bases[dest]=r;if(p)p.bv++;addLog(`${r.name} — but volé`);closeRunnerModal();renderGame()}
-function scoreSelectedRunner(){if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];state.bases[selectedBase]=null;scoreRunner(r,false);closeRunnerModal();renderGame()}
-function outSelectedRunner(){if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];state.bases[selectedBase]=null;state.outs++;pitcherStats().outs++;addLog(`${r.name} est retiré sur les buts`);closeRunnerModal();endHalfIfNeeded();renderGame()}
+function moveSelectedRunner(dest){if(blockIfGameOver())return;if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];if(state.bases[dest]){toast("Ce but est déjà occupé");return}state.bases[selectedBase]=null;state.bases[dest]=r;addLog(`${r.name} est placé au ${dest===1?"1er":dest+"e"} but`);closeRunnerModal();renderGame()}
+function stealSelectedRunner(){if(blockIfGameOver())return;if(!selectedBase||selectedBase>=3)return;const dest=selectedBase+1;if(state.bases[dest]){toast("Le but suivant est occupé");return}saveHistory();const r=state.bases[selectedBase],p=getPlayer(r);state.bases[selectedBase]=null;state.bases[dest]=r;if(p)p.bv++;addLog(`${r.name} — but volé`);closeRunnerModal();renderGame()}
+function scoreSelectedRunner(){if(blockIfGameOver())return;if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];state.bases[selectedBase]=null;scoreRunner(r,false);closeRunnerModal();renderGame()}
+function outSelectedRunner(){if(blockIfGameOver())return;if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];state.bases[selectedBase]=null;state.outs++;pitcherStats().outs++;addLog(`${r.name} est retiré sur les buts`);closeRunnerModal();endHalfIfNeeded();renderGame()}
 
 function openPlayerProfile(p,team){$("profileTitle").textContent=p.name;$("profileSub").textContent=team+" • "+p.pos;$("profileStats").innerHTML=[statCell("MOY",avg(p)),statCell("H",p.h),statCell("HR",p.hr),statCell("RBI",p.rbi),statCell("R",p.r),statCell("BV",p.bv)].join("");$("profileNote").textContent="";$("profileModal").classList.add("show")}
 function openPitcherProfile(p,team){const ps=teams[team].pitcherStats;$("profileTitle").textContent=p?p.name:"Lanceur";$("profileSub").textContent=team+" • L";$("profileStats").innerHTML=[statCell("IP",`${Math.floor(ps.outs/3)}.${ps.outs%3}`),statCell("ERA",era(ps)),statCell("K",ps.k),statCell("BB",ps.bb)].join("");$("profileNote").textContent="ERA provisoire : points mérités/non mérités non distingués."; $("profileModal").classList.add("show")}
@@ -1927,7 +2026,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.9.9.
+// L'accueil par rôles est l'écran initial de v0.10.0.
 
 renderLineupEditor();
 

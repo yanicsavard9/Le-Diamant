@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.8</title>
+<title>Diamond v0.11.9</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -325,11 +325,28 @@ body:not(.role-official) #gameLogCard{display:none!important}
   flex:0 0 auto;
 }
 
+
+.player-used-brewers{
+  color:#4f9cff!important;
+  font-weight:900;
+}
+.player-used-yankees{
+  color:#ef6a6a!important;
+  font-weight:900;
+}
+.player-used-note{
+  font-size:11px;
+  font-weight:900;
+  margin-top:4px;
+}
+.player-used-note.brewers{color:#4f9cff}
+.player-used-note.yankees{color:#ef6a6a}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.8 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.9 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1558,6 +1575,16 @@ function toggleSubstitutionPanel(){
   panel.classList.toggle("hidden");
   if(!panel.classList.contains("hidden")) refreshSubstitutionOptions();
 }
+
+function playerNeedsReentryWarning(player){
+  return !!(player && (player.wasUsedInGame || player.lockedStarter));
+}
+
+function confirmPlayerReentry(player){
+  if(!playerNeedsReentryWarning(player))return true;
+  return confirm(`${player.name} a déjà été utilisé dans ce match. Voulez-vous vraiment le remettre dans l’alignement?`);
+}
+
 function refreshSubstitutionOptions(){
   const teamName=editorTeam;
   const t=teams[teamName];
@@ -1582,8 +1609,9 @@ function refreshSubstitutionOptions(){
       <button type="button"
         class="sub-bench-choice ${selectedSubBenchIndex===i?"selected":""}"
         onclick="selectSubBenchPlayer(${i})">
-        <b>${p.name}</b>
+        <b class="${p.lockedStarter?(p.lockedStarterTeam==="Brewers"?"player-used-brewers":"player-used-yankees"):""}">${p.name}</b>
         <div class="muted" style="font-size:12px">${teamName} • ${p.pos||"DH"}</div>
+        ${(p.wasUsedInGame||p.lockedStarter)?`<div class="player-used-note ${p.lockedStarterTeam==="Brewers"?"brewers":"yankees"}">DÉJÀ UTILISÉ DANS LE MATCH</div>`:""}
       </button>`).join("")
     : `<div class="muted">Aucun joueur au banc pour ${teamName}.</div>`;
 
@@ -1601,7 +1629,8 @@ function selectSubBenchPlayer(index){
 function confirmSubstitution(){
   if(!gameStarted || currentRole!=="official")return;
 
-  const t=teams[coachTeam];
+  const teamName=editorTeam;
+  const t=teams[teamName];
   const outIdx=Number($("subOut").value);
   const inIdx=selectedSubBenchIndex;
 
@@ -1613,8 +1642,23 @@ function confirmSubstitution(){
   const outgoing=t.lineup[outIdx];
   const incoming=t.bench[inIdx];
 
-  const outgoingToBench={...outgoing,active:false};
-  const incomingToLineup={...incoming,active:true,pos:outgoing.pos};
+  if(playerNeedsReentryWarning(incoming)){
+    const ok=confirm(`${incoming.name} a déjà été utilisé dans ce match. Voulez-vous vraiment le remettre dans l’alignement?`);
+    if(!ok)return;
+  }
+
+  const outgoingToBench={
+    ...outgoing,
+    active:false,
+    wasUsedInGame:true
+  };
+
+  const incomingToLineup={
+    ...incoming,
+    active:true,
+    pos:outgoing.pos,
+    wasUsedInGame:true
+  };
 
   t.lineup[outIdx]=incomingToLineup;
   t.bench[inIdx]=outgoingToBench;
@@ -2151,6 +2195,16 @@ function approveSelectedTeamLineup(){
     s.homeLocked=true;
   }
 
+  // Conserver l'identité des joueurs de l'alignement partant.
+  // Ils seront affichés en couleur et une réutilisation depuis le banc déclenchera un avertissement.
+  if(teams[teamName]){
+    (teams[teamName].lineup||[]).forEach(p=>{
+      p.lockedStarter=true;
+      p.lockedStarterTeam=teamName;
+      p.wasUsedInGame=true;
+    });
+  }
+
   officialLockedTeams[teamName]=true;
   renderOfficialSingleLineupReview();
   renderOfficialGameStatus();
@@ -2240,6 +2294,16 @@ function approveAndLockOfficialGame(){
 }
 
 function startPreparedOfficialGame(){
+  ["Brewers","Yankees"].forEach(teamName=>{
+    (teams[teamName]?.lineup||[]).forEach(p=>{
+      if(p.lockedStarter!==true){
+        p.lockedStarter=true;
+        p.lockedStarterTeam=teamName;
+      }
+      p.wasUsedInGame=true;
+    });
+  });
+
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
   if(!g)return;
 
@@ -3187,7 +3251,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.8.
+// L'accueil par rôles est l'écran initial de v0.11.9.
 
 renderLineupEditor();
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.7</title>
+<title>Diamond v0.11.8</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -301,11 +301,35 @@ body:not(.role-official) .official-bottom-tabs{display:none!important}
 .extra-inning-controls button{max-width:none!important}
 body:not(.role-official) #gameLogCard{display:none!important}
 .submit-status-note{display:block}
+
+#officialAlignmentReviewModal .sheet{
+  max-height:82vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#officialAlignmentReviewList{
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  flex:1 1 auto;
+  min-height:0;
+  padding-right:2px;
+}
+#officialAlignmentReviewModal h3,
+#officialAlignmentReviewModal #officialAlignmentReviewMeta,
+#officialAlignmentReviewModal .section-title,
+#officialAlignmentReviewModal #officialApproveSingleLineupBtn,
+#officialAlignmentReviewModal #officialSingleLineupLockStatus,
+#officialAlignmentReviewModal button[onclick="closeOfficialAlignmentReview()"]{
+  flex:0 0 auto;
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.7 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.8 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -549,7 +573,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
           <button type="button" id="innings9Btn" onclick="setRegulationInnings(9)">9 MANCHES</button>
         </div>
       </div>
-<button id="startGameBtn" class="primary" style="width:100%;margin-top:10px" disabled onclick="startGame()">DÉBUTER LE MATCH</button>
+<button id="startGameBtn" class="primary" style="width:100%;margin-top:10px" disabled onclick="startGame()">DÉBUTER LA PARTIE</button>
     </div>
   </section>
 
@@ -733,14 +757,14 @@ body:not(.role-official) #gameLogCard{display:none!important}
       <button type="button" id="prep9Btn" onclick="setOfficialPrepInnings(9)">9 MANCHES</button>
     </div>
 
-    <button type="button" class="primary" id="officialApproveLockBtn" style="width:100%;margin-top:14px" onclick="approveAndLockOfficialGame()">
-      APPROUVER ET VERROUILLER LES ALIGNEMENTS
+    <button type="button" class="primary" id="officialApproveLockBtn" style="width:100%;margin-top:14px" onclick="startPreparedOfficialGame()">
+      DÉBUTER LA PARTIE
     </button>
 
-    <div id="officialPrepLockStatus" class="readonly-note hidden" style="margin-top:10px"></div>
+    
 
     <button type="button" class="primary hidden" id="officialStartPreparedGameBtn" style="width:100%;margin-top:10px" onclick="startPreparedOfficialGame()">
-      DÉBUTER LE MATCH
+      DÉBUTER LA PARTIE
     </button>
 
     <button type="button" style="width:100%;margin-top:8px" onclick="closeOfficialPreGame()">RETOUR</button>
@@ -2035,6 +2059,9 @@ function openOfficialTeamAlignment(side){
 
   renderOfficialSingleLineupReview();
   $("officialAlignmentReviewModal").classList.add("show");
+
+  const list=$("officialAlignmentReviewList");
+  if(list)list.scrollTop=0;
 }
 
 
@@ -2189,11 +2216,16 @@ function renderOfficialPreGame(){
     }
   });
 
+  const approveBtn=$("officialApproveLockBtn");
+  if(approveBtn)approveBtn.classList.add("hidden");
+
   const startBtn=$("officialStartPreparedGameBtn");
   if(startBtn){
     const ready=!!(s?.awayLocked&&s?.homeLocked);
     startBtn.disabled=!ready;
+    startBtn.classList.remove("hidden");
     startBtn.style.opacity=ready?"1":".48";
+    startBtn.textContent="DÉBUTER LA PARTIE";
   }
 }
 
@@ -2224,18 +2256,35 @@ function startPreparedOfficialGame(){
 
   $("officialPreGameModal").classList.remove("show");
 
+  currentRole="official";
+  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.add("role-official");
+
+  $("roleHome").classList.add("hidden");
+  if($("officialHub"))$("officialHub").classList.add("hidden");
+  $("viewerView").classList.add("hidden");
+  $("pregame").classList.add("hidden");
+  $("game").classList.remove("hidden");
+
   teams.Brewers.submitted=true;
   teams.Yankees.submitted=true;
 
   regulationInnings=officialPrepInnings;
   displayedInnings=officialPrepInnings;
 
-  editorTeam="Brewers";
-  coachTeam="Brewers";
+  gameStarted=true;
+  state.gameOver=false;
+  state.winner=null;
+  state.gameOverReason="";
+  state.inning=1;
+  state.top=true;
+  state.outs=0;
+  state.bases={1:null,2:null,3:null};
+  state.pending=[];
 
-  // Passage à l'espace officiel du match, puis lancement du flux de départ.
-  openOfficialPregameWorkspace();
-  startGame();
+  setRoleBadge("MARQUEUR");
+  renderGame();
+  toast(`Partie débutée • ${officialPrepInnings} manches`);
 }
 
 function closeOfficialPreGame(){
@@ -3138,7 +3187,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.7.
+// L'accueil par rôles est l'écran initial de v0.11.8.
 
 renderLineupEditor();
 

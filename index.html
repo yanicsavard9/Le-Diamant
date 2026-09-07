@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.14</title>
+<title>Diamond v0.11.15</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.11.14 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.11.15 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.11.14 — corrige la bande noire à droite sur iPhone */
+/* v0.11.15 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.11.14 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.11.15 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -630,11 +630,109 @@ body{background:var(--bg)}
   }
 }
 
+
+/* v0.11.15 — enlève toute ligne sous le lanceur */
+.pitcher-center,
+.pitcher-center *,
+.pitcher-center .player-link,
+.pitcher-center a,
+.pitcher-center button{
+  text-decoration:none !important;
+  border-bottom:0 !important;
+  box-shadow:none !important;
+  outline:none !important;
+}
+.pitcher-center::before,
+.pitcher-center::after,
+.pitcher-center .player-link::before,
+.pitcher-center .player-link::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Horaire — doit défiler verticalement sur iPhone */
+#scheduleView,
+#schedule,
+.schedule-view,
+.schedule-screen,
+#viewerSchedule,
+#officialSchedule{
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+  max-height:none !important;
+  height:auto !important;
+}
+
+@media (max-width:640px){
+  body{
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+  .app{
+    min-height:100dvh;
+    height:auto !important;
+    overflow:visible !important;
+  }
+  #viewerView,
+  #officialHub,
+  #scheduleView,
+  #schedule,
+  .schedule-view,
+  .schedule-screen{
+    height:auto !important;
+    max-height:none !important;
+    overflow-y:visible !important;
+  }
+  .bottom-tabs,
+  .bottom-nav{
+    position:static !important;
+  }
+}
+
+
+/* v0.11.15 — correctifs ciblés après vérification du HTML réel */
+
+/* Masque la diagonale du losange qui passait sous le nom du lanceur */
+.pitcher-center{
+  z-index:8 !important;
+  background:var(--card) !important;
+  padding:5px 8px !important;
+  border-radius:14px !important;
+  line-height:1 !important;
+}
+.pitcher-center .player-link{
+  display:block !important;
+  text-decoration:none !important;
+  border:0 !important;
+}
+
+/* La fenêtre Horaire est une feuille fixe : le défilement doit se faire DANS la feuille */
+#leagueInfoModal{
+  align-items:flex-end !important;
+  overflow:hidden !important;
+}
+#leagueInfoModal .sheet{
+  width:min(560px,100%) !important;
+  max-height:calc(100dvh - 12px) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  -webkit-overflow-scrolling:touch !important;
+  overscroll-behavior:contain;
+  touch-action:pan-y !important;
+  padding-bottom:calc(20px + env(safe-area-inset-bottom)) !important;
+}
+#leagueSchedulePanel{
+  overflow:visible !important;
+  height:auto !important;
+  max-height:none !important;
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.14 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.15 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2704,6 +2802,9 @@ function backToOfficialGames(){
 }
 
 function renderSchedule(){
+  document.body.style.overflowY="auto";
+  document.documentElement.style.overflowY="auto";
+
   const candidates=[
     $("viewerSchedule"),
     $("officialSchedule"),
@@ -3364,6 +3465,8 @@ leagueSchedule.forEach(g=>{
 function openLeagueInfo(tab){
   renderSchedule();
   renderStandings();
+  const leagueSheet=document.querySelector("#leagueInfoModal .sheet");
+  if(leagueSheet) leagueSheet.scrollTop=0;
 
   const map={
     schedule:["Horaire","leagueSchedulePanel"],
@@ -3627,7 +3730,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.14.
+// L'accueil par rôles est l'écran initial de v0.11.15.
 
 renderLineupEditor();
 

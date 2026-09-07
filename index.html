@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.13.1</title>
+<title>Diamond v0.13.2</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.13.1 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.13.2 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.13.1 — corrige la bande noire à droite sur iPhone */
+/* v0.13.2 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.13.1 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.13.2 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.1 — enlève toute ligne sous le lanceur */
+/* v0.13.2 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.1 — correctifs ciblés après vérification du HTML réel */
+/* v0.13.2 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.1 — changements rapides + fermeture Horaire en haut */
+/* v0.13.2 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.1 — formats de match 3/4/5/7/9 manches */
+/* v0.13.2 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.1 */
+/* v0.13.2 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -943,10 +943,32 @@ button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingle
 .role-card{pointer-events:auto!important;position:relative!important;z-index:21!important;touch-action:manipulation!important}
 </style>
 
+
+<style id="diamond-v0132-role-touch">
+#roleHome{position:relative!important;isolation:isolate!important}
+#roleHome .card{position:relative!important;z-index:1!important}
+#roleHome .role-grid{position:relative!important;z-index:9998!important}
+#roleHome .role-card{
+  position:relative!important;
+  z-index:9999!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:rgba(255,255,255,.08)!important;
+}
+#roleHome .role-card *{pointer-events:none!important}
+#leagueTeamsStrip,#leagueTeamsStrip *{pointer-events:none!important}
+#roleHome::before,#roleHome::after,
+#roleHome .card::before,#roleHome .card::after,
+#roleHome .role-grid::before,#roleHome .role-grid::after,
+#roleHome .role-card::before,#roleHome .role-card::after{
+  pointer-events:none!important;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.1 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.2 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -963,15 +985,15 @@ button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingle
       <div class="league-team-chip bananes"><div class="dot">B</div><div>Bananes</div></div>
     </div></div>
       <div class="role-grid">
-        <button class="role-card" type="button" onclick="selectRole('viewer')">
+        <button class="role-card" data-role="viewer" type="button" onclick="selectRole('viewer')">
           <strong>👤 Joueur / Spectateur</strong>
           <small>Match en direct, statistiques des joueurs, résultats et classement.</small>
         </button>
-        <button class="role-card" type="button" onclick="selectRole('captain')">
+        <button class="role-card" data-role="captain" type="button" onclick="selectRole('captain')">
           <strong>🧢 Capitaine / Entraîneur</strong>
           <small>Liste de joueurs, alignement, positions, banc et soumission de l’alignement.</small>
         </button>
-        <button class="role-card" type="button" onclick="selectRole('official')">
+        <button class="role-card" data-role="official" type="button" onclick="selectRole('official')">
           <strong>📋 Marqueur / Gestionnaire</strong>
           <small>Approbation, verrouillage, pointage en direct, fin et sauvegarde du match.</small>
         </button>
@@ -3908,7 +3930,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.13.1.
+// L'accueil par rôles est l'écran initial de v0.13.2.
 
 renderLineupEditor();
 
@@ -3971,5 +3993,62 @@ document.querySelectorAll(".action-btn,.kbtn").forEach(btn=>{
     <button type="button" style="width:100%;margin-top:12px" onclick="closeLeagueInfo()">FERMER</button>
   </div>
 </div>
+
+<script id="diamond-v0132-role-touch-js">
+(function(){
+  let lastRoleTouch=0;
+
+  function homeIsVisible(){
+    const home=document.getElementById("roleHome");
+    return home && !home.classList.contains("hidden");
+  }
+
+  function roleAtPoint(x,y){
+    const cards=[...document.querySelectorAll("#roleHome .role-card[data-role]")];
+    for(const card of cards){
+      const r=card.getBoundingClientRect();
+      if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) return card.dataset.role;
+    }
+    return null;
+  }
+
+  function activateRoleFromPoint(x,y){
+    if(!homeIsVisible()) return false;
+    const role=roleAtPoint(x,y);
+    if(!role || typeof window.selectRole!=="function") return false;
+    const now=Date.now();
+    if(now-lastRoleTouch<450) return true;
+    lastRoleTouch=now;
+    window.selectRole(role);
+    return true;
+  }
+
+  document.addEventListener("touchend",function(e){
+    if(!e.changedTouches || !e.changedTouches.length) return;
+    const t=e.changedTouches[0];
+    if(activateRoleFromPoint(t.clientX,t.clientY)){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  },{capture:true,passive:false});
+
+  document.addEventListener("pointerup",function(e){
+    if(e.pointerType==="touch") return;
+    if(activateRoleFromPoint(e.clientX,e.clientY)){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  },true);
+
+  document.addEventListener("DOMContentLoaded",function(){
+    document.querySelectorAll("#roleHome .role-card[data-role]").forEach(function(card){
+      card.addEventListener("click",function(){
+        if(typeof window.selectRole==="function") window.selectRole(card.dataset.role);
+      });
+    });
+  });
+})();
+</script>
+
 </body>
 </html>

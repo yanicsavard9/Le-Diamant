@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.2</title>
+<title>Diamond v0.11.3</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -301,7 +301,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.2 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.3 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -650,6 +650,37 @@ body:not(.role-official) #gameLogCard{display:none!important}
     </div>
     <div id="officialGamesList" style="margin-top:12px"></div>
     <button type="button" style="width:100%;margin-top:14px" onclick="closeOfficialGames()">FERMER</button>
+  </div>
+</div>
+
+
+<div class="modal" id="officialPreGameModal">
+  <div class="sheet">
+    <h3 id="officialPreGameTitle">PRÉPARER LE MATCH</h3>
+
+    <div class="readonly-note" id="officialPreGameMeta"></div>
+
+    <div class="section-title" style="margin-top:12px">ALIGNEMENTS REÇUS</div>
+    <div id="officialPreGameLineups"></div>
+
+    <div class="section-title" style="margin-top:14px">NOMBRE DE MANCHES</div>
+    <div class="inning-format">
+      <button type="button" id="prep5Btn" onclick="setOfficialPrepInnings(5)">5 MANCHES</button>
+      <button type="button" id="prep7Btn" onclick="setOfficialPrepInnings(7)">7 MANCHES</button>
+      <button type="button" id="prep9Btn" onclick="setOfficialPrepInnings(9)">9 MANCHES</button>
+    </div>
+
+    <button type="button" class="primary" id="officialApproveLockBtn" style="width:100%;margin-top:14px" onclick="approveAndLockOfficialGame()">
+      APPROUVER ET VERROUILLER LES ALIGNEMENTS
+    </button>
+
+    <div id="officialPrepLockStatus" class="readonly-note hidden" style="margin-top:10px"></div>
+
+    <button type="button" class="primary hidden" id="officialStartPreparedGameBtn" style="width:100%;margin-top:10px" onclick="startPreparedOfficialGame()">
+      DÉBUTER LE MATCH
+    </button>
+
+    <button type="button" style="width:100%;margin-top:8px" onclick="closeOfficialPreGame()">RETOUR</button>
   </div>
 </div>
 
@@ -1882,19 +1913,117 @@ function prepareSelectedOfficialGame(){
     return;
   }
 
-  // Le moteur actuel est configuré pour Brewers vs Yankees.
+  $("officialGameDetailModal").classList.remove("show");
+
+  officialPrepInnings=regulationInnings||7;
+  officialPrepLocked=false;
+
+  $("officialPreGameTitle").textContent=`PRÉPARER • ${g.away} vs ${g.home}`;
+  $("officialPreGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
+
+  renderOfficialPreGame();
+  $("officialPreGameModal").classList.add("show");
+}
+
+
+function renderOfficialPreGame(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
+  if(!g)return;
+
+  const wrap=$("officialPreGameLineups");
+  if(wrap){
+    wrap.innerHTML=`
+      <div class="readonly-note" style="margin-bottom:8px">
+        <strong>${g.away}</strong><br>
+        ✅ Alignement reçu
+      </div>
+      <div class="readonly-note">
+        <strong>${g.home}</strong><br>
+        ✅ Alignement reçu
+      </div>`;
+  }
+
+  [5,7,9].forEach(n=>{
+    const btn=$("prep"+n+"Btn");
+    if(btn){
+      btn.classList.toggle("active",officialPrepInnings===n);
+      btn.disabled=officialPrepLocked;
+    }
+  });
+
+  const lockBtn=$("officialApproveLockBtn");
+  if(lockBtn){
+    lockBtn.classList.toggle("hidden",officialPrepLocked);
+  }
+
+  const status=$("officialPrepLockStatus");
+  if(status){
+    status.classList.toggle("hidden",!officialPrepLocked);
+    if(officialPrepLocked){
+      status.textContent=`✅ Alignements approuvés et verrouillés • ${officialPrepInnings} manches`;
+    }
+  }
+
+  const startBtn=$("officialStartPreparedGameBtn");
+  if(startBtn){
+    startBtn.classList.toggle("hidden",!officialPrepLocked);
+  }
+}
+
+function setOfficialPrepInnings(n){
+  if(officialPrepLocked)return;
+  if(![5,7,9].includes(n))return;
+
+  officialPrepInnings=n;
+  renderOfficialPreGame();
+}
+
+function approveAndLockOfficialGame(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
+  if(!g)return;
+
+  const s=officialGameSubmissions[scheduleGameKey(g)];
+  if(!s || !s.awaySubmitted || !s.homeSubmitted){
+    toast("Les deux alignements doivent être reçus");
+    return;
+  }
+
+  if(!teams[g.away] || !teams[g.home]){
+    toast("Ce match n’est pas encore entièrement configuré dans le prototype.");
+    return;
+  }
+
   if(g.away!=="Brewers" || g.home!=="Yankees"){
     toast("Prototype : ce match sera jouable lorsque les rosters de ces équipes seront ajoutés.");
     return;
   }
 
-  $("officialGameDetailModal").classList.remove("show");
+  teams.Brewers.submitted=true;
+  teams.Yankees.submitted=true;
+  regulationInnings=officialPrepInnings;
+  displayedInnings=officialPrepInnings;
+  officialPrepLocked=true;
 
-  // Ouvre réellement l'écran de préparation du marqueur.
+  renderOfficialPreGame();
+  toast("Alignements verrouillés");
+}
+
+function startPreparedOfficialGame(){
+  if(!officialPrepLocked){
+    toast("Approuvez et verrouillez d’abord les alignements");
+    return;
+  }
+
+  $("officialPreGameModal").classList.remove("show");
+
+  currentRole="official";
   selectRole("official");
 
   teams.Brewers.submitted=true;
   teams.Yankees.submitted=true;
+
+  regulationInnings=officialPrepInnings;
+  displayedInnings=officialPrepInnings;
 
   editorTeam="Brewers";
   coachTeam="Brewers";
@@ -1902,7 +2031,12 @@ function prepareSelectedOfficialGame(){
   renderBenchEditor();
   renderPregameStatus();
 
-  toast("Match prêt à être débuté");
+  toast(`Match prêt • ${officialPrepInnings} manches`);
+}
+
+function closeOfficialPreGame(){
+  $("officialPreGameModal").classList.remove("show");
+  $("officialGameDetailModal").classList.add("show");
 }
 
 function backToOfficialGames(){
@@ -2489,6 +2623,8 @@ let standings={
 let selectedCompletedGameId=null;
 
 let officialSelectedGameId=null;
+let officialPrepInnings=7;
+let officialPrepLocked=false;
 
 const leagueSchedule=[
   {date:"2026-09-07",time:"18:30",away:"Brewers",home:"Yankees"},
@@ -2774,7 +2910,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.2.
+// L'accueil par rôles est l'écran initial de v0.11.3.
 
 renderLineupEditor();
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.4</title>
+<title>Diamond v0.11.5</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -305,7 +305,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.4 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.5 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -658,6 +658,29 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </div>
 
 
+
+<div class="modal" id="officialAlignmentReviewModal">
+  <div class="sheet">
+    <h3 id="officialAlignmentReviewTitle">ALIGNEMENT</h3>
+    <div id="officialAlignmentReviewMeta" class="readonly-note"></div>
+
+    <div class="section-title" style="margin-top:12px">ALIGNEMENT SOUMIS</div>
+    <div id="officialAlignmentReviewList"></div>
+
+    <button type="button" class="primary" id="officialApproveSingleLineupBtn"
+      style="width:100%;margin-top:14px"
+      onclick="approveSelectedTeamLineup()">
+      APPROUVER ET VERROUILLER CET ALIGNEMENT
+    </button>
+
+    <div id="officialSingleLineupLockStatus" class="readonly-note hidden" style="margin-top:10px"></div>
+
+    <button type="button" style="width:100%;margin-top:8px" onclick="closeOfficialAlignmentReview()">
+      RETOUR AU MATCH
+    </button>
+  </div>
+</div>
+
 <div class="modal" id="officialPreGameModal">
   <div class="sheet">
     <h3 id="officialPreGameTitle">PRÉPARER LE MATCH</h3>
@@ -985,7 +1008,7 @@ function closeRosterModal(){
 }
 
 function renderLineupEditor(){
-  const lineupLocked=gameStarted && currentRole!=="official";
+  const lineupLocked=(gameStarted || officialLockedTeams[editorTeam]) && currentRole!=="official";
   coachTeam=editorTeam;
 
   $("coachTitle").textContent="Alignement "+editorTeam;
@@ -1046,6 +1069,7 @@ function renderLineupEditor(){
   if(gameStarted && currentRole==="official")refreshSubstitutionOptions();
 }
 function selectBattingOrderSlot(i){
+  if(officialLockedTeams[editorTeam] && currentRole!=="official"){toast("Alignement verrouillé par le marqueur");return;}
   if(gameStarted){
     toast("L’ordre des frappeurs est verrouillé pendant le match");
     return;
@@ -1089,8 +1113,10 @@ function toggleActive(i,v){
   if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}if(gameStarted)return;teams[coachTeam].lineup[i].active=v;teams[coachTeam].submitted=false;renderPregameStatus()}
 function resetLineup(){
   selectedOrderSlot=null;
+  if(officialLockedTeams[editorTeam] && currentRole!=="official"){toast("Alignement verrouillé par le marqueur");return;}
   if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}teams[coachTeam].lineup=originalTeams[coachTeam].map((p,i)=>freshPlayer(p,i,coachTeam[0]));teams[coachTeam].submitted=false;renderLineupEditor();toast("Alignement réinitialisé")}
 function submitLineup(){
+  if(officialLockedTeams[editorTeam] && currentRole!=="official"){toast("Alignement verrouillé par le marqueur");return;}
   if(gameStarted && currentRole!=="official"){
     toast("Alignement verrouillé pour le capitaine pendant le match");
     return;
@@ -1902,28 +1928,45 @@ function renderOfficialGameStatus(){
   if(!g)return;
 
   const key=scheduleGameKey(g);
-  const s=officialGameSubmissions[key]||{awaySubmitted:false,homeSubmitted:false};
+  const s=officialGameSubmissions[key]||{
+    awaySubmitted:false,homeSubmitted:false,awayLocked:false,homeLocked:false
+  };
+
+  const awayState=s.awayLocked
+    ?"🔒 Alignement approuvé et verrouillé"
+    :(s.awaySubmitted?"✅ Alignement reçu":"⏳ Alignement en attente");
+
+  const homeState=s.homeLocked
+    ?"🔒 Alignement approuvé et verrouillé"
+    :(s.homeSubmitted?"✅ Alignement reçu":"⏳ Alignement en attente");
 
   $("officialGameSubmissionStatus").innerHTML=`
     <div class="readonly-note" style="margin-bottom:8px">
-      <strong>${g.away}</strong><br>
-      ${s.awaySubmitted?"✅ Alignement reçu":"⏳ Alignement en attente"}
+      <strong>${g.away}</strong><br>${awayState}
     </div>
     <div class="readonly-note">
-      <strong>${g.home}</strong><br>
-      ${s.homeSubmitted?"✅ Alignement reçu":"⏳ Alignement en attente"}
+      <strong>${g.home}</strong><br>${homeState}
     </div>`;
 
   const awayBtn=$("officialAwayAlignmentBtn");
   const homeBtn=$("officialHomeAlignmentBtn");
-  if(awayBtn)awayBtn.textContent=`ALIGNEMENT ${g.away.toUpperCase()}`;
-  if(homeBtn)homeBtn.textContent=`ALIGNEMENT ${g.home.toUpperCase()}`;
+
+  if(awayBtn){
+    awayBtn.textContent=`ALIGNEMENT ${g.away.toUpperCase()}${s.awayLocked?" 🔒":""}`;
+    awayBtn.disabled=!s.awaySubmitted;
+  }
+  if(homeBtn){
+    homeBtn.textContent=`ALIGNEMENT ${g.home.toUpperCase()}${s.homeLocked?" 🔒":""}`;
+    homeBtn.disabled=!s.homeSubmitted;
+  }
 
   const btn=$("officialPrepareGameBtn");
   if(btn){
-    const ready=s.awaySubmitted&&s.homeSubmitted;
+    const ready=s.awayLocked&&s.homeLocked;
     btn.disabled=!ready;
-    btn.textContent=ready?"PRÉPARER CE MATCH":"EN ATTENTE DES 2 ALIGNEMENTS";
+    btn.classList.toggle("active",ready);
+    btn.style.opacity=ready?"1":".48";
+    btn.textContent=ready?"PRÉPARER CE MATCH":"VERROUILLEZ LES 2 ALIGNEMENTS";
   }
 }
 
@@ -1931,20 +1974,96 @@ function openOfficialTeamAlignment(side){
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
   if(!g)return;
 
-  const teamName=side==="away"?g.away:g.home;
+  const key=scheduleGameKey(g);
+  const s=officialGameSubmissions[key];
+  if(!s)return;
 
+  const submitted=side==="away"?s.awaySubmitted:s.homeSubmitted;
+  if(!submitted){
+    toast("Cet alignement n’a pas encore été soumis");
+    return;
+  }
+
+  const teamName=side==="away"?g.away:g.home;
   if(!teams[teamName]){
     toast(`L’équipe ${teamName} n’a pas encore de joueurs configurés dans le prototype.`);
     return;
   }
 
+  officialAlignmentReviewSide=side;
+
   $("officialGameDetailModal").classList.remove("show");
+  $("officialAlignmentReviewTitle").textContent=`ALIGNEMENT ${teamName.toUpperCase()}`;
+  $("officialAlignmentReviewMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
 
-  // Ouvre réellement l'espace marqueur / alignements.
-  selectRole("official");
-  showCoach(teamName);
+  renderOfficialSingleLineupReview();
+  $("officialAlignmentReviewModal").classList.add("show");
+}
 
-  toast(`Alignement ${teamName}`);
+
+function renderOfficialSingleLineupReview(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
+  if(!g || !officialAlignmentReviewSide)return;
+
+  const key=scheduleGameKey(g);
+  const s=officialGameSubmissions[key];
+  const side=officialAlignmentReviewSide;
+  const teamName=side==="away"?g.away:g.home;
+  const locked=side==="away"?s.awayLocked:s.homeLocked;
+  const t=teams[teamName];
+
+  const active=(t?.lineup||[]).filter(p=>p.active!==false);
+
+  const list=$("officialAlignmentReviewList");
+  if(list){
+    list.innerHTML=active.map((p,i)=>`
+      <div class="readonly-note" style="margin-bottom:7px;display:grid;grid-template-columns:34px 1fr 58px;gap:8px;align-items:center">
+        <strong>${i+1}</strong>
+        <span>${p.name}</span>
+        <strong style="text-align:right">${p.pos}</strong>
+      </div>`).join("") || '<div class="readonly-note">Aucun joueur actif.</div>';
+  }
+
+  const btn=$("officialApproveSingleLineupBtn");
+  if(btn){
+    btn.classList.toggle("hidden",locked);
+    btn.textContent=`APPROUVER ET VERROUILLER ${teamName.toUpperCase()}`;
+  }
+
+  const status=$("officialSingleLineupLockStatus");
+  if(status){
+    status.classList.toggle("hidden",!locked);
+    if(locked)status.textContent=`🔒 Alignement ${teamName} approuvé et verrouillé`;
+  }
+}
+
+function approveSelectedTeamLineup(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
+  if(!g || !officialAlignmentReviewSide)return;
+
+  const key=scheduleGameKey(g);
+  const s=officialGameSubmissions[key];
+  const side=officialAlignmentReviewSide;
+  const teamName=side==="away"?g.away:g.home;
+
+  if(side==="away"){
+    if(!s.awaySubmitted){toast("Alignement non soumis");return;}
+    s.awayLocked=true;
+  }else{
+    if(!s.homeSubmitted){toast("Alignement non soumis");return;}
+    s.homeLocked=true;
+  }
+
+  officialLockedTeams[teamName]=true;
+  renderOfficialSingleLineupReview();
+  renderOfficialGameStatus();
+  toast(`Alignement ${teamName} verrouillé`);
+}
+
+function closeOfficialAlignmentReview(){
+  $("officialAlignmentReviewModal").classList.remove("show");
+  renderOfficialGameStatus();
+  $("officialGameDetailModal").classList.add("show");
 }
 
 function prepareSelectedOfficialGame(){
@@ -1952,8 +2071,8 @@ function prepareSelectedOfficialGame(){
   if(!g)return;
 
   const s=officialGameSubmissions[scheduleGameKey(g)];
-  if(!s || !s.awaySubmitted || !s.homeSubmitted){
-    toast("Les deux alignements doivent être reçus");
+  if(!s || !s.awayLocked || !s.homeLocked){
+    toast("Approuvez et verrouillez les deux alignements");
     return;
   }
 
@@ -1965,7 +2084,6 @@ function prepareSelectedOfficialGame(){
   $("officialGameDetailModal").classList.remove("show");
 
   officialPrepInnings=regulationInnings||7;
-  officialPrepLocked=false;
 
   $("officialPreGameTitle").textContent=`PRÉPARER • ${g.away} vs ${g.home}`;
   $("officialPreGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
@@ -1979,16 +2097,17 @@ function renderOfficialPreGame(){
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
   if(!g)return;
 
+  const s=officialGameSubmissions[scheduleGameKey(g)];
   const wrap=$("officialPreGameLineups");
   if(wrap){
     wrap.innerHTML=`
       <div class="readonly-note" style="margin-bottom:8px">
         <strong>${g.away}</strong><br>
-        ✅ Alignement reçu
+        ${s?.awayLocked?"🔒 Alignement verrouillé":"⏳ Non verrouillé"}
       </div>
       <div class="readonly-note">
         <strong>${g.home}</strong><br>
-        ✅ Alignement reçu
+        ${s?.homeLocked?"🔒 Alignement verrouillé":"⏳ Non verrouillé"}
       </div>`;
   }
 
@@ -1996,70 +2115,40 @@ function renderOfficialPreGame(){
     const btn=$("prep"+n+"Btn");
     if(btn){
       btn.classList.toggle("active",officialPrepInnings===n);
-      btn.disabled=officialPrepLocked;
+      btn.disabled=false;
     }
   });
 
-  const lockBtn=$("officialApproveLockBtn");
-  if(lockBtn){
-    lockBtn.classList.toggle("hidden",officialPrepLocked);
-  }
-
-  const status=$("officialPrepLockStatus");
-  if(status){
-    status.classList.toggle("hidden",!officialPrepLocked);
-    if(officialPrepLocked){
-      status.textContent=`✅ Alignements approuvés et verrouillés • ${officialPrepInnings} manches`;
-    }
-  }
-
   const startBtn=$("officialStartPreparedGameBtn");
   if(startBtn){
-    startBtn.classList.toggle("hidden",!officialPrepLocked);
+    const ready=!!(s?.awayLocked&&s?.homeLocked);
+    startBtn.disabled=!ready;
+    startBtn.style.opacity=ready?"1":".48";
   }
 }
 
 function setOfficialPrepInnings(n){
-  if(officialPrepLocked)return;
   if(![5,7,9].includes(n))return;
-
   officialPrepInnings=n;
   renderOfficialPreGame();
 }
 
 function approveAndLockOfficialGame(){
+  toast("Les alignements se verrouillent maintenant individuellement depuis le match du soir.");
+}
+
+function startPreparedOfficialGame(){
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
   if(!g)return;
 
   const s=officialGameSubmissions[scheduleGameKey(g)];
-  if(!s || !s.awaySubmitted || !s.homeSubmitted){
-    toast("Les deux alignements doivent être reçus");
-    return;
-  }
-
-  if(!teams[g.away] || !teams[g.home]){
-    toast("Ce match n’est pas encore entièrement configuré dans le prototype.");
+  if(!s?.awayLocked || !s?.homeLocked){
+    toast("Les deux alignements doivent être verrouillés");
     return;
   }
 
   if(g.away!=="Brewers" || g.home!=="Yankees"){
     toast("Prototype : ce match sera jouable lorsque les rosters de ces équipes seront ajoutés.");
-    return;
-  }
-
-  teams.Brewers.submitted=true;
-  teams.Yankees.submitted=true;
-  regulationInnings=officialPrepInnings;
-  displayedInnings=officialPrepInnings;
-  officialPrepLocked=true;
-
-  renderOfficialPreGame();
-  toast("Alignements verrouillés");
-}
-
-function startPreparedOfficialGame(){
-  if(!officialPrepLocked){
-    toast("Approuvez et verrouillez d’abord les alignements");
     return;
   }
 
@@ -2674,6 +2763,8 @@ let selectedCompletedGameId=null;
 let officialSelectedGameId=null;
 let officialPrepInnings=7;
 let officialPrepLocked=false;
+let officialAlignmentReviewSide=null;
+const officialLockedTeams={Brewers:false,Yankees:false,Sox:false,Expos:false,Indiens:false,Bananes:false};
 let selectedOrderSlot=null;
 
 const leagueSchedule=[
@@ -2706,7 +2797,9 @@ const officialGameSubmissions={};
 leagueSchedule.forEach(g=>{
   officialGameSubmissions[g.date+"|"+g.time+"|"+g.away+"|"+g.home]={
     awaySubmitted:false,
-    homeSubmitted:false
+    homeSubmitted:false,
+    awayLocked:false,
+    homeLocked:false
   };
 });
 
@@ -2960,7 +3053,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.4.
+// L'accueil par rôles est l'écran initial de v0.11.5.
 
 renderLineupEditor();
 

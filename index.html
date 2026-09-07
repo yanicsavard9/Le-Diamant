@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.16</title>
+<title>Diamond v0.11.18</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.11.16 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.11.18 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.11.16 — corrige la bande noire à droite sur iPhone */
+/* v0.11.18 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.11.16 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.11.18 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.16 — enlève toute ligne sous le lanceur */
+/* v0.11.18 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.16 — correctifs ciblés après vérification du HTML réel */
+/* v0.11.18 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.16 — changements rapides + fermeture Horaire en haut */
+/* v0.11.18 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -753,11 +753,27 @@ body{background:var(--bg)}
   font-weight:900;
 }
 
+
+/* v0.11.18 — formats de match 3/4/5/7/9 manches */
+.inning-format{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px;
+}
+@media (max-width:640px){
+  .inning-format{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .inning-format button{
+    min-height:46px;
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.16 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.18 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -996,7 +1012,9 @@ body{background:var(--bg)}
         <div class="section-title">Nombre de manches réglementaires</div>
         <div class="muted" style="font-size:12px">Choisi par le marqueur avant le début du match.</div>
         <div class="inning-format">
-          <button type="button" id="innings5Btn" onclick="setRegulationInnings(5)">5 MANCHES</button>
+          <button type="button" id="innings3Btn" onclick="setRegulationInnings(3)">3 MANCHES</button>
+        <button type="button" id="innings4Btn" onclick="setRegulationInnings(4)">4 MANCHES</button>
+        <button type="button" id="innings5Btn" onclick="setRegulationInnings(5)">5 MANCHES</button>
           <button type="button" id="innings7Btn" onclick="setRegulationInnings(7)" class="active">7 MANCHES</button>
           <button type="button" id="innings9Btn" onclick="setRegulationInnings(9)">9 MANCHES</button>
         </div>
@@ -1187,6 +1205,8 @@ body{background:var(--bg)}
 
     <div class="section-title" style="margin-top:14px">NOMBRE DE MANCHES</div>
     <div class="inning-format">
+      <button type="button" id="prep3Btn" onclick="setOfficialPrepInnings(3)">3 MANCHES</button>
+      <button type="button" id="prep4Btn" onclick="setOfficialPrepInnings(4)">4 MANCHES</button>
       <button type="button" id="prep5Btn" onclick="setOfficialPrepInnings(5)">5 MANCHES</button>
       <button type="button" id="prep7Btn" onclick="setOfficialPrepInnings(7)">7 MANCHES</button>
       <button type="button" id="prep9Btn" onclick="setOfficialPrepInnings(9)">9 MANCHES</button>
@@ -2734,7 +2754,7 @@ function renderOfficialPreGame(){
       </div>`;
   }
 
-  [5,7,9].forEach(n=>{
+  [3,4,5,7,9].forEach(n=>{
     const btn=$("prep"+n+"Btn");
     if(btn){
       btn.classList.toggle("active",officialPrepInnings===n);
@@ -3518,7 +3538,50 @@ function undo(){
   toast("Dernière action annulée");
 }
 function askReset(){$("resetModal").classList.add("show")}function closeReset(){$("resetModal").classList.remove("show")}
-function confirmReset(){resetStatsOnly();gameStarted=false;Object.values(teams).forEach(t=>t.submitted=false);closeReset();showPregame();renderPregameStatus();renderLineupEditor();toast("Nouvelle partie : alignements déverrouillés")}
+function confirmReset(){
+  // Remet à zéro uniquement le match actif.
+  resetStatsOnly();
+  gameStarted=false;
+
+  // Détache l'ancien match de l'écran de pointage.
+  activeScheduleGameKey=null;
+  officialSelectedGameId=null;
+  officialAlignmentReviewSide=null;
+  selectedCompletedGameId=null;
+
+  // Ferme les fenêtres liées au match courant.
+  closeReset();
+  if($("gameOverModal"))$("gameOverModal").classList.remove("show");
+  if($("profileModal"))$("profileModal").classList.remove("show");
+  if($("runnerModal"))$("runnerModal").classList.remove("show");
+  if($("substitutionModal"))$("substitutionModal").classList.remove("show");
+  if($("officialPreGameModal"))$("officialPreGameModal").classList.remove("show");
+  if($("officialGameDetailModal"))$("officialGameDetailModal").classList.remove("show");
+  if($("officialAlignmentReviewModal"))$("officialAlignmentReviewModal").classList.remove("show");
+
+  // Retour au tableau du marqueur : aucun nom d'équipe ni pointage affiché
+  // tant qu'un nouveau match n'est pas choisi et préparé.
+  currentRole="official";
+  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.add("role-official");
+
+  $("roleHome").classList.add("hidden");
+  $("viewerView").classList.add("hidden");
+  $("pregame").classList.add("hidden");
+  $("game").classList.add("hidden");
+  if($("officialHub"))$("officialHub").classList.remove("hidden");
+
+  setRoleBadge("MARQUEUR");
+  renderOfficialGames();
+
+  // Les alignements déjà soumis/verrouillés restent disponibles.
+  // Le marqueur choisit le prochain match, valide ce qui reste à valider,
+  // choisit le nombre de manches et redémarre ensuite.
+  $("officialGamesModal").classList.add("show");
+
+  window.scrollTo({top:0,behavior:"auto"});
+  toast("Nouveau match prêt • choisissez un match du soir");
+}
 
 
 let currentRole=null;
@@ -3846,7 +3909,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.16.
+// L'accueil par rôles est l'écran initial de v0.11.18.
 
 renderLineupEditor();
 

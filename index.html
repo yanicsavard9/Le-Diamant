@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.3</title>
+<title>Diamond v0.11.4</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -30,6 +30,10 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .team-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#fff;border:2px solid rgba(255,255,255,.18)}
 .status{margin-top:8px;font-size:13px;color:var(--muted)}.ok{color:#9cf0bf;font-weight:800}
 .lineup-row{display:grid;grid-template-columns:36px 1fr 88px;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #263646}
+.order-button{width:40px;height:40px;border-radius:12px;padding:0;font-weight:900;font-size:17px}
+.lineup-row.order-selected{background:rgba(79,156,255,.14);border:1px solid rgba(79,156,255,.55);border-radius:14px;padding:8px;margin:4px 0}
+.lineup-order-help{margin-bottom:10px;font-size:12px}
+
 .lineup-row:last-child{border-bottom:0}.order{font-weight:900;text-align:center}.player-name{font-weight:800}.pos-select{width:100%;background:#111a23;color:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
 .row-tools{grid-column:2/4;display:flex;gap:6px}.row-tools button{padding:6px 9px;font-size:12px}
 .coach-tabs{display:flex;gap:8px;margin-bottom:10px}.coach-tabs button{flex:1}.coach-tabs .active{outline:2px solid var(--green)}
@@ -301,7 +305,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.3 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.4 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -799,6 +803,7 @@ function showCoach(teamName){
 
   selectedSubBenchIndex=null;
   selectedLineupSlot=null;
+  selectedOrderSlot=null;
   selectedBenchSlot=null;
 
   if($("substitutionPanel"))$("substitutionPanel").classList.add("hidden");
@@ -986,9 +991,20 @@ function renderLineupEditor(){
   $("coachTitle").textContent="Alignement "+editorTeam;
   const list=teams[editorTeam].lineup;
 
-  $("lineupEditor").innerHTML=list.map((p,i)=>`
-    <div class="lineup-row">
-      <div class="order">${i+1}</div>
+  $("lineupEditor").innerHTML=`
+    <div class="readonly-note lineup-order-help">
+      Touchez le <strong>rang</strong> d’un joueur, puis touchez le nouveau rang pour interchanger les deux joueurs.
+    </div>
+  `+list.map((p,i)=>`
+    <div class="lineup-row ${selectedOrderSlot===i?"order-selected":""}">
+      <div class="order">
+        <button type="button"
+          class="order-button"
+          onclick="selectBattingOrderSlot(${i})"
+          ${lineupLocked||gameStarted?"disabled":""}>
+          ${i+1}
+        </button>
+      </div>
       <div>
         <button type="button"
           class="lineup-player-btn ${gameStarted&&p.lockedStarter?(p.lockedStarterTeam==="Brewers"?"player-used-brewers":"player-used-yankees"):""}"
@@ -1002,10 +1018,6 @@ function renderLineupEditor(){
       <select class="pos-select" onchange="changePos(${i},this.value)">
         ${POSITIONS.map(pos=>`<option ${pos===p.pos?"selected":""}>${pos}</option>`).join("")}
       </select>
-      <div class="row-tools">
-        <button onclick="movePlayer(${i},-1)" ${i===0?"disabled":""}>↑ Monter</button>
-        <button onclick="movePlayer(${i},1)" ${i===list.length-1?"disabled":""}>↓ Descendre</button>
-      </div>
     </div>`).join("");
 
   renderTeamRoster();
@@ -1016,7 +1028,7 @@ function renderLineupEditor(){
     if(!el.closest("#substitutionPanel"))el.disabled=lineupLocked;
   });
 
-  document.querySelectorAll("#lineupEditor button").forEach(b=>b.disabled=lineupLocked);
+  document.querySelectorAll("#lineupEditor .lineup-player-btn").forEach(b=>b.disabled=lineupLocked);
 
   if($("lineupControls"))$("lineupControls").querySelectorAll("button").forEach(b=>b.disabled=lineupLocked);
   if($("addBenchBtn"))$("addBenchBtn").disabled=lineupLocked;
@@ -1033,6 +1045,42 @@ function renderLineupEditor(){
 
   if(gameStarted && currentRole==="official")refreshSubstitutionOptions();
 }
+function selectBattingOrderSlot(i){
+  if(gameStarted){
+    toast("L’ordre des frappeurs est verrouillé pendant le match");
+    return;
+  }
+
+  const lineup=teams[editorTeam].lineup;
+  if(!lineup || !lineup[i])return;
+
+  if(selectedOrderSlot===null){
+    selectedOrderSlot=i;
+    renderLineupEditor();
+    toast(`${lineup[i].name} sélectionné • choisissez le nouveau rang`);
+    return;
+  }
+
+  if(selectedOrderSlot===i){
+    selectedOrderSlot=null;
+    renderLineupEditor();
+    toast("Sélection annulée");
+    return;
+  }
+
+  const from=selectedOrderSlot;
+  const playerA=lineup[from];
+  const playerB=lineup[i];
+
+  [lineup[from],lineup[i]]=[lineup[i],lineup[from]];
+  teams[editorTeam].submitted=false;
+  selectedOrderSlot=null;
+
+  renderLineupEditor();
+  renderPregameStatus();
+  toast(`${playerA.name} et ${playerB.name} interchangés`);
+}
+
 function movePlayer(i,d){
   if(gameStarted)return;const a=teams[coachTeam].lineup,j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];teams[coachTeam].submitted=false;renderLineupEditor()}
 function changePos(i,v){
@@ -1040,6 +1088,7 @@ function changePos(i,v){
 function toggleActive(i,v){
   if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}if(gameStarted)return;teams[coachTeam].lineup[i].active=v;teams[coachTeam].submitted=false;renderPregameStatus()}
 function resetLineup(){
+  selectedOrderSlot=null;
   if(gameStarted && currentRole!=="official"){toast("Alignement verrouillé pour le capitaine pendant le match");return}teams[coachTeam].lineup=originalTeams[coachTeam].map((p,i)=>freshPlayer(p,i,coachTeam[0]));teams[coachTeam].submitted=false;renderLineupEditor();toast("Alignement réinitialisé")}
 function submitLineup(){
   if(gameStarted && currentRole!=="official"){
@@ -2625,6 +2674,7 @@ let selectedCompletedGameId=null;
 let officialSelectedGameId=null;
 let officialPrepInnings=7;
 let officialPrepLocked=false;
+let selectedOrderSlot=null;
 
 const leagueSchedule=[
   {date:"2026-09-07",time:"18:30",away:"Brewers",home:"Yankees"},
@@ -2910,7 +2960,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.3.
+// L'accueil par rôles est l'écran initial de v0.11.4.
 
 renderLineupEditor();
 

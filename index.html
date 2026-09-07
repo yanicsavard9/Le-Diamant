@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.12.0</title>
+<title>Diamond v0.13.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.12.0 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.13.0 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.12.0 — corrige la bande noire à droite sur iPhone */
+/* v0.13.0 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.12.0 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.13.0 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.12.0 — enlève toute ligne sous le lanceur */
+/* v0.13.0 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.12.0 — correctifs ciblés après vérification du HTML réel */
+/* v0.13.0 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.12.0 — changements rapides + fermeture Horaire en haut */
+/* v0.13.0 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.12.0 — formats de match 3/4/5/7/9 manches */
+/* v0.13.0 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.12.0 */
+/* v0.13.0 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -795,17 +795,166 @@ body{background:var(--bg)}
 }
 
 </style>
+
+<style id="diamond-v0130-style">
+:root{
+  --bg:#09131f;
+  --panel:#121f2f;
+  --panel2:#17273a;
+  --line:#29445f;
+  --text:#f3f7fb;
+  --muted:#9fb0c4;
+  --accent:#2d8cff;
+  --good:#4fd18b;
+  --warn:#ff9f43;
+  --radius:22px;
+}
+html,body{background:var(--bg)!important;color:var(--text)!important}
+body{overflow-x:hidden}
+.app-shell,.screen,.view{max-width:100%!important;width:100%!important}
+.card,.sheet,.panel,.role-card,.readonly-note{
+  border-radius:var(--radius)!important;
+}
+.role-card{
+  border:1px solid #31465d!important;
+  background:#101a26!important;
+  box-shadow:none!important;
+}
+.role-card:hover{transform:none!important}
+.topbar,.app-header{
+  background:linear-gradient(180deg,rgba(9,19,31,.98),rgba(9,19,31,.92))!important;
+}
+#brandVersion{
+  background:#162538!important;
+  border:1px solid #29445f!important;
+  border-radius:999px!important;
+  padding:8px 14px!important;
+  font-size:14px!important;
+  letter-spacing:.03em;
+}
+#leagueTeamsStrip{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:16px;
+}
+.league-team-chip{
+  min-height:76px;
+  padding:10px 8px;
+  border:1px solid #2a425b;
+  border-radius:16px;
+  background:#102031;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  font-weight:800;
+  text-align:center;
+}
+.league-team-chip .dot{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;font-size:17px;font-weight:900;
+  border:2px solid rgba(255,255,255,.75);
+}
+.league-team-chip.brewers{background:#0e2743}.league-team-chip.brewers .dot{background:#163b66}
+.league-team-chip.yankees{background:#35191f}.league-team-chip.yankees .dot{background:#7c2028}
+.league-team-chip.sox{background:#20242b}.league-team-chip.sox .dot{background:#050505}
+.league-team-chip.expos{background:#0e2f56}.league-team-chip.expos .dot{background:#15549a}
+.league-team-chip.indiens{background:#4a151a}.league-team-chip.indiens .dot{background:#8b1b24}
+.league-team-chip.bananes{background:#51420c}.league-team-chip.bananes .dot{background:#b69a12}
+
+#captainTeamChooser{
+  margin:14px 0 18px;
+}
+#captainTeamChooser h3{
+  margin:0 0 10px;
+  font-size:18px;
+}
+.team-choice-grid{
+  display:grid;
+  gap:10px;
+}
+.team-choice-btn{
+  width:100%;
+  min-height:60px;
+  border-radius:16px;
+  border:1px solid #2f4862;
+  background:#102033;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  font-size:18px;
+  font-weight:800;
+}
+.team-choice-btn .left{display:flex;align-items:center;gap:12px}
+.team-choice-btn .badge-dot{
+  width:34px;height:34px;border-radius:50%;
+  display:grid;place-items:center;
+  background:#172c42;border:2px solid rgba(255,255,255,.8);font-size:15px
+}
+.team-choice-btn.active{outline:2px solid var(--good);border-color:var(--good)}
+.team-choice-btn[data-team="Yankees"]{background:#3a151c}
+.team-choice-btn[data-team="Sox"]{background:#20252c}
+.team-choice-btn[data-team="Expos"]{background:#0e3159}
+.team-choice-btn[data-team="Indiens"]{background:#4a171b}
+.team-choice-btn[data-team="Bananes"]{background:#57470a}
+
+#captainTeamSummary{
+  margin:10px 0 14px;
+  padding:10px 14px;
+  background:#0c1723;
+  border:1px solid #263d54;
+  border-radius:14px;
+  color:var(--muted);
+}
+
+#leagueStandingsPanel table,#leagueStatsPanel table,#leagueSchedulePanel table{
+  width:100%;
+}
+.schedule-card{
+  border:1px solid #27455f!important;
+  background:#0f1d2b!important;
+  border-radius:18px!important;
+}
+.schedule-card.final{border-color:#4fd18b!important}
+#officialHub .hub-card{
+  border-radius:18px!important;
+  border:1px solid #29445f!important;
+  background:#0f1b29!important;
+}
+button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingleLineupBtn{
+  background:linear-gradient(180deg,#3793ff,#1c6ee5)!important;
+  border:0!important;
+  color:white!important;
+  border-radius:14px!important;
+}
+.bottom-tabs{
+  backdrop-filter:blur(12px);
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.12.0 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.0 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
     <div class="card">
       <div class="section-title">Bienvenue dans Diamond</div>
       <h2>Choisissez votre accès</h2>
-      <div class="muted">Une seule application, trois expériences adaptées au rôle de chacun.</div>
+      <div class="muted">Une seule application, trois expériences adaptées au rôle de chacun.
+    <div id="leagueTeamsStrip" aria-label="Équipes de la ligue">
+      <div class="league-team-chip brewers"><div class="dot">B</div><div>Brewers</div></div>
+      <div class="league-team-chip yankees"><div class="dot">Y</div><div>Yankees</div></div>
+      <div class="league-team-chip sox"><div class="dot">S</div><div>Sox</div></div>
+      <div class="league-team-chip expos"><div class="dot">E</div><div>Expos</div></div>
+      <div class="league-team-chip indiens"><div class="dot">I</div><div>Indiens</div></div>
+      <div class="league-team-chip bananes"><div class="dot">B</div><div>Bananes</div></div>
+    </div></div>
       <div class="role-grid">
         <button class="role-card" type="button" onclick="selectRole('viewer')">
           <strong>👤 Joueur / Spectateur</strong>
@@ -938,21 +1087,23 @@ body{background:var(--bg)}
       <button id="returnMatchBtn" class="return-match hidden" onclick="returnToGame()">↩ RETOUR AU MATCH</button>
     </div>
 
-    <div class="team-strip">
-      <div class="team-card brewers">
-        <div class="team-head"><img class="team-logo" id="pregameBrewersLogo"> Brewers</div>
-        <div class="status" id="brewersStatus">Alignement non soumis</div>
-      </div>
-      <div class="team-card yankees">
-        <div class="team-head"><img class="team-logo" id="pregameYankeesLogo"> Yankees</div>
-        <div class="status" id="yankeesStatus">Alignement non soumis</div>
-      </div>
+    <div id="captainLeagueStrip" class="team-strip six-team-strip">
+      <div class="team-card brewers" onclick="showCoach('Brewers')"><div class="team-head">⚾ Brewers</div><div class="status" id="brewersStatus">Alignement non soumis</div></div>
+      <div class="team-card yankees" onclick="showCoach('Yankees')"><div class="team-head">⚾ Yankees</div><div class="status" id="yankeesStatus">Alignement non soumis</div></div>
+      <div class="team-card sox" onclick="showCoach('Sox')"><div class="team-head">⚾ Sox</div><div class="status" id="soxStatus">Alignement non soumis</div></div>
+      <div class="team-card expos" onclick="showCoach('Expos')"><div class="team-head">⚾ Expos</div><div class="status" id="exposStatus">Alignement non soumis</div></div>
+      <div class="team-card indiens" onclick="showCoach('Indiens')"><div class="team-head">⚾ Indiens</div><div class="status" id="indiensStatus">Alignement non soumis</div></div>
+      <div class="team-card bananes" onclick="showCoach('Bananes')"><div class="team-head">⚾ Bananes</div><div class="status" id="bananesStatus">Alignement non soumis</div></div>
     </div>
 
     <div class="card">
-      <div class="coach-tabs">
+      <div class="coach-tabs six-coach-tabs">
         <button id="tabBrewers" class="active" onclick="showCoach('Brewers')">BREWERS</button>
         <button id="tabYankees" onclick="showCoach('Yankees')">YANKEES</button>
+        <button id="tabSox" onclick="showCoach('Sox')">SOX</button>
+        <button id="tabExpos" onclick="showCoach('Expos')">EXPOS</button>
+        <button id="tabIndiens" onclick="showCoach('Indiens')">INDIENS</button>
+        <button id="tabBananes" onclick="showCoach('Bananes')">BANANES</button>
       </div>
       <div class="section-title" id="coachTitle">Alignement Brewers</div>
       <div class="muted" style="font-size:12px;margin-bottom:7px">Touchez le nom d’un joueur dans l’alignement pour ouvrir la liste des joueurs de cette équipe.</div>
@@ -1380,27 +1531,19 @@ function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show")
 
 function showCoach(teamName){
   if(!teams[teamName])return;
-
-  editorTeam=teamName;
-  coachTeam=teamName;
-
-  $("tabBrewers").classList.toggle("active",teamName==="Brewers");
-  $("tabYankees").classList.toggle("active",teamName==="Yankees");
-
-  selectedSubBenchIndex=null;
-  selectedLineupSlot=null;
-  selectedOrderSlot=null;
-  selectedBenchSlot=null;
-
+  coachTeam=teamName;editorTeam=teamName;
+  ["Brewers","Yankees","Sox","Expos","Indiens","Bananes"].forEach(t=>{
+    const btn=$("tab"+t);if(btn)btn.classList.toggle("active",t===teamName);
+  });
+  selectedSubBenchIndex=null;selectedLineupSlot=null;selectedOrderSlot=null;selectedBenchSlot=null;
   if($("substitutionPanel"))$("substitutionPanel").classList.add("hidden");
-
-  renderLineupEditor();
-  renderBenchEditor();
-
-  if(gameStarted && currentRole==="official"){
-    refreshSubstitutionOptions();
-  }
-
+  const title=$("coachTitle");if(title)title.textContent="Alignement "+teamName;
+  const benchTitle=$("benchTitle");if(benchTitle)benchTitle.textContent="🪑 BANC — "+teamName.toUpperCase();
+  document.querySelectorAll("#captainLeagueStrip .team-card").forEach(card=>card.classList.remove("selected-team"));
+  const idx=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"].indexOf(teamName);
+  const cards=document.querySelectorAll("#captainLeagueStrip .team-card");if(cards[idx])cards[idx].classList.add("selected-team");
+  renderLineupEditor();renderBenchEditor();
+  if(gameStarted&&currentRole==="official")refreshSubstitutionOptions();
   renderPregameStatus();
 }
 
@@ -1721,55 +1864,21 @@ function submitLineup(){
   });
 }
 function renderPregameStatus(){
-  ["Brewers","Yankees"].forEach(t=>{
+  ["Brewers","Yankees","Sox","Expos","Indiens","Bananes"].forEach(t=>{
     const el=$(t.toLowerCase()+"Status");
-    if(el){
-      el.textContent=teams[t].submitted?"✅ Alignement soumis":"⏳ Alignement non soumis";
-      el.className="status "+(teams[t].submitted?"ok":"");
-    }
+    if(el){el.textContent=teams[t].submitted?"✅ Alignement soumis":"⏳ Alignement non soumis";el.className="status "+(teams[t].submitted?"ok":"");}
   });
-
-  const teamName=editorTeam;
-  const submitted=!!teams[teamName]?.submitted;
-
+  const teamName=editorTeam,submitted=!!teams[teamName]?.submitted;
   const note=$("submitStatusNote");
-  if(note){
-    note.textContent=submitted?`✅ ALIGNEMENT ${teamName.toUpperCase()} SOUMIS AVEC SUCCÈS`:"";
-    note.style.display=(currentRole!=="official" && submitted)?"block":"none";
-    note.classList.toggle("hidden",!(currentRole!=="official" && submitted));
-  }
-
-  const btn=$("submitLineupBtn");
-  if(btn && currentRole!=="official"){
-    btn.textContent=submitted?"✓ SOUMIS":"SOUMETTRE";
-  }
-
-  const ready=teams.Brewers.submitted&&teams.Yankees.submitted;
-
-  const readyBlock=$("readyBlock");
-  if(readyBlock)readyBlock.classList.toggle("hidden",!ready);
-
-  const returnBtn=$("returnMatchBtn");
-  if(returnBtn)returnBtn.classList.toggle("hidden",!gameStarted || currentRole!=="official");
-
-  const lockNote=$("lineupLockNote");
-  if(lockNote)lockNote.classList.toggle("hidden",!gameStarted);
-
-  const liveNote=$("officialLiveEditNote");
-  if(liveNote)liveNote.classList.toggle("hidden",!(gameStarted&&currentRole==="official"));
-
-  const startBtn=$("startGameBtn");
-  if(startBtn){
-    startBtn.classList.toggle("hidden",gameStarted);
-    startBtn.disabled=!ready;
-  }
-
-  const waiting=$("scorerWaiting");
-  if(waiting){
-    waiting.textContent=gameStarted
-      ?"Match en cours — alignements verrouillés pour les capitaines."
-      :(ready?"Prêt à commencer.":"En attente des deux alignements…");
-  }
+  if(note){note.textContent=submitted?`✅ ALIGNEMENT ${teamName.toUpperCase()} SOUMIS AVEC SUCCÈS`:"";note.style.display=(currentRole!=="official"&&submitted)?"block":"none";note.classList.toggle("hidden",!(currentRole!=="official"&&submitted));}
+  const btn=$("submitLineupBtn");if(btn&&currentRole!=="official")btn.textContent=submitted?"✓ SOUMIS":"SOUMETTRE";
+  const ready=!!(teams[activeAwayTeam]?.submitted&&teams[activeHomeTeam]?.submitted);
+  const readyBlock=$("readyBlock");if(readyBlock)readyBlock.classList.toggle("hidden",!ready);
+  const returnBtn=$("returnMatchBtn");if(returnBtn)returnBtn.classList.toggle("hidden",!gameStarted||currentRole!=="official");
+  const lockNote=$("lineupLockNote");if(lockNote)lockNote.classList.toggle("hidden",!gameStarted);
+  const liveNote=$("officialLiveEditNote");if(liveNote)liveNote.classList.toggle("hidden",!(gameStarted&&currentRole==="official"));
+  const startBtn=$("startGameBtn");if(startBtn){startBtn.classList.toggle("hidden",gameStarted);startBtn.disabled=!ready;}
+  const waiting=$("scorerWaiting");if(waiting)waiting.textContent=gameStarted?"Match en cours — alignements verrouillés pour les capitaines.":(ready?"Prêt à commencer.":"En attente des deux alignements du match sélectionné…");
 }
 
 
@@ -2303,13 +2412,13 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
   [1,2,3].forEach(i=>$("outBall"+i).classList.toggle("filled",state.outs>=i));
   const occ=Object.values(state.bases).filter(Boolean).length;$("basesText").textContent=occ?occ+" coureur"+(occ>1?"s":"")+" sur les buts":"Buts vides";
   const b=batter(),n=nextBatterObj();$("batterName").textContent=b.name+" • "+b.pos;
-  $("batterName").className="batter-name player-link "+(currentBattingTeam()==="Brewers"?"batter-team-brewers":"batter-team-yankees");
+  $("batterName").className="batter-name player-link "+("team-"+currentBattingTeam().toLowerCase());
   $("batterName").onclick=()=>openPlayerProfile(b,currentBattingTeam());
 
   const homeBatter=$("homeBatterName");
   if(homeBatter){
     homeBatter.textContent=b.name;
-    homeBatter.className="player-link "+(currentBattingTeam()==="Brewers"?"brewers":"yankees");
+    homeBatter.className="player-link "+("team-"+currentBattingTeam().toLowerCase());
     homeBatter.onclick=()=>openPlayerProfile(b,currentBattingTeam());
   }
   $("batterStats").textContent=`${b.h} en ${b.ab} • ${avg(b)} • ${b.rbi} RBI`;
@@ -3731,6 +3840,13 @@ function selectViewerTeam(team){
   renderViewer();
 }
 
+
+function setViewerTeam(teamName){
+  if(!teams[teamName])return;
+  viewerSelectedTeam=teamName;
+  renderViewer();
+}
+
 function renderViewer(){
   const batting=currentBattingTeam();
   const vb=$("viewerTeamBrewers"), vy=$("viewerTeamYankees");
@@ -3754,7 +3870,7 @@ function renderViewer(){
     ? `Match en cours • ${currentBattingTeam()} au bâton`
     : "Match à venir.";
 
-  const team=viewerSelectedTeam || "Brewers";
+  const team=viewerSelectedTeam || activeAwayTeam;
   const t=teams[team];
 
   const title=$("viewerStatsTeamTitle");
@@ -3785,7 +3901,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.12.0.
+// L'accueil par rôles est l'écran initial de v0.13.0.
 
 renderLineupEditor();
 

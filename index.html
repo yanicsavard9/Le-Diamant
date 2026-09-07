@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.1</title>
+<title>Diamond v0.11.2</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -301,7 +301,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.1 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.2 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -661,8 +661,8 @@ body:not(.role-official) #gameLogCard{display:none!important}
     <div id="officialGameSubmissionStatus" style="margin-top:12px"></div>
 
     <div class="sheet-grid" style="margin-top:12px">
-      <button type="button" onclick="openOfficialTeamAlignment('away')">ALIGNEMENT VISITEUR</button>
-      <button type="button" onclick="openOfficialTeamAlignment('home')">ALIGNEMENT LOCAL</button>
+      <button type="button" id="officialAwayAlignmentBtn" onclick="openOfficialTeamAlignment('away')">ALIGNEMENT VISITEUR</button>
+      <button type="button" id="officialHomeAlignmentBtn" onclick="openOfficialTeamAlignment('home')">ALIGNEMENT LOCAL</button>
     </div>
 
     <button type="button" class="primary" id="officialPrepareGameBtn" style="width:100%;margin-top:12px" onclick="prepareSelectedOfficialGame()">
@@ -1834,6 +1834,11 @@ function renderOfficialGameStatus(){
       ${s.homeSubmitted?"✅ Alignement reçu":"⏳ Alignement en attente"}
     </div>`;
 
+  const awayBtn=$("officialAwayAlignmentBtn");
+  const homeBtn=$("officialHomeAlignmentBtn");
+  if(awayBtn)awayBtn.textContent=`ALIGNEMENT ${g.away.toUpperCase()}`;
+  if(homeBtn)homeBtn.textContent=`ALIGNEMENT ${g.home.toUpperCase()}`;
+
   const btn=$("officialPrepareGameBtn");
   if(btn){
     const ready=s.awaySubmitted&&s.homeSubmitted;
@@ -1845,16 +1850,21 @@ function renderOfficialGameStatus(){
 function openOfficialTeamAlignment(side){
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
   if(!g)return;
+
   const teamName=side==="away"?g.away:g.home;
 
   if(!teams[teamName]){
-    toast(`Alignement ${teamName} simulé — équipe non encore configurée dans le moteur`);
+    toast(`L’équipe ${teamName} n’a pas encore de joueurs configurés dans le prototype.`);
     return;
   }
 
   $("officialGameDetailModal").classList.remove("show");
-  showPregame();
+
+  // Ouvre réellement l'espace marqueur / alignements.
+  selectRole("official");
   showCoach(teamName);
+
+  toast(`Alignement ${teamName}`);
 }
 
 function prepareSelectedOfficialGame(){
@@ -1867,17 +1877,32 @@ function prepareSelectedOfficialGame(){
     return;
   }
 
+  if(!teams[g.away] || !teams[g.home]){
+    toast("Ce match n’est pas encore entièrement configuré dans le prototype.");
+    return;
+  }
+
+  // Le moteur actuel est configuré pour Brewers vs Yankees.
   if(g.away!=="Brewers" || g.home!=="Yankees"){
-    toast("Prototype : seul Brewers vs Yankees est entièrement jouable pour l’instant");
+    toast("Prototype : ce match sera jouable lorsque les rosters de ces équipes seront ajoutés.");
     return;
   }
 
   $("officialGameDetailModal").classList.remove("show");
-  showPregame();
-  currentRole="official";
+
+  // Ouvre réellement l'écran de préparation du marqueur.
+  selectRole("official");
+
   teams.Brewers.submitted=true;
   teams.Yankees.submitted=true;
+
+  editorTeam="Brewers";
+  coachTeam="Brewers";
+  renderLineupEditor();
+  renderBenchEditor();
   renderPregameStatus();
+
+  toast("Match prêt à être débuté");
 }
 
 function backToOfficialGames(){
@@ -2749,7 +2774,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.1.
+// L'accueil par rôles est l'écran initial de v0.11.2.
 
 renderLineupEditor();
 

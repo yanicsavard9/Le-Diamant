@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.5</title>
+<title>Diamond v0.11.6</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -305,7 +305,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.5 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.6 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -326,7 +326,43 @@ body:not(.role-official) #gameLogCard{display:none!important}
           <strong>📋 Marqueur / Gestionnaire</strong>
           <small>Approbation, verrouillage, pointage en direct, fin et sauvegarde du match.</small>
         </button>
-<button type="button" class="role-card" onclick="openOfficialGames()">MATCHS DU SOIR</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="officialHub" class="hidden">
+    <div class="role-topbar">
+      <div>
+        <b>📋 Marqueur / Gestionnaire</b>
+        <div class="muted" style="font-size:12px">Choisissez ce que vous voulez consulter ou gérer.</div>
+      </div>
+      <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Espace marqueur</div>
+      <h2>Que voulez-vous faire?</h2>
+
+      <div class="role-grid">
+        <button class="role-card" type="button" onclick="openOfficialGames()">
+          <strong>🌙 Matchs du soir</strong>
+          <small>Recevoir, vérifier et verrouiller les alignements avant chaque match.</small>
+        </button>
+
+        <button class="role-card" type="button" onclick="openLeagueInfo('stats')">
+          <strong>📊 Statistiques</strong>
+          <small>Consulter les statistiques des joueurs et des matchs.</small>
+        </button>
+
+        <button class="role-card" type="button" onclick="openLeagueInfo('standings')">
+          <strong>🏆 Classement</strong>
+          <small>Consulter le classement de la ligue.</small>
+        </button>
+
+        <button class="role-card" type="button" onclick="openLeagueInfo('schedule')">
+          <strong>📅 Horaire</strong>
+          <small>Consulter tous les matchs prévus et les résultats.</small>
+        </button>
       </div>
     </div>
   </section>
@@ -1638,6 +1674,7 @@ function backToPregame(){
     return;
   }
   $("game").classList.add("hidden");
+  if($("officialHub"))$("officialHub").classList.add("hidden");
   $("pregame").classList.remove("hidden");
   if($("officialPregameCard"))$("officialPregameCard").classList.remove("hidden");
   renderLineupEditor();
@@ -2154,9 +2191,6 @@ function startPreparedOfficialGame(){
 
   $("officialPreGameModal").classList.remove("show");
 
-  currentRole="official";
-  selectRole("official");
-
   teams.Brewers.submitted=true;
   teams.Yankees.submitted=true;
 
@@ -2165,11 +2199,10 @@ function startPreparedOfficialGame(){
 
   editorTeam="Brewers";
   coachTeam="Brewers";
-  renderLineupEditor();
-  renderBenchEditor();
-  renderPregameStatus();
 
-  toast(`Match prêt • ${officialPrepInnings} manches`);
+  // Passage à l'espace officiel du match, puis lancement du flux de départ.
+  openOfficialPregameWorkspace();
+  startGame();
 }
 
 function closeOfficialPreGame(){
@@ -2945,7 +2978,9 @@ function selectRole(role){
   document.body.classList.add("role-"+role);
 
   $("roleHome").classList.add("hidden");
+  if($("officialHub"))$("officialHub").classList.add("hidden");
   $("viewerView").classList.add("hidden");
+  if($("officialHub"))$("officialHub").classList.add("hidden");
   $("pregame").classList.add("hidden");
   $("game").classList.add("hidden");
 
@@ -2959,22 +2994,39 @@ function selectRole(role){
     return;
   }
 
+  if(role==="official"){
+    setRoleBadge("MARQUEUR");
+    if($("officialHub"))$("officialHub").classList.remove("hidden");
+    return;
+  }
+
+  // Capitaine / entraîneur
+  $("pregame").classList.remove("hidden");
+  setRoleBadge("CAPITAINE");
+  $("workspaceRoleTitle").textContent="🧢 Capitaine / Entraîneur";
+  $("workspaceRoleSub").textContent="Préparer et soumettre l’alignement de votre équipe.";
+  if($("officialPregameCard"))$("officialPregameCard").classList.add("hidden");
+  if($("returnMatchBtn"))$("returnMatchBtn").classList.add("hidden");
+
+  renderLineupEditor();
+  renderPregameStatus();
+}
+
+function openOfficialPregameWorkspace(){
+  currentRole="official";
+  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.add("role-official");
+
+  $("roleHome").classList.add("hidden");
+  if($("officialHub"))$("officialHub").classList.add("hidden");
+  $("viewerView").classList.add("hidden");
+  $("game").classList.add("hidden");
   $("pregame").classList.remove("hidden");
 
-  if(role==="captain"){
-    setRoleBadge("CAPITAINE");
-    $("workspaceRoleTitle").textContent="🧢 Capitaine / Entraîneur";
-    $("workspaceRoleSub").textContent="Préparer et soumettre l’alignement de votre équipe.";
-    if($("officialPregameCard"))$("officialPregameCard").classList.add("hidden");
-    // Le capitaine n'a jamais accès au diamant interactif ni au pointage.
-    if($("returnMatchBtn"))$("returnMatchBtn").classList.add("hidden");
-  }else{
-    setRoleBadge("MARQUEUR");
-    $("workspaceRoleTitle").textContent="📋 Marqueur / Gestionnaire";
-    $("workspaceRoleSub").textContent="Approuver les alignements et gérer le match.";
-    if($("officialPregameCard"))$("officialPregameCard").classList.remove("hidden");
-    setRegulationInnings(regulationInnings);
-  }
+  setRoleBadge("MARQUEUR");
+  $("workspaceRoleTitle").textContent="📋 Marqueur / Gestionnaire";
+  $("workspaceRoleSub").textContent="Match préparé — vérification finale avant le début.";
+  if($("officialPregameCard"))$("officialPregameCard").classList.remove("hidden");
 
   renderLineupEditor();
   renderPregameStatus();
@@ -3053,7 +3105,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.5.
+// L'accueil par rôles est l'écran initial de v0.11.6.
 
 renderLineupEditor();
 

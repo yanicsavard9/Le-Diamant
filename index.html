@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.19</title>
+<title>Diamond v0.11.20</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.11.19 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.11.20 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.11.19 — corrige la bande noire à droite sur iPhone */
+/* v0.11.20 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.11.19 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.11.20 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.19 — enlève toute ligne sous le lanceur */
+/* v0.11.20 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.19 — correctifs ciblés après vérification du HTML réel */
+/* v0.11.20 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.19 — changements rapides + fermeture Horaire en haut */
+/* v0.11.20 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.19 — formats de match 3/4/5/7/9 manches */
+/* v0.11.20 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -769,11 +769,36 @@ body{background:var(--bg)}
   }
 }
 
+
+/* v0.11.20 */
+#completedGameModal,
+#completedGameTeamModal,
+#officialCompletedGameModal{
+  z-index:1200 !important;
+}
+#leagueInfoModal{
+  z-index:1100;
+}
+@media (max-width:640px){
+  #viewerStatsPanel table,
+  #leagueStatsPanel table{
+    font-size:13px;
+  }
+  #viewerStatsPanel th,
+  #viewerStatsPanel td,
+  #leagueStatsPanel th,
+  #leagueStatsPanel td{
+    padding-left:6px;
+    padding-right:6px;
+    white-space:nowrap;
+  }
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.19 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.20 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -813,7 +838,7 @@ body{background:var(--bg)}
 
       <div class="role-grid">
         <button class="role-card" type="button" onclick="openOfficialGames()">
-          <strong>🌙 Matchs du soir</strong>
+          <strong>📅 Matchs de la journée</strong>
           <small>Recevoir, vérifier et verrouiller les alignements avant chaque match.</small>
         </button>
 
@@ -877,7 +902,7 @@ body{background:var(--bg)}
 
       <div style="overflow:auto">
         <table class="viewer-table">
-          <thead><tr><th>Joueur</th><th>MOY</th><th>H</th><th>HR</th><th>RBI</th><th>R</th></tr></thead>
+          <thead><tr><th>Joueur</th><th>MOY</th><th>AB</th><th>H</th><th>HR</th><th>RBI</th><th>R</th></tr></thead>
           <tbody id="viewerStatsBody"></tbody>
         </table>
       </div>
@@ -1161,7 +1186,7 @@ body{background:var(--bg)}
 
 <div class="modal" id="officialGamesModal">
   <div class="sheet">
-    <h3>⚾ MATCHS DU SOIR</h3>
+    <h3>⚾ MATCHS DE LA JOURNÉE</h3>
     <div class="readonly-note">
       Sélectionnez un match pour voir les alignements reçus et préparer la partie.
     </div>
@@ -1242,7 +1267,7 @@ body{background:var(--bg)}
       PRÉPARER CE MATCH
     </button>
 
-    <button type="button" style="width:100%;margin-top:8px" onclick="backToOfficialGames()">RETOUR AUX MATCHS DU SOIR</button>
+    <button type="button" style="width:100%;margin-top:8px" onclick="backToOfficialGames()">RETOUR AUX MATCHS DE LA JOURNÉE</button>
   </div>
 </div>
 
@@ -2973,6 +2998,8 @@ function renderStandings(){
 }
 
 function openCompletedGame(gameId){
+  // Depuis Horaire, le résumé du match doit apparaître immédiatement au premier plan.
+  if($("leagueInfoModal"))$("leagueInfoModal").classList.remove("show");
   const game=completedGames.find(g=>g.id===gameId);
   if(!game)return;
 
@@ -3928,6 +3955,7 @@ function renderViewer(){
     <tr>
       <td>${p.name}</td>
       <td>${avg(p)}</td>
+      <td>${p.ab||0}</td>
       <td>${p.h||0}</td>
       <td>${p.hr||0}</td>
       <td>${p.rbi||0}</td>
@@ -3937,7 +3965,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.19.
+// L'accueil par rôles est l'écran initial de v0.11.20.
 
 renderLineupEditor();
 

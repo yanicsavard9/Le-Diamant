@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.18</title>
+<title>Diamond v0.11.19</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.11.18 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.11.19 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.11.18 — corrige la bande noire à droite sur iPhone */
+/* v0.11.19 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.11.18 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.11.19 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.18 — enlève toute ligne sous le lanceur */
+/* v0.11.19 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.18 — correctifs ciblés après vérification du HTML réel */
+/* v0.11.19 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.18 — changements rapides + fermeture Horaire en haut */
+/* v0.11.19 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.18 — formats de match 3/4/5/7/9 manches */
+/* v0.11.19 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -773,7 +773,7 @@ body{background:var(--bg)}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.18 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.19 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2034,11 +2034,19 @@ function refreshSubstitutionOptions(){
   const confirmBtn=$("confirmSubBtn");
   if(!outSel || !choices)return;
 
+  // Important: conserver le joueur à remplacer lorsque la liste se rafraîchit.
+  const previousOutValue=outSel.value;
+
   const bench=teamBench(teamName);
 
   outSel.innerHTML=t.lineup.map((p,i)=>`<option value="${i}">${p.name} — ${p.pos}</option>`).join("");
 
+  if(previousOutValue!=="" && t.lineup[Number(previousOutValue)]){
+    outSel.value=previousOutValue;
+  }
+
   const available=bench.map((p,i)=>({p,i})).filter(x=>x.p && !x.p.placeholder);
+
   if(selectedSubBenchIndex!==null && !available.some(x=>x.i===selectedSubBenchIndex)){
     selectedSubBenchIndex=null;
   }
@@ -2054,12 +2062,17 @@ function refreshSubstitutionOptions(){
       </button>`).join("")
     : `<div class="muted">Aucun joueur au banc pour ${teamName}.</div>`;
 
-  if(confirmBtn)confirmBtn.disabled=available.length===0 || selectedSubBenchIndex===null;
+  if(confirmBtn){
+    confirmBtn.disabled=available.length===0 || selectedSubBenchIndex===null;
+  }
 }
 
 function selectSubBenchPlayer(index){
-  const t=teams[coachTeam];
+  const teamName=editorTeam;
+  const t=teams[teamName];
+
   if(!t || !t.bench[index] || t.bench[index].placeholder)return;
+
   selectedSubBenchIndex=index;
   refreshSubstitutionOptions();
   toast(`${t.bench[index].name} sélectionné`);
@@ -2099,6 +2112,7 @@ function confirmSubstitution(){
     wasUsedInGame:true
   };
 
+  // Le remplaçant prend exactement la case du frappeur remplacé.
   t.lineup[outIdx]=incomingToLineup;
   t.bench[inIdx]=outgoingToBench;
 
@@ -2107,6 +2121,12 @@ function confirmSubstitution(){
 
   renderLineupEditor();
   renderPregameStatus();
+
+  // Retour immédiat au match pour que le nom au bâton soit mis à jour.
+  $("pregame").classList.add("hidden");
+  $("game").classList.remove("hidden");
+  renderGame();
+
   toast(`${incomingToLineup.name} remplace ${outgoing.name}`);
 }
 
@@ -2776,7 +2796,7 @@ function renderOfficialPreGame(){
 }
 
 function setOfficialPrepInnings(n){
-  if(![5,7,9].includes(n))return;
+  if(![3,4,5,7,9].includes(n))return;
   officialPrepInnings=n;
   renderOfficialPreGame();
 }
@@ -3665,13 +3685,21 @@ function closeLeagueInfo(){ $("leagueInfoModal").classList.remove("show"); }
 
 
 function setRegulationInnings(n){
-  if(gameStarted){toast("Le nombre de manches est verrouillé pendant le match");return}
-  if(![5,7,9].includes(n))return;
+  if(gameStarted){
+    toast("Le nombre de manches est verrouillé pendant le match");
+    return;
+  }
+  if(![3,4,5,7,9].includes(n))return;
+
   regulationInnings=n;
   displayedInnings=n;
-  [5,7,9].forEach(v=>{
+
+  [3,4,5,7,9].forEach(v=>{
     const btn=$("innings"+v+"Btn");
-    if(btn)btn.classList.toggle("active",v===n);
+    if(btn){
+      btn.classList.toggle("active",v===n);
+      btn.disabled=false;
+    }
   });
 }
 
@@ -3909,7 +3937,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.18.
+// L'accueil par rôles est l'écran initial de v0.11.19.
 
 renderLineupEditor();
 

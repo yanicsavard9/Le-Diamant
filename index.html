@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.13.0</title>
+<title>Diamond v0.13.1</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.13.0 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.13.1 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.13.0 — corrige la bande noire à droite sur iPhone */
+/* v0.13.1 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.13.0 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.13.1 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.0 — enlève toute ligne sous le lanceur */
+/* v0.13.1 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.0 — correctifs ciblés après vérification du HTML réel */
+/* v0.13.1 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.0 — changements rapides + fermeture Horaire en haut */
+/* v0.13.1 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.0 — formats de match 3/4/5/7/9 manches */
+/* v0.13.1 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.0 */
+/* v0.13.1 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -936,10 +936,17 @@ button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingle
 }
 </style>
 
+
+<style id="diamond-v0131-touchfix">
+#leagueTeamsStrip,#leagueTeamsStrip *{pointer-events:none!important}
+.role-grid{position:relative!important;z-index:20!important}
+.role-card{pointer-events:auto!important;position:relative!important;z-index:21!important;touch-action:manipulation!important}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.0 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.1 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -3901,7 +3908,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.13.0.
+// L'accueil par rôles est l'écran initial de v0.13.1.
 
 renderLineupEditor();
 

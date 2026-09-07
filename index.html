@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.6</title>
+<title>Diamond v0.11.7</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -305,7 +305,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.6 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.7 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -700,7 +700,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
     <h3 id="officialAlignmentReviewTitle">ALIGNEMENT</h3>
     <div id="officialAlignmentReviewMeta" class="readonly-note"></div>
 
-    <div class="section-title" style="margin-top:12px">ALIGNEMENT SOUMIS</div>
+    <div class="section-title" style="margin-top:12px">ALIGNEMENT SOUMIS — LECTURE SEULE</div>
     <div id="officialAlignmentReviewList"></div>
 
     <button type="button" class="primary" id="officialApproveSingleLineupBtn"
@@ -2049,16 +2049,49 @@ function renderOfficialSingleLineupReview(){
   const locked=side==="away"?s.awayLocked:s.homeLocked;
   const t=teams[teamName];
 
-  const active=(t?.lineup||[]).filter(p=>p.active!==false);
+  if(!t)return;
+
+  const lineup=t.lineup||[];
+  const bench=t.bench||[];
 
   const list=$("officialAlignmentReviewList");
   if(list){
-    list.innerHTML=active.map((p,i)=>`
-      <div class="readonly-note" style="margin-bottom:7px;display:grid;grid-template-columns:34px 1fr 58px;gap:8px;align-items:center">
-        <strong>${i+1}</strong>
-        <span>${p.name}</span>
-        <strong style="text-align:right">${p.pos}</strong>
-      </div>`).join("") || '<div class="readonly-note">Aucun joueur actif.</div>';
+    const lineupHtml=lineup.map((p,i)=>`
+      <div class="lineup-row ${locked?"order-selected":""}">
+        <div class="order">
+          <button type="button" class="order-button" disabled>${i+1}</button>
+        </div>
+        <div>
+          <button type="button" class="lineup-player-btn" disabled>${p.name}</button>
+          <label class="muted" style="font-size:12px">
+            <input type="checkbox" ${p.active?"checked":""} disabled> Actif
+          </label>
+        </div>
+        <select class="pos-select" disabled>
+          ${POSITIONS.map(pos=>`<option ${pos===p.pos?"selected":""}>${pos}</option>`).join("")}
+        </select>
+      </div>`).join("");
+
+    const benchHtml=bench.length
+      ? bench.map((p,i)=>`
+          <div class="readonly-note" style="margin-bottom:7px">
+            <strong>${p.name}</strong>
+            <span class="muted"> • ${p.pos||"—"}</span>
+          </div>`).join("")
+      : `<div class="readonly-note">Aucun joueur au banc.</div>`;
+
+    list.innerHTML=`
+      <div class="readonly-note" style="margin-bottom:10px">
+        <strong>${teamName}</strong><br>
+        ${locked?"🔒 Alignement déjà verrouillé":"✅ Alignement soumis — prêt à être validé"}
+      </div>
+
+      <div class="section-title">ORDRE DES FRAPPEURS</div>
+      ${lineupHtml}
+
+      <div class="section-title" style="margin-top:14px">BANC — ${teamName.toUpperCase()}</div>
+      ${benchHtml}
+    `;
   }
 
   const btn=$("officialApproveSingleLineupBtn");
@@ -3105,7 +3138,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.6.
+// L'accueil par rôles est l'écran initial de v0.11.7.
 
 renderLineupEditor();
 

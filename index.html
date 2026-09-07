@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.0</title>
+<title>Diamond v0.11.1</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -301,7 +301,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.0 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.1 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2465,15 +2465,6 @@ let selectedCompletedGameId=null;
 
 let officialSelectedGameId=null;
 
-const officialGameSubmissions={};
-leagueSchedule.forEach(g=>{
-  officialGameSubmissions[g.date+"|"+g.time+"|"+g.away+"|"+g.home]={
-    awaySubmitted:false,
-    homeSubmitted:false
-  };
-});
-
-
 const leagueSchedule=[
   {date:"2026-09-07",time:"18:30",away:"Brewers",home:"Yankees"},
   {date:"2026-09-07",time:"19:45",away:"Sox",home:"Expos"},
@@ -2499,6 +2490,15 @@ const leagueSchedule=[
   {date:"2026-09-17",time:"19:45",away:"Expos",home:"Sox"},
   {date:"2026-09-17",time:"21:00",away:"Indiens",home:"Yankees"}
 ];
+
+const officialGameSubmissions={};
+leagueSchedule.forEach(g=>{
+  officialGameSubmissions[g.date+"|"+g.time+"|"+g.away+"|"+g.home]={
+    awaySubmitted:false,
+    homeSubmitted:false
+  };
+});
+
 
 
 
@@ -2749,7 +2749,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.0.
+// L'accueil par rôles est l'écran initial de v0.11.1.
 
 renderLineupEditor();
 
@@ -2795,7 +2795,7 @@ document.querySelectorAll(".action-btn,.kbtn").forEach(btn=>{
 
 <div class="modal" id="leagueInfoModal">
   <div class="sheet">
-    <h3 id="leagueInfoTitle">Horaire</h3><div id="viewerSchedule" style="margin-top:10px"></div>
+    <h3 id="leagueInfoTitle">Horaire</h3>
     <div id="leagueSchedulePanel" class="league-tab-panel active">
       <div class="readonly-note"><b>Horaire</b><br>Les matchs à venir apparaîtront ici lorsque le calendrier de la ligue sera connecté.</div>
     </div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.13.3</title>
+<title>Diamond v0.13.4</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.13.3 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.13.4 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.13.3 — corrige la bande noire à droite sur iPhone */
+/* v0.13.4 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.13.3 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.13.4 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.3 — enlève toute ligne sous le lanceur */
+/* v0.13.4 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.3 — correctifs ciblés après vérification du HTML réel */
+/* v0.13.4 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.3 — changements rapides + fermeture Horaire en haut */
+/* v0.13.4 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.3 — formats de match 3/4/5/7/9 manches */
+/* v0.13.4 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.3 */
+/* v0.13.4 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -943,32 +943,22 @@ button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingle
 .role-card{pointer-events:auto!important;position:relative!important;z-index:21!important;touch-action:manipulation!important}
 </style>
 
-
-<style id="diamond-v0132-role-touch">
-#roleHome{position:relative!important;isolation:isolate!important}
-#roleHome .card{position:relative!important;z-index:1!important}
-#roleHome .role-grid{position:relative!important;z-index:9998!important}
+<style id="diamond-v0134-role-touch">
 #roleHome .role-card{
   position:relative!important;
-  z-index:9999!important;
+  z-index:2!important;
   pointer-events:auto!important;
-  touch-action:manipulation!important;
+  touch-action:pan-y!important;
   -webkit-tap-highlight-color:rgba(255,255,255,.08)!important;
 }
 #roleHome .role-card *{pointer-events:none!important}
 #leagueTeamsStrip,#leagueTeamsStrip *{pointer-events:none!important}
-#roleHome::before,#roleHome::after,
-#roleHome .card::before,#roleHome .card::after,
-#roleHome .role-grid::before,#roleHome .role-grid::after,
-#roleHome .role-card::before,#roleHome .role-card::after{
-  pointer-events:none!important;
-}
 </style>
 
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.3 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.4 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2429,45 +2419,66 @@ function runnerRef(p,team){return {id:p.id,name:p.name,team}}
 
 function renderGame(){
   const batting=currentBattingTeam();
-  const sb=$("scoreTeamBrewers"), sy=$("scoreTeamYankees");
-  if(sb){sb.classList.toggle("team-at-bat",batting==="Brewers");sb.classList.toggle("team-defense",batting!=="Brewers");}
-  if(sy){sy.classList.toggle("team-at-bat",batting==="Yankees");sy.classList.toggle("team-defense",batting!=="Yankees");}
-if(!$("viewerView").classList.contains("hidden"))renderViewer();
-  $("awayRuns").textContent=state.awayRuns;$("homeRuns").textContent=state.homeRuns;$("half").textContent=state.top?"Haut":"Bas";$("inning").textContent=ordinal(state.inning);
+  const awayBox=$("awayTeam"),homeBox=$("homeTeam");
+
+  if(awayBox){
+    const n=awayBox.querySelector(".name");if(n)n.textContent=activeAwayTeam.toUpperCase();
+    awayBox.classList.toggle("active",state.top);
+  }
+  if(homeBox){
+    const n=homeBox.querySelector(".name");if(n)n.textContent=activeHomeTeam.toUpperCase();
+    homeBox.classList.toggle("active",!state.top);
+  }
+
+  if(!$("viewerView").classList.contains("hidden"))renderViewer();
+  $("awayRuns").textContent=state.awayRuns;
+  $("homeRuns").textContent=state.homeRuns;
+  $("half").textContent=state.top?"Haut":"Bas";
+  $("inning").textContent=ordinal(state.inning);
   renderLineScores();
-  $("awayTeam").classList.toggle("active",state.top);$("homeTeam").classList.toggle("active",!state.top);
+
   $("atBatTeam").textContent="AU BÂTON : "+currentBattingTeam().toUpperCase();
   $("outsText").textContent=state.outs+" retrait"+(state.outs>1?"s":"");
   [1,2,3].forEach(i=>$("outBall"+i).classList.toggle("filled",state.outs>=i));
-  const occ=Object.values(state.bases).filter(Boolean).length;$("basesText").textContent=occ?occ+" coureur"+(occ>1?"s":"")+" sur les buts":"Buts vides";
-  const b=batter(),n=nextBatterObj();$("batterName").textContent=b.name+" • "+b.pos;
-  $("batterName").className="batter-name player-link "+("team-"+currentBattingTeam().toLowerCase());
+
+  const occ=Object.values(state.bases).filter(Boolean).length;
+  $("basesText").textContent=occ?occ+" coureur"+(occ>1?"s":"")+" sur les buts":"Buts vides";
+
+  const b=batter(),n=nextBatterObj();
+  $("batterName").textContent=b.name+" • "+b.pos;
+  $("batterName").className="batter-name player-link team-"+currentBattingTeam().toLowerCase();
   $("batterName").onclick=()=>openPlayerProfile(b,currentBattingTeam());
 
   const homeBatter=$("homeBatterName");
   if(homeBatter){
     homeBatter.textContent=b.name;
-    homeBatter.className="player-link "+("team-"+currentBattingTeam().toLowerCase());
+    homeBatter.className="player-link team-"+currentBattingTeam().toLowerCase();
     homeBatter.onclick=()=>openPlayerProfile(b,currentBattingTeam());
   }
+
   $("batterStats").textContent=`${b.h} en ${b.ab} • ${avg(b)} • ${b.rbi} RBI`;
-  const p=currentPitcher(),ft=currentFieldingTeam();$("pitcherName").textContent="⚾ "+(p?p.name:"Aucun lanceur")+" • "+ft;$("pitcherName").className="player-link team-"+ft.toLowerCase();
-  $("pitcherName").onclick=()=>openPitcherProfile(p,ft);$("pendingNote").classList.toggle("show",state.pending.length>0);
+  const p=currentPitcher(),ft=currentFieldingTeam();
+  $("pitcherName").textContent="⚾ "+(p?p.name:"Aucun lanceur")+" • "+ft;
+  $("pitcherName").className="player-link team-"+ft.toLowerCase();
+  $("pitcherName").onclick=()=>openPitcherProfile(p,ft);
+  $("pendingNote").classList.toggle("show",state.pending.length>0);
+
   [1,2,3].forEach(base=>{
     const el=$("b"+base),r=state.bases[base];
     if(r){
       el.className="base team-"+r.team.toLowerCase();
       el.innerHTML=`<button class="player-link" aria-label="Déplacer ${r.name}">${r.name.split(" ")[0]}</button>`;
-      el.querySelector("button").onclick=e=>{
-        e.stopPropagation();
-        openRunnerControls(base);
-      };
+      el.querySelector("button").onclick=e=>{e.stopPropagation();openRunnerControls(base);};
     }else{
       el.className="base empty";
       el.textContent=base===1?"1er":base+"e";
     }
   });
-  $("gameLog").innerHTML=state.log.length?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join(""):"<div>Aucune action enregistrée.</div>";
+
+  $("gameLog").innerHTML=state.log.length
+    ?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join("")
+    :"<div>Aucune action enregistrée.</div>";
+
   keepLiveGameLocked();
 
   if(state.gameOver){
@@ -2475,8 +2486,6 @@ if(!$("viewerView").classList.contains("hidden"))renderViewer();
     if(banner)banner.textContent=`MATCH TERMINÉ • ${state.winner.toUpperCase()} GAGNENT`;
   }
 
-  // Les boutons restent physiquement cliquables.
-  // Les fonctions de pointage décident elles-mêmes si une action est permise.
   document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>{
     btn.disabled=false;
     btn.style.pointerEvents="auto";
@@ -3020,14 +3029,33 @@ function renderStandings(){
     $("leagueStandingsPanel")
   ].filter(Boolean);
 
-  const rows=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"].map(team=>{
-    const s=standings[team];
+  const ordered=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"]
+    .map(team=>{
+      const s=standings[team];
+      return {team,...s,PTS:(s.W||0)*2,DIFF:(s.RF||0)-(s.RA||0)};
+    })
+    .sort((a,b)=>
+      b.PTS-a.PTS ||
+      b.W-a.W ||
+      b.DIFF-a.DIFF ||
+      b.RF-a.RF ||
+      a.team.localeCompare(b.team,"fr")
+    );
+
+  const rows=ordered.map((s,index)=>{
     const pct=(s.W+s.L)?(s.W/(s.W+s.L)).toFixed(3).replace(/^0/,""):"—";
-    return `<tr><td>${team}</td><td>${s.W}</td><td>${s.L}</td><td>${pct}</td></tr>`;
+    return `<tr>
+      <td><strong>${index+1}</strong></td>
+      <td>${s.team}</td>
+      <td><strong>${s.PTS}</strong></td>
+      <td>${s.W}</td>
+      <td>${s.L}</td>
+      <td>${pct}</td>
+    </tr>`;
   }).join("");
 
   const html=`<table class="viewer-table">
-    <thead><tr><th>Équipe</th><th>V</th><th>D</th><th>%</th></tr></thead>
+    <thead><tr><th>#</th><th>Équipe</th><th>PTS</th><th>V</th><th>D</th><th>%</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 
@@ -3608,7 +3636,7 @@ function confirmReset(){
 
 
 let currentRole=null;
-let viewerSelectedTeam="Brewers";
+let viewerSelectedTeam=null;
 let pendingGameOver=null;
 let completedGames=[];
 let standings={};["Brewers","Yankees","Sox","Expos","Indiens","Bananes"].forEach(n=>standings[n]={W:0,L:0,RF:0,RA:0});
@@ -3797,7 +3825,6 @@ function selectRole(role){
   $("roleHome").classList.add("hidden");
   if($("officialHub"))$("officialHub").classList.add("hidden");
   $("viewerView").classList.add("hidden");
-  if($("officialHub"))$("officialHub").classList.add("hidden");
   $("pregame").classList.add("hidden");
   $("game").classList.add("hidden");
 
@@ -3805,7 +3832,7 @@ function selectRole(role){
 
   if(role==="viewer"){
     setRoleBadge("JOUEUR");
-    if(typeof viewerSelectedTeam!=="undefined")viewerSelectedTeam="Brewers";
+    prepareViewerTarget();
     renderViewer();
     $("viewerView").classList.remove("hidden");
     return;
@@ -3817,7 +3844,6 @@ function selectRole(role){
     return;
   }
 
-  // Capitaine / entraîneur
   $("pregame").classList.remove("hidden");
   setRoleBadge("CAPITAINE");
   $("workspaceRoleTitle").textContent="🧢 Capitaine / Entraîneur";
@@ -3870,6 +3896,38 @@ function selectViewerTeam(team){
 }
 
 
+
+function prepareViewerTarget(){
+  if(gameStarted && !state.gameOver){
+    viewerSelectedTeam=activeAwayTeam;
+    return {mode:"live",game:null};
+  }
+
+  const nextGame=leagueSchedule.find(g=>{
+    const key=scheduleGameKey(g);
+    return !completedGames.some(c=>c.scheduleKey===key);
+  });
+
+  if(nextGame){
+    activeAwayTeam=nextGame.away;
+    activeHomeTeam=nextGame.home;
+    activeScheduleGameKey=scheduleGameKey(nextGame);
+    viewerSelectedTeam=activeAwayTeam;
+    return {mode:"upcoming",game:nextGame};
+  }
+
+  const latest=completedGames[0]||null;
+  if(latest){
+    activeAwayTeam=latest.awayTeam;
+    activeHomeTeam=latest.homeTeam;
+    viewerSelectedTeam=activeAwayTeam;
+    return {mode:"final",game:latest};
+  }
+
+  viewerSelectedTeam=activeAwayTeam;
+  return {mode:"upcoming",game:null};
+}
+
 function setViewerTeam(teamName){
   if(!teams[teamName])return;
   viewerSelectedTeam=teamName;
@@ -3877,60 +3935,103 @@ function setViewerTeam(teamName){
 }
 
 function renderViewer(){
-  const batting=currentBattingTeam();
-  const vb=$("viewerTeamBrewers"), vy=$("viewerTeamYankees");
-  if(vb){vb.classList.toggle("team-at-bat",batting==="Brewers");vb.classList.toggle("team-defense",batting!=="Brewers");}
-  if(vy){vy.classList.toggle("team-at-bat",batting==="Yankees");vy.classList.toggle("team-defense",batting!=="Yankees");}
-
   const st=state;
-
-  // Le rôle Joueur/Spectateur est strictement en lecture seule.
-  // On masque toujours les interfaces d'édition et de pointage.
   $("pregame").classList.add("hidden");
   $("game").classList.add("hidden");
 
-  $("viewerAwayRuns").textContent=st.awayRuns;
-  $("viewerHomeRuns").textContent=st.homeRuns;
-  $("viewerHalf").textContent=st.top?"Haut":"Bas";
-  $("viewerInning").textContent=ordinal(st.inning);
-  $("viewerOuts").textContent=st.outs+" retrait"+(st.outs>1?"s":"");
-  renderLineScores();
-  $("viewerStatus").textContent=gameStarted
-    ? `Match en cours • ${currentBattingTeam()} au bâton`
-    : "Match à venir.";
+  let mode="upcoming", target=null;
+  if(gameStarted && !state.gameOver){
+    mode="live";
+  }else{
+    const linked=completedGames.find(c=>c.scheduleKey===activeScheduleGameKey);
+    const scheduled=leagueSchedule.find(g=>scheduleGameKey(g)===activeScheduleGameKey);
+    if(linked && !scheduled) { mode="final"; target=linked; }
+    else if(scheduled && completedGames.some(c=>c.scheduleKey===activeScheduleGameKey)){
+      mode="final";target=completedGames.find(c=>c.scheduleKey===activeScheduleGameKey);
+    }else if(scheduled){
+      mode="upcoming";target=scheduled;
+    }else if(completedGames[0]){
+      mode="final";target=completedGames[0];
+    }
+  }
 
-  const team=viewerSelectedTeam || activeAwayTeam;
-  const t=teams[team];
+  const awayCard=$("viewerTeamBrewers"),homeCard=$("viewerTeamYankees");
+  if(awayCard){
+    const label=awayCard.querySelector(".team-copy b");if(label)label.textContent=activeAwayTeam.toUpperCase();
+  }
+  if(homeCard){
+    const label=homeCard.querySelector(".team-copy b");if(label)label.textContent=activeHomeTeam.toUpperCase();
+  }
+
+  const batting=mode==="live"?currentBattingTeam():null;
+  if(awayCard){
+    awayCard.classList.toggle("team-at-bat",batting===activeAwayTeam);
+    awayCard.classList.toggle("team-defense",!!batting&&batting!==activeAwayTeam);
+  }
+  if(homeCard){
+    homeCard.classList.toggle("team-at-bat",batting===activeHomeTeam);
+    homeCard.classList.toggle("team-defense",!!batting&&batting!==activeHomeTeam);
+  }
+
+  let awayRuns=0,homeRuns=0;
+  if(mode==="live"){awayRuns=st.awayRuns;homeRuns=st.homeRuns;}
+  if(mode==="final"&&target){awayRuns=target.awayRuns;homeRuns=target.homeRuns;}
+
+  $("viewerAwayRuns").textContent=awayRuns;
+  $("viewerHomeRuns").textContent=homeRuns;
+  $("viewerHalf").textContent=mode==="live"?(st.top?"Haut":"Bas"):(mode==="final"?"FINAL":"À venir");
+  $("viewerInning").textContent=mode==="live"?ordinal(st.inning):"";
+  $("viewerOuts").textContent=mode==="live"?(st.outs+" retrait"+(st.outs>1?"s":"")):"";
+
+  if(mode==="live"){
+    renderLineScores();
+    $("viewerStatus").textContent=`Match en cours • ${currentBattingTeam()} au bâton`;
+  }else if(mode==="final"&&target){
+    $("viewerStatus").textContent=`Match terminé • ${target.awayTeam} ${target.awayRuns} – ${target.homeTeam} ${target.homeRuns}`;
+    const ls=$("viewerLineScore");
+    if(ls){
+      const maxInning=Math.max(
+        target.regulationInnings||0,
+        ...Object.keys(target.inningRuns?.[target.awayTeam]||{}).map(Number),
+        ...Object.keys(target.inningRuns?.[target.homeTeam]||{}).map(Number)
+      );
+      const headers=Array.from({length:maxInning},(_,i)=>`<th>${i+1}</th>`).join("");
+      const row=(team,total)=>`<tr><td>${team}</td>${Array.from({length:maxInning},(_,i)=>{
+        const v=target.inningRuns?.[team]?.[i+1];
+        return `<td>${v==null?"":v}</td>`;
+      }).join("")}<td><strong>${total}</strong></td></tr>`;
+      ls.innerHTML=`<thead><tr><th>Équipe</th>${headers}<th>R</th></tr></thead>
+        <tbody>${row(target.awayTeam,target.awayRuns)}${row(target.homeTeam,target.homeRuns)}</tbody>`;
+    }
+  }else{
+    $("viewerStatus").textContent=`Prochain match • ${activeAwayTeam} vs ${activeHomeTeam}`;
+    const ls=$("viewerLineScore");if(ls)ls.innerHTML="";
+  }
+
+  const team=(viewerSelectedTeam&&teams[viewerSelectedTeam])?viewerSelectedTeam:activeAwayTeam;
+  viewerSelectedTeam=team;
+  const teamData=teams[team];
 
   const title=$("viewerStatsTeamTitle");
   if(title)title.textContent=team.toUpperCase();
 
   const logoHost=$("viewerStatsTeamLogo");
-  if(logoHost){
-    logoHost.innerHTML = team==="Brewers"
-      ? `<div style="font-size:30px">⚾</div>`
-      : `<div style="font-size:30px">⚾</div>`;
-  }
+  if(logoHost)logoHost.innerHTML=`<div style="font-size:30px">⚾</div>`;
 
-  const b=$("viewerBrewersTab"), y=$("viewerYankeesTab");
-  if(b)b.classList.toggle("active",team==="Brewers");
-  if(y)y.classList.toggle("active",team==="Yankees");
+  const b=$("viewerBrewersTab"),y=$("viewerYankeesTab");
+  if(b){b.textContent=activeAwayTeam.toUpperCase();b.onclick=()=>setViewerTeam(activeAwayTeam);b.classList.toggle("active",team===activeAwayTeam);}
+  if(y){y.textContent=activeHomeTeam.toUpperCase();y.onclick=()=>setViewerTeam(activeHomeTeam);y.classList.toggle("active",team===activeHomeTeam);}
 
-  const rows=t.lineup.map(p=>`
+  const rows=teamData.lineup.map(p=>`
     <tr>
-      <td>${p.name}</td>
-      <td>${avg(p)}</td>
-      <td>${p.ab||0}</td>
-      <td>${p.h||0}</td>
-      <td>${p.hr||0}</td>
-      <td>${p.rbi||0}</td>
-      <td>${p.r||0}</td>
+      <td>${p.name}</td><td>${avg(p)}</td><td>${p.ab||0}</td><td>${p.h||0}</td>
+      <td>${p.hr||0}</td><td>${p.rbi||0}</td><td>${p.r||0}</td>
     </tr>`);
 
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.13.3.
+// L'accueil par rôles est l'écran initial de v0.13.4.
 
 renderLineupEditor();
 
@@ -3993,62 +4094,5 @@ document.querySelectorAll(".action-btn,.kbtn").forEach(btn=>{
     <button type="button" style="width:100%;margin-top:12px" onclick="closeLeagueInfo()">FERMER</button>
   </div>
 </div>
-
-<script id="diamond-v0132-role-touch-js">
-(function(){
-  let lastRoleTouch=0;
-
-  function homeIsVisible(){
-    const home=document.getElementById("roleHome");
-    return home && !home.classList.contains("hidden");
-  }
-
-  function roleAtPoint(x,y){
-    const cards=[...document.querySelectorAll("#roleHome .role-card[data-role]")];
-    for(const card of cards){
-      const r=card.getBoundingClientRect();
-      if(x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) return card.dataset.role;
-    }
-    return null;
-  }
-
-  function activateRoleFromPoint(x,y){
-    if(!homeIsVisible()) return false;
-    const role=roleAtPoint(x,y);
-    if(!role || typeof window.selectRole!=="function") return false;
-    const now=Date.now();
-    if(now-lastRoleTouch<450) return true;
-    lastRoleTouch=now;
-    window.selectRole(role);
-    return true;
-  }
-
-  document.addEventListener("touchend",function(e){
-    if(!e.changedTouches || !e.changedTouches.length) return;
-    const t=e.changedTouches[0];
-    if(activateRoleFromPoint(t.clientX,t.clientY)){
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  },{capture:true,passive:false});
-
-  document.addEventListener("pointerup",function(e){
-    if(e.pointerType==="touch") return;
-    if(activateRoleFromPoint(e.clientX,e.clientY)){
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  },true);
-
-  document.addEventListener("DOMContentLoaded",function(){
-    document.querySelectorAll("#roleHome .role-card[data-role]").forEach(function(card){
-      card.addEventListener("click",function(){
-        if(typeof window.selectRole==="function") window.selectRole(card.dataset.role);
-      });
-    });
-  });
-})();
-</script>
-
 </body>
 </html>

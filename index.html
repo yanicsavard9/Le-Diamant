@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.20</title>
+<title>Diamond v0.12.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.11.20 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.12.0 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.11.20 — corrige la bande noire à droite sur iPhone */
+/* v0.12.0 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.11.20 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.12.0 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.20 — enlève toute ligne sous le lanceur */
+/* v0.12.0 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.20 — correctifs ciblés après vérification du HTML réel */
+/* v0.12.0 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.20 — changements rapides + fermeture Horaire en haut */
+/* v0.12.0 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.20 — formats de match 3/4/5/7/9 manches */
+/* v0.12.0 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.20 */
+/* v0.12.0 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -798,7 +798,7 @@ body{background:var(--bg)}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.20 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.12.0 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1308,14 +1308,36 @@ const originalTeams={
     {name:"Pull Glu",pos:"SS"},{name:"Jack Doug",pos:"Piton"},{name:"Rick Paul",pos:"LF"},
     {name:"Éric Cho",pos:"CF"},{name:"Marc Jule",pos:"CF"},{name:"Simon Tray",pos:"RF"},
     {name:"Peter Pan",pos:"L"},{name:"Donnie",pos:"C"}
+  ],
+  Sox:[
+    {name:"Alex Roy",pos:"SS"},{name:"Tommy Bouchard",pos:"CF"},{name:"Nico Fortin",pos:"2B"},{name:"Sam Gagnon",pos:"1B"},
+    {name:"Maxime Côté",pos:"3B"},{name:"Louis Tremblay",pos:"LF"},{name:"Félix Morin",pos:"RF"},{name:"Jérémy Lavoie",pos:"C"},
+    {name:"Olivier Simard",pos:"DH"},{name:"Mathieu Girard",pos:"L"},{name:"Zach Pelletier",pos:"Piton"}
+  ],
+  Expos:[
+    {name:"Émile Bergeron",pos:"CF"},{name:"Antoine Gauthier",pos:"SS"},{name:"Charles Beaulieu",pos:"1B"},{name:"Hugo Lapointe",pos:"3B"},
+    {name:"Raphaël Nadeau",pos:"RF"},{name:"William Caron",pos:"2B"},{name:"Loïc Harvey",pos:"LF"},{name:"Jacob Perron",pos:"C"},
+    {name:"Nathan Cloutier",pos:"DH"},{name:"Gabriel Ouellet",pos:"L"},{name:"Thomas Dufour",pos:"Piton"}
+  ],
+  Indiens:[
+    {name:"Xavier Leblanc",pos:"2B"},{name:"Samuel Hébert",pos:"CF"},{name:"Philippe Martel",pos:"SS"},{name:"Vincent Parent",pos:"1B"},
+    {name:"Alexis Grenier",pos:"3B"},{name:"Mikaël Brassard",pos:"RF"},{name:"Justin Boivin",pos:"LF"},{name:"Tristan Gagné",pos:"C"},
+    {name:"Anthony Lessard",pos:"DH"},{name:"David Renaud",pos:"L"},{name:"Kevin Savard",pos:"Piton"}
+  ],
+  Bananes:[
+    {name:"Léo Deschênes",pos:"SS"},{name:"Eliot Villeneuve",pos:"CF"},{name:"Milan Gosselin",pos:"2B"},{name:"Noah Blackburn",pos:"1B"},
+    {name:"Malik Thériault",pos:"3B"},{name:"Arthur Lemieux",pos:"LF"},{name:"Logan Bélanger",pos:"RF"},{name:"Édouard Vachon",pos:"C"},
+    {name:"Adam Turcotte",pos:"DH"},{name:"Benjamin Larouche",pos:"L"},{name:"Félix Dallaire",pos:"Piton"}
   ]
 };
 function freshPlayer(p,i,team){return {id:team+"_"+i,name:p.name,pos:p.pos,active:true,ab:0,h:0,hr:0,rbi:0,r:0,bv:0,bb:0,hbp:0,k:0}}
-let teams={
-  Brewers:{submitted:false,lineup:originalTeams.Brewers.map((p,i)=>freshPlayer(p,i,"B")),pitcherStats:{outs:0,h:0,k:0,bb:0,er:0}},
-  Yankees:{submitted:false,lineup:originalTeams.Yankees.map((p,i)=>freshPlayer(p,i,"Y")),pitcherStats:{outs:0,h:0,k:0,bb:0,er:0}}
-};
+const TEAM_CODES={Brewers:"B",Yankees:"Y",Sox:"S",Expos:"E",Indiens:"I",Bananes:"N"};
+let teams={};
+Object.keys(originalTeams).forEach(teamName=>{
+  teams[teamName]={submitted:false,lineup:originalTeams[teamName].map((p,i)=>freshPlayer(p,i,TEAM_CODES[teamName])),pitcherStats:{outs:0,h:0,k:0,bb:0,er:0}};
+});
 let coachTeam="Brewers"; let editorTeam="Brewers";
+let activeAwayTeam="Brewers"; let activeHomeTeam="Yankees";
 let profilePlayerRef=null; let profileTeamRef=null;
 let gameStarted=false;
 let extraPlayerSeq=100;
@@ -1335,8 +1357,8 @@ const $=id=>document.getElementById(id);
 $("pregameBrewersLogo").src=BREWERS_LOGO;$("pregameYankeesLogo").src=YANKEES_LOGO;
 
 function activeLineup(team){return teams[team].lineup.filter(p=>p.active)}
-function currentBattingTeam(){return state.top?"Brewers":"Yankees"}
-function currentFieldingTeam(){return state.top?"Yankees":"Brewers"}
+function currentBattingTeam(){return state.top?activeAwayTeam:activeHomeTeam}
+function currentFieldingTeam(){return state.top?activeHomeTeam:activeAwayTeam}
 function currentPitcher(){
   const t=currentFieldingTeam();
   return teams[t].lineup.find(p=>p.active && p.pos==="L") || teams[t].lineup.find(p=>p.active) || null
@@ -2240,19 +2262,10 @@ function returnToGame(){
 }
 
 function resetStatsOnly(){
-  Object.values(teams).forEach(t=>{
-    t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=p.bb=p.hbp=p.k=0});
-    t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0};
-  });
+  Object.values(teams).forEach(t=>{t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=p.bb=p.hbp=p.k=0});t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0};});
   displayedInnings=regulationInnings;
-  state={
-    awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,
-    batterIndex:{Brewers:0,Yankees:0},
-    bases:{1:null,2:null,3:null},
-    history:[],log:[],pending:[],
-    inningRuns:{Brewers:{},Yankees:{}},
-    gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false
-  };
+  const batterIndex={},inningRuns={};Object.keys(teams).forEach(n=>{batterIndex[n]=0;inningRuns[n]={};});
+  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex,bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns,gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};
 }
 function serializableState(){
   const stateWithoutHistory={
@@ -2336,8 +2349,8 @@ function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batte
 
 function keepLiveGameLocked(){
   if(!gameStarted)return;
-  teams.Brewers.submitted=true;
-  teams.Yankees.submitted=true;
+  teams[activeAwayTeam].submitted=true;
+  teams[activeHomeTeam].submitted=true;
 }
 
 
@@ -2356,95 +2369,25 @@ function clonePlain(obj){
   return JSON.parse(JSON.stringify(obj));
 }
 
-function getTeamRuns(teamName){
-  return teamName==="Brewers" ? state.awayRuns : state.homeRuns;
-}
+function getTeamRuns(teamName){return teamName===activeAwayTeam?state.awayRuns:state.homeRuns}
 
-function getOpponent(teamName){
-  return teamName==="Brewers" ? "Yankees" : "Brewers";
-}
+function getOpponent(teamName){return teamName===activeAwayTeam?activeHomeTeam:activeAwayTeam}
 
 function makeCompletedGameSnapshot(){
-  const id="game-"+Date.now();
-  const winner=state.winner;
-  const loser=getOpponent(winner);
-
-  const snapshotTeams={};
-  const matchStats={};
-
-  ["Brewers","Yankees"].forEach(teamName=>{
-    const t=teams[teamName];
-    const combined=[...(t.lineup||[]),...(t.bench||[])];
-    const seen=new Set();
-    const matchPlayers=[];
-
-    combined.forEach(p=>{
-      if(!p)return;
-      const key=String(p.id||p.name);
-      if(seen.has(key))return;
-      seen.add(key);
-
-      const copy=clonePlain(p);
-      matchPlayers.push(copy);
-    });
-
-    snapshotTeams[teamName]={
-      lineup:clonePlain(t.lineup||[]),
-      bench:clonePlain(t.bench||[]),
-      matchPlayers,
-      pitcherStats:clonePlain(t.pitcherStats||{outs:0,h:0,k:0,bb:0,er:0})
-    };
-
-    matchStats[teamName]=matchPlayers.map(p=>({
-      id:p.id||p.name,
-      name:p.name,
-      pos:p.pos||"",
-      AB:Number(p.ab)||0,
-      H:Number(p.h)||0,
-      HR:Number(p.hr)||0,
-      RBI:Number(p.rbi)||0,
-      R:Number(p.r)||0,
-      BB:Number(p.bb)||0,
-      HBP:Number(p.hbp)||0,
-      K:Number(p.k)||0
-    }));
+  const id="game-"+Date.now(),winner=state.winner,loser=getOpponent(winner),snapshotTeams={},matchStats={};
+  [activeAwayTeam,activeHomeTeam].forEach(teamName=>{
+    const t=teams[teamName],combined=[...(t.lineup||[]),...(t.bench||[])],seen=new Set(),matchPlayers=[];
+    combined.forEach(p=>{if(!p)return;const k=String(p.id||p.name);if(seen.has(k))return;seen.add(k);matchPlayers.push(clonePlain(p));});
+    snapshotTeams[teamName]={lineup:clonePlain(t.lineup||[]),bench:clonePlain(t.bench||[]),matchPlayers,pitcherStats:clonePlain(t.pitcherStats)};
+    matchStats[teamName]=matchPlayers.map(p=>({id:p.id||p.name,name:p.name,pos:p.pos||"",AB:+p.ab||0,H:+p.h||0,HR:+p.hr||0,RBI:+p.rbi||0,R:+p.r||0,BB:+p.bb||0,HBP:+p.hbp||0,K:+p.k||0}));
   });
-
-  return {
-    id,
-    scheduleKey:activeScheduleGameKey||officialSelectedGameId||null,
-    dateLabel:"Aujourd’hui",
-    status:"FINAL",
-    winner,
-    loser,
-    awayTeam:"Brewers",
-    homeTeam:"Yankees",
-    awayRuns:state.awayRuns,
-    homeRuns:state.homeRuns,
-    regulationInnings,
-    inningRuns:clonePlain(state.inningRuns||{Brewers:{},Yankees:{}}),
-    teams:snapshotTeams,
-    matchStats,
-    finalizedAt:Date.now()
-  };
+  return {id,scheduleKey:activeScheduleGameKey||officialSelectedGameId||null,dateLabel:"Aujourd’hui",status:"FINAL",winner,loser,awayTeam:activeAwayTeam,homeTeam:activeHomeTeam,awayRuns:state.awayRuns,homeRuns:state.homeRuns,regulationInnings,inningRuns:clonePlain(state.inningRuns||{}),teams:snapshotTeams,matchStats,finalizedAt:Date.now()};
 }
 
 function updateStandingsFromGame(game){
-  const b=game.awayRuns;
-  const y=game.homeRuns;
-
-  standings.Brewers.RF+=b;
-  standings.Brewers.RA+=y;
-  standings.Yankees.RF+=y;
-  standings.Yankees.RA+=b;
-
-  if(b>y){
-    standings.Brewers.W++;
-    standings.Yankees.L++;
-  }else if(y>b){
-    standings.Yankees.W++;
-    standings.Brewers.L++;
-  }
+  const a=game.awayTeam,h=game.homeTeam,ar=game.awayRuns,hr=game.homeRuns;
+  standings[a].RF+=ar;standings[a].RA+=hr;standings[h].RF+=hr;standings[h].RA+=ar;
+  if(ar>hr){standings[a].W++;standings[h].L++;}else if(hr>ar){standings[h].W++;standings[a].L++;}
 }
 
 function saveFinalGameToLocalSeason(){
@@ -2832,60 +2775,16 @@ function approveAndLockOfficialGame(){
 
 function startPreparedOfficialGame(){
   activeScheduleGameKey=officialSelectedGameId||activeScheduleGameKey;
-
-  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
-  if(!g)return;
-
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);if(!g)return;
   const s=officialGameSubmissions[scheduleGameKey(g)];
-  if(!s?.awayLocked || !s?.homeLocked){
-    toast("Les deux alignements doivent être verrouillés");
-    return;
-  }
-
-  if(g.away!=="Brewers" || g.home!=="Yankees"){
-    toast("Prototype : ce match sera jouable lorsque les rosters de ces équipes seront ajoutés.");
-    return;
-  }
-
-  $("officialPreGameModal").classList.remove("show");
-
-  currentRole="official";
-  document.body.classList.remove("role-viewer","role-captain","role-official");
-  document.body.classList.add("role-official");
-
-  $("roleHome").classList.add("hidden");
-  if($("officialHub"))$("officialHub").classList.add("hidden");
-  $("viewerView").classList.add("hidden");
-  $("pregame").classList.add("hidden");
-  $("game").classList.remove("hidden");
-
-  // Les alignements restent les mêmes, mais chaque match débute avec ses propres statistiques.
-  regulationInnings=officialPrepInnings;
-  displayedInnings=officialPrepInnings;
-  resetStatsOnly();
-  regulationInnings=officialPrepInnings;
-  displayedInnings=officialPrepInnings;
-
-  teams.Brewers.submitted=true;
-  teams.Yankees.submitted=true;
-
-  ["Brewers","Yankees"].forEach(teamName=>{
-    (teams[teamName]?.lineup||[]).forEach(p=>{
-      p.lockedStarter=true;
-      p.lockedStarterTeam=teamName;
-      p.wasUsedInGame=true;
-    });
-  });
-
-  gameStarted=true;
-  state.gameOver=false;
-  state.winner=null;
-  state.gameOverReason="";
-  state._finalGameSaved=false;
-
-  setRoleBadge("MARQUEUR");
-  renderGame();
-  toast(`Partie débutée • ${officialPrepInnings} manches`);
+  if(!s?.awayLocked||!s?.homeLocked){toast("Les deux alignements doivent être verrouillés");return;}
+  activeAwayTeam=g.away;activeHomeTeam=g.home;
+  $("officialPreGameModal").classList.remove("show");currentRole="official";
+  document.body.classList.remove("role-viewer","role-captain","role-official");document.body.classList.add("role-official");
+  $("roleHome").classList.add("hidden");if($("officialHub"))$("officialHub").classList.add("hidden");$("viewerView").classList.add("hidden");$("pregame").classList.add("hidden");$("game").classList.remove("hidden");
+  regulationInnings=officialPrepInnings;displayedInnings=officialPrepInnings;resetStatsOnly();regulationInnings=officialPrepInnings;displayedInnings=officialPrepInnings;
+  [activeAwayTeam,activeHomeTeam].forEach(teamName=>{teams[teamName].submitted=true;(teams[teamName].lineup||[]).forEach(p=>{p.lockedStarter=true;p.lockedStarterTeam=teamName;p.wasUsedInGame=true;});});
+  gameStarted=true;state.gameOver=false;state.winner=null;state.gameOverReason="";state._finalGameSaved=false;setRoleBadge("MARQUEUR");renderGame();toast(`${activeAwayTeam} vs ${activeHomeTeam} • ${officialPrepInnings} manches`);
 }
 
 function closeOfficialPreGame(){
@@ -2983,7 +2882,7 @@ function renderStandings(){
     $("leagueStandingsPanel")
   ].filter(Boolean);
 
-  const rows=["Brewers","Yankees"].map(team=>{
+  const rows=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"].map(team=>{
     const s=standings[team];
     const pct=(s.W+s.L)?(s.W/(s.W+s.L)).toFixed(3).replace(/^0/,""):"—";
     return `<tr><td>${team}</td><td>${s.W}</td><td>${s.L}</td><td>${pct}</td></tr>`;
@@ -3012,7 +2911,7 @@ function openCompletedGame(gameId){
   }
 
   renderCompletedGameLineScore(game);
-  showCompletedGameTeam("Brewers");
+  showCompletedGameTeam(game.awayTeam);
 
   const modal=$("matchDetailModal");
   if(modal)modal.classList.add("show");
@@ -3024,43 +2923,19 @@ function closeMatchDetail(){
 }
 
 function renderCompletedGameLineScore(game){
-  const el=$("matchDetailLineScore");
-  if(!el)return;
-
-  const maxInning=Math.max(
-    game.regulationInnings||0,
-    ...Object.keys(game.inningRuns?.Brewers||{}).map(Number),
-    ...Object.keys(game.inningRuns?.Yankees||{}).map(Number)
-  );
-
+  const el=$("matchDetailLineScore");if(!el)return;
+  const maxInning=Math.max(game.regulationInnings||0,...Object.keys(game.inningRuns?.[game.awayTeam]||{}).map(Number),...Object.keys(game.inningRuns?.[game.homeTeam]||{}).map(Number));
   const headers=Array.from({length:maxInning},(_,i)=>`<th>${i+1}</th>`).join("");
-  const row=(team,total)=>{
-    const cells=Array.from({length:maxInning},(_,i)=>{
-      const v=game.inningRuns?.[team]?.[i+1];
-      return `<td>${v==null?"":v}</td>`;
-    }).join("");
-    return `<tr><td>${team}</td>${cells}<td><strong>${total}</strong></td></tr>`;
-  };
-
-  el.innerHTML=`<div class="table-scroll"><table>
-    <thead><tr><th>Équipe</th>${headers}<th>R</th></tr></thead>
-    <tbody>${row("Brewers",game.awayRuns)}${row("Yankees",game.homeRuns)}</tbody>
-  </table></div>`;
+  const row=(team,total)=>`<tr><td>${team}</td>${Array.from({length:maxInning},(_,i)=>{const v=game.inningRuns?.[team]?.[i+1];return `<td>${v==null?"":v}</td>`}).join("")}<td><strong>${total}</strong></td></tr>`;
+  el.innerHTML=`<div class="table-scroll"><table><thead><tr><th>Équipe</th>${headers}<th>R</th></tr></thead><tbody>${row(game.awayTeam,game.awayRuns)}${row(game.homeTeam,game.homeRuns)}</tbody></table></div>`;
 }
 
 function showCompletedGameTeam(teamName){
-  const game=completedGames.find(g=>g.id===selectedCompletedGameId);
-  if(!game)return;
-
-  const btab=$("matchStatsBrewersTab"), ytab=$("matchStatsYankeesTab");
-  if(btab)btab.classList.toggle("active",teamName==="Brewers");
-  if(ytab)ytab.classList.toggle("active",teamName==="Yankees");
-
-  const t=game.teams?.[teamName];
-  if(!t)return;
-
-  renderCompletedBattingStats(t,teamName,game.matchStats?.[teamName]||null);
-  renderCompletedPitchingStats(t,teamName);
+  const game=completedGames.find(g=>g.id===selectedCompletedGameId);if(!game)return;
+  const a=$("matchStatsBrewersTab"),h=$("matchStatsYankeesTab");
+  if(a){a.textContent=game.awayTeam;a.classList.toggle("active",teamName===game.awayTeam);a.onclick=()=>showCompletedGameTeam(game.awayTeam);}
+  if(h){h.textContent=game.homeTeam;h.classList.toggle("active",teamName===game.homeTeam);h.onclick=()=>showCompletedGameTeam(game.homeTeam);}
+  const t=game.teams?.[teamName];if(!t)return;renderCompletedBattingStats(t,teamName,game.matchStats?.[teamName]||null);renderCompletedPitchingStats(t,teamName);
 }
 
 function statValue(player,key){
@@ -3178,8 +3053,8 @@ function confirmGameOver(){
   state.winner=pendingGameOver.winner;
   state.gameOverReason=pendingGameOver.reason||"";
   gameStarted=true;
-  teams.Brewers.submitted=true;
-  teams.Yankees.submitted=true;
+  teams[activeAwayTeam].submitted=true;
+  teams[activeHomeTeam].submitted=true;
 
   addLog(`FIN DU MATCH • ${state.winner} gagnent ${state.awayRuns}-${state.homeRuns}`);
 
@@ -3254,17 +3129,10 @@ function closeGameOverModal(){
 
 function checkWalkOff(){
   if(state.gameOver)return true;
-
-  if(!state.top && isFinalOrExtraInning() && state.homeRuns>state.awayRuns){
-    if(!pendingGameOver){
-      proposeGameOver(
-        "Yankees",
-        "Les Yankees ont pris l’avance en fin de la dernière manche. Confirmez la fin du match ou continuez la rencontre."
-      );
-    }
+  if(!state.top&&isFinalOrExtraInning()&&state.homeRuns>state.awayRuns){
+    if(!pendingGameOver)proposeGameOver(activeHomeTeam,`${activeHomeTeam} ont pris l’avance en fin de la dernière manche. Confirmez la fin du match ou continuez la rencontre.`);
     return false;
-  }
-  return false;
+  } return false;
 }
 
 function blockIfEndDecisionPending(){
@@ -3304,47 +3172,17 @@ function currentTeamRunsAdd(){
 }
 function scoreRunner(r,rbi=true){currentTeamRunsAdd();const p=getPlayer(r);if(p)p.r++;if(rbi)batter().rbi++;addLog(`${r.name} marque${rbi?" • RBI à "+batter().name:""}`)}
 function endHalfIfNeeded(){
-  if(state.outs<3 || state.gameOver)return;
-
-  const endingTop=state.top;
-  const inningJustPlayed=state.inning;
-
-  // Haut de dernière manche : local mène -> proposer fin, sans changer de manche.
-  if(endingTop && inningJustPlayed>=regulationInnings && state.homeRuns>state.awayRuns){
-    state.outs=0;
-    state.bases={1:null,2:null,3:null};
-    state.pending=[];
-    proposeGameOver(
-      "Yankees",
-      "Les Yankees mènent après le haut de la dernière manche. Confirmez la fin du match ou modifiez le nombre de manches."
-    );
-    return;
+  if(state.outs<3||state.gameOver)return;
+  const endingTop=state.top,inningJustPlayed=state.inning;
+  if(endingTop&&inningJustPlayed>=regulationInnings&&state.homeRuns>state.awayRuns){
+    state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];proposeGameOver(activeHomeTeam,`${activeHomeTeam} mènent après le haut de la dernière manche.`);return;
   }
-
-  // Bas de dernière manche : visiteurs mènent -> proposer fin.
-  if(!endingTop && inningJustPlayed>=regulationInnings && state.awayRuns>state.homeRuns){
-    state.outs=0;
-    state.bases={1:null,2:null,3:null};
-    state.pending=[];
-    proposeGameOver(
-      "Brewers",
-      "Les Brewers mènent après la fin de la manche prévue. Confirmez la fin du match ou continuez la rencontre."
-    );
-    return;
+  if(!endingTop&&inningJustPlayed>=regulationInnings&&state.awayRuns>state.homeRuns){
+    state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];proposeGameOver(activeAwayTeam,`${activeAwayTeam} mènent après la fin de la manche prévue.`);return;
   }
-
-  state.outs=0;
-  state.bases={1:null,2:null,3:null};
-  state.pending=[];
-  state.top=!state.top;
-
-  if(state.top){
-    state.inning++;
-    if(state.inning>displayedInnings)displayedInnings=state.inning;
-  }
-
-  const p=currentPitcher();
-  addLog("Changement de demi-manche • "+(p?p.name:"Aucun lanceur")+" au monticule");
+  state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];state.top=!state.top;
+  if(state.top){state.inning++;if(state.inning>displayedInnings)displayedInnings=state.inning;}
+  const p=currentPitcher();addLog("Changement de demi-manche • "+(p?p.name:"Aucun lanceur")+" au monticule");
 }
 function blockIfPending(){if(state.pending.length){toast("Confirmez d’abord les coureurs");return true}return false}
 
@@ -3392,8 +3230,8 @@ function recordStrikeout(){if(blockIfGameOver())return;
   nextBatter();
   endHalfIfNeeded();
 
-  teams.Brewers.submitted=true;
-  teams.Yankees.submitted=true;
+  teams[activeAwayTeam].submitted=true;
+  teams[activeHomeTeam].submitted=true;
   gameStarted=true;
 
   renderGame();
@@ -3414,8 +3252,8 @@ function recordOut(){if(blockIfGameOver())return;
   endHalfIfNeeded();
 
   // Garde les alignements verrouillés pendant toute la rencontre.
-  teams.Brewers.submitted=true;
-  teams.Yankees.submitted=true;
+  teams[activeAwayTeam].submitted=true;
+  teams[activeHomeTeam].submitted=true;
   gameStarted=true;
 
   renderGame();
@@ -3635,10 +3473,7 @@ let currentRole=null;
 let viewerSelectedTeam="Brewers";
 let pendingGameOver=null;
 let completedGames=[];
-let standings={
-  Brewers:{W:0,L:0,RF:0,RA:0},
-  Yankees:{W:0,L:0,RF:0,RA:0}
-};
+let standings={};["Brewers","Yankees","Sox","Expos","Indiens","Bananes"].forEach(n=>standings[n]={W:0,L:0,RF:0,RA:0});
 let selectedCompletedGameId=null;
 
 let officialSelectedGameId=null;
@@ -3781,26 +3616,11 @@ function inningRuns(team,inning){
 }
 
 function renderLineScoreInto(id){
-  const table=$(id);
-  if(!table)return;
-
-  const last=Math.max(displayedInnings,regulationInnings,state.inning);
-  const innings=Array.from({length:last},(_,i)=>i+1);
-
+  const table=$(id);if(!table)return;
+  const last=Math.max(displayedInnings,regulationInnings,state.inning),innings=Array.from({length:last},(_,i)=>i+1);
   const head=innings.map(i=>`<th class="${i===state.inning?"current-inning":""}">${i}</th>`).join("");
-  const row=(team,total)=>`
-    <tr>
-      <td class="${team==="Brewers"?"batter-team-brewers":"batter-team-yankees"}">${team}</td>
-      ${innings.map(i=>`<td class="${i===state.inning?"current-inning":""}">${inningRuns(team,i)}</td>`).join("")}
-      <td>${total}</td>
-    </tr>`;
-
-  table.innerHTML=`
-    <thead><tr><th>Équipe</th>${head}<th>R</th></tr></thead>
-    <tbody>
-      ${row("Brewers",state.awayRuns)}
-      ${row("Yankees",state.homeRuns)}
-    </tbody>`;
+  const row=(team,total)=>`<tr><td>${team}</td>${innings.map(i=>`<td class="${i===state.inning?"current-inning":""}">${inningRuns(team,i)}</td>`).join("")}<td>${total}</td></tr>`;
+  table.innerHTML=`<thead><tr><th>Équipe</th>${head}<th>R</th></tr></thead><tbody>${row(activeAwayTeam,state.awayRuns)}${row(activeHomeTeam,state.homeRuns)}</tbody>`;
 }
 
 function renderLineScores(){
@@ -3965,7 +3785,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.20.
+// L'accueil par rôles est l'écran initial de v0.12.0.
 
 renderLineupEditor();
 

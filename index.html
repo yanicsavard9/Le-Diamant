@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.10.8</title>
+<title>Diamond v0.11.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -301,7 +301,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.10.8 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.0 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -322,6 +322,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
           <strong>📋 Marqueur / Gestionnaire</strong>
           <small>Approbation, verrouillage, pointage en direct, fin et sauvegarde du match.</small>
         </button>
+<button type="button" class="role-card" onclick="openOfficialGames()">MATCHS DU SOIR</button>
       </div>
     </div>
   </section>
@@ -639,6 +640,38 @@ body:not(.role-official) #gameLogCard{display:none!important}
 </div>
 
 
+
+
+<div class="modal" id="officialGamesModal">
+  <div class="sheet">
+    <h3>⚾ MATCHS DU SOIR</h3>
+    <div class="readonly-note">
+      Sélectionnez un match pour voir les alignements reçus et préparer la partie.
+    </div>
+    <div id="officialGamesList" style="margin-top:12px"></div>
+    <button type="button" style="width:100%;margin-top:14px" onclick="closeOfficialGames()">FERMER</button>
+  </div>
+</div>
+
+<div class="modal" id="officialGameDetailModal">
+  <div class="sheet">
+    <h3 id="officialGameTitle">MATCH</h3>
+    <div id="officialGameMeta" class="readonly-note"></div>
+
+    <div id="officialGameSubmissionStatus" style="margin-top:12px"></div>
+
+    <div class="sheet-grid" style="margin-top:12px">
+      <button type="button" onclick="openOfficialTeamAlignment('away')">ALIGNEMENT VISITEUR</button>
+      <button type="button" onclick="openOfficialTeamAlignment('home')">ALIGNEMENT LOCAL</button>
+    </div>
+
+    <button type="button" class="primary" id="officialPrepareGameBtn" style="width:100%;margin-top:12px" onclick="prepareSelectedOfficialGame()">
+      PRÉPARER CE MATCH
+    </button>
+
+    <button type="button" style="width:100%;margin-top:8px" onclick="backToOfficialGames()">RETOUR AUX MATCHS DU SOIR</button>
+  </div>
+</div>
 
 <div class="modal" id="matchDetailModal">
   <div class="sheet">
@@ -1009,6 +1042,14 @@ function submitLineup(){
   if(btn)btn.textContent="✓ SOUMIS";
 
   toast("Alignement "+teamName+" soumis");
+
+  leagueSchedule.forEach(g=>{
+    const key=scheduleGameKey(g);
+    const s=officialGameSubmissions[key];
+    if(!s)return;
+    if(g.away===teamName)s.awaySubmitted=true;
+    if(g.home===teamName)s.homeSubmitted=true;
+  });
 }
 function renderPregameStatus(){
   ["Brewers","Yankees"].forEach(t=>{
@@ -1706,6 +1747,145 @@ function saveFinalGameToLocalSeason(){
   renderStandings();
 }
 
+
+function scheduleGameKey(g){
+  return g.date+"|"+g.time+"|"+g.away+"|"+g.home;
+}
+
+function formatScheduleDate(iso){
+  const [y,m,d]=iso.split("-").map(Number);
+  const days=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+  const months=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+  const dt=new Date(y,m-1,d);
+  return `${days[dt.getDay()]} ${d} ${months[m-1]}`;
+}
+
+function getOfficialNightGames(){
+  // Prototype: show the earliest schedule date that still has scheduled games.
+  const sorted=[...leagueSchedule].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  if(!sorted.length)return [];
+  const firstDate=sorted[0].date;
+  return sorted.filter(g=>g.date===firstDate);
+}
+
+function openOfficialGames(){
+  currentRole="official";
+  renderOfficialGames();
+  $("officialGamesModal").classList.add("show");
+}
+
+function closeOfficialGames(){
+  $("officialGamesModal").classList.remove("show");
+}
+
+function renderOfficialGames(){
+  const list=$("officialGamesList");
+  if(!list)return;
+
+  const games=getOfficialNightGames();
+  if(!games.length){
+    list.innerHTML='<div class="readonly-note">Aucun match prévu.</div>';
+    return;
+  }
+
+  list.innerHTML=games.map(g=>{
+    const key=scheduleGameKey(g);
+    const s=officialGameSubmissions[key]||{awaySubmitted:false,homeSubmitted:false};
+    return `
+      <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px" onclick="openOfficialGame('${key}')">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+          <strong>${g.time} — ${g.away} vs ${g.home}</strong>
+          <span>›</span>
+        </div>
+        <div style="margin-top:6px;font-size:12px">
+          ${g.away}: ${s.awaySubmitted?"✅ soumis":"⏳ en attente"}<br>
+          ${g.home}: ${s.homeSubmitted?"✅ soumis":"⏳ en attente"}
+        </div>
+      </button>`;
+  }).join("");
+}
+
+function openOfficialGame(key){
+  officialSelectedGameId=key;
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===key);
+  if(!g)return;
+
+  $("officialGamesModal").classList.remove("show");
+  $("officialGameTitle").textContent=`${g.away} vs ${g.home}`;
+  $("officialGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
+  renderOfficialGameStatus();
+  $("officialGameDetailModal").classList.add("show");
+}
+
+function renderOfficialGameStatus(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
+  if(!g)return;
+
+  const key=scheduleGameKey(g);
+  const s=officialGameSubmissions[key]||{awaySubmitted:false,homeSubmitted:false};
+
+  $("officialGameSubmissionStatus").innerHTML=`
+    <div class="readonly-note" style="margin-bottom:8px">
+      <strong>${g.away}</strong><br>
+      ${s.awaySubmitted?"✅ Alignement reçu":"⏳ Alignement en attente"}
+    </div>
+    <div class="readonly-note">
+      <strong>${g.home}</strong><br>
+      ${s.homeSubmitted?"✅ Alignement reçu":"⏳ Alignement en attente"}
+    </div>`;
+
+  const btn=$("officialPrepareGameBtn");
+  if(btn){
+    const ready=s.awaySubmitted&&s.homeSubmitted;
+    btn.disabled=!ready;
+    btn.textContent=ready?"PRÉPARER CE MATCH":"EN ATTENTE DES 2 ALIGNEMENTS";
+  }
+}
+
+function openOfficialTeamAlignment(side){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
+  if(!g)return;
+  const teamName=side==="away"?g.away:g.home;
+
+  if(!teams[teamName]){
+    toast(`Alignement ${teamName} simulé — équipe non encore configurée dans le moteur`);
+    return;
+  }
+
+  $("officialGameDetailModal").classList.remove("show");
+  showPregame();
+  showCoach(teamName);
+}
+
+function prepareSelectedOfficialGame(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===officialSelectedGameId);
+  if(!g)return;
+
+  const s=officialGameSubmissions[scheduleGameKey(g)];
+  if(!s || !s.awaySubmitted || !s.homeSubmitted){
+    toast("Les deux alignements doivent être reçus");
+    return;
+  }
+
+  if(g.away!=="Brewers" || g.home!=="Yankees"){
+    toast("Prototype : seul Brewers vs Yankees est entièrement jouable pour l’instant");
+    return;
+  }
+
+  $("officialGameDetailModal").classList.remove("show");
+  showPregame();
+  currentRole="official";
+  teams.Brewers.submitted=true;
+  teams.Yankees.submitted=true;
+  renderPregameStatus();
+}
+
+function backToOfficialGames(){
+  $("officialGameDetailModal").classList.remove("show");
+  renderOfficialGames();
+  $("officialGamesModal").classList.add("show");
+}
+
 function renderSchedule(){
   const candidates=[
     $("viewerSchedule"),
@@ -1713,15 +1893,48 @@ function renderSchedule(){
     $("leagueSchedulePanel")
   ].filter(Boolean);
 
-  const html=completedGames.length
-    ? completedGames.map(game=>{
-        return `<button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:8px" onclick="openCompletedGame('${game.id}')">
+  const fmtDate=(iso)=>{
+    const [y,m,d]=iso.split("-").map(Number);
+    const days=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+    const months=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+    const dt=new Date(y,m-1,d);
+    return `${days[dt.getDay()]} ${d} ${months[m-1]}`;
+  };
+
+  const completedHtml=completedGames.length
+    ? `<div class="section-title">MATCHS TERMINÉS</div>`+
+      completedGames.map(game=>`
+        <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:8px"
+          onclick="openCompletedGame('${game.id}')">
           <strong>${game.awayTeam} ${game.awayRuns} – ${game.homeTeam} ${game.homeRuns}</strong><br>
           <span class="muted">FINAL • Touchez pour voir les statistiques du match</span>
-        </button>`;
-      }).join("")
-    : `<div class="readonly-note">Aucun match terminé pour le moment.</div>`;
+        </button>`).join("")
+    : "";
 
+  const grouped={};
+  leagueSchedule.forEach(g=>{
+    if(!grouped[g.date])grouped[g.date]=[];
+    grouped[g.date].push(g);
+  });
+
+  const futureHtml=Object.keys(grouped).sort().map(date=>{
+    const games=grouped[date].map(g=>`
+      <div class="readonly-note" style="margin-bottom:7px">
+        <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+          <strong>${g.away} vs ${g.home}</strong>
+          <span class="muted">${g.time}</span>
+        </div>
+        <div class="muted" style="font-size:12px;margin-top:3px">À venir</div>
+      </div>`).join("");
+
+    return `
+      <div style="margin-top:14px">
+        <div class="section-title">${fmtDate(date).toUpperCase()}</div>
+        ${games}
+      </div>`;
+  }).join("");
+
+  const html=completedHtml + futureHtml;
   candidates.forEach(el=>el.innerHTML=html);
 }
 
@@ -2250,6 +2463,44 @@ let standings={
 };
 let selectedCompletedGameId=null;
 
+let officialSelectedGameId=null;
+
+const officialGameSubmissions={};
+leagueSchedule.forEach(g=>{
+  officialGameSubmissions[g.date+"|"+g.time+"|"+g.away+"|"+g.home]={
+    awaySubmitted:false,
+    homeSubmitted:false
+  };
+});
+
+
+const leagueSchedule=[
+  {date:"2026-09-07",time:"18:30",away:"Brewers",home:"Yankees"},
+  {date:"2026-09-07",time:"19:45",away:"Sox",home:"Expos"},
+  {date:"2026-09-07",time:"21:00",away:"Indiens",home:"Bananes"},
+
+  {date:"2026-09-08",time:"18:30",away:"Yankees",home:"Sox"},
+  {date:"2026-09-08",time:"19:45",away:"Expos",home:"Indiens"},
+  {date:"2026-09-08",time:"21:00",away:"Bananes",home:"Brewers"},
+
+  {date:"2026-09-10",time:"18:30",away:"Brewers",home:"Sox"},
+  {date:"2026-09-10",time:"19:45",away:"Yankees",home:"Indiens"},
+  {date:"2026-09-10",time:"21:00",away:"Expos",home:"Bananes"},
+
+  {date:"2026-09-14",time:"18:30",away:"Indiens",home:"Brewers"},
+  {date:"2026-09-14",time:"19:45",away:"Sox",home:"Bananes"},
+  {date:"2026-09-14",time:"21:00",away:"Yankees",home:"Expos"},
+
+  {date:"2026-09-15",time:"18:30",away:"Brewers",home:"Expos"},
+  {date:"2026-09-15",time:"19:45",away:"Bananes",home:"Yankees"},
+  {date:"2026-09-15",time:"21:00",away:"Sox",home:"Indiens"},
+
+  {date:"2026-09-17",time:"18:30",away:"Bananes",home:"Brewers"},
+  {date:"2026-09-17",time:"19:45",away:"Expos",home:"Sox"},
+  {date:"2026-09-17",time:"21:00",away:"Indiens",home:"Yankees"}
+];
+
+
 
 function openLeagueInfo(tab){
   renderSchedule();
@@ -2498,7 +2749,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.10.8.
+// L'accueil par rôles est l'écran initial de v0.11.0.
 
 renderLineupEditor();
 

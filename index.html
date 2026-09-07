@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.11.15</title>
+<title>Diamond v0.11.16</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -92,7 +92,7 @@ button.warn{background:#4a2930;border-color:#6f3c45;color:#ffd8dd}.small{padding
 .roster-choice{width:100%;text-align:left;margin:5px 0;padding:11px 12px}
 .roster-choice small{display:block;color:var(--muted);margin-top:2px}
 
-.diamond{width:165px;height:165px;border:2px solid #718196;transform:rotate(45deg);position:absolute;left:50%;top:48%;translate:-50% -50%}
+.diamond{width:165px;height:165px;border:0;transform:rotate(45deg);position:absolute;left:50%;top:48%;translate:-50% -50%}
 .base{position:absolute;width:62px;min-height:58px;border-radius:14px;background:var(--card2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;padding:4px;cursor:pointer}
 .base.empty{color:#718196}.base.team-brewers{border-color:var(--blue);background:rgba(47,120,196,.18)}.base.team-yankees{border-color:var(--red);background:rgba(216,74,74,.18)}
 #b2{left:50%;top:12px;transform:translateX(-50%)}#b1{right:25px;top:108px}#b3{left:25px;top:108px}#home{left:50%;bottom:5px;transform:translateX(-50%);width:48px;min-height:48px}
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.11.15 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.11.16 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.11.15 — corrige la bande noire à droite sur iPhone */
+/* v0.11.16 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.11.15 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.11.16 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.15 — enlève toute ligne sous le lanceur */
+/* v0.11.16 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.11.15 — correctifs ciblés après vérification du HTML réel */
+/* v0.11.16 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -728,11 +728,36 @@ body{background:var(--bg)}
   max-height:none !important;
 }
 
+
+/* v0.11.16 — changements rapides + fermeture Horaire en haut */
+#profileChangeBtn{
+  min-height:52px;
+  font-weight:900;
+}
+
+.league-info-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.league-info-header h3{
+  margin:0;
+}
+.league-info-close-top{
+  flex:0 0 auto;
+  min-height:40px;
+  padding:8px 12px;
+  font-size:13px;
+  font-weight:900;
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.15 • 2 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.11.16 • 2 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1074,7 +1099,14 @@ body{background:var(--bg)}
 <button class="primary" onclick="scoreSelectedRunner()">MARQUE</button><button class="warn" onclick="outSelectedRunner()">RETIRÉ</button>
 </div><button style="width:100%;margin-top:9px" onclick="closeRunnerModal()">FERMER</button></div></div>
 
-<div class="modal" id="profileModal"><div class="sheet"><h3 id="profileTitle"></h3><p id="profileSub"></p><div class="stats-grid" id="profileStats"></div><div class="muted" id="profileNote"></div><button style="width:100%;margin-top:10px" onclick="closeProfile()">FERMER</button></div></div>
+<div class="modal" id="profileModal"><div class="sheet">
+  <h3 id="profileTitle"></h3>
+  <p id="profileSub"></p>
+  <div class="stats-grid" id="profileStats"></div>
+  <div class="muted" id="profileNote"></div>
+  <button id="profileChangeBtn" class="primary hidden" type="button" style="width:100%;margin-top:12px" onclick="openBatterChangeFromProfile()">⇄ EFFECTUER UN CHANGEMENT</button>
+  <button style="width:100%;margin-top:10px" onclick="closeProfile()">FERMER</button>
+</div></div>
 
 <div class="modal" id="resetModal"><div class="sheet"><h3>⚠️ Nouvelle partie?</h3><p><b>Êtes-vous certain que c’est bien ce que vous voulez faire?</b></p><p>Le pointage et les statistiques de la partie en cours seront remis à zéro. Les alignements seront déverrouillés et devront être soumis de nouveau.</p><div class="sheet-grid"><button onclick="closeReset()">ANNULER</button><button class="warn" onclick="confirmReset()">OUI, NOUVELLE PARTIE</button></div></div></div>
 
@@ -1239,6 +1271,7 @@ let teams={
   Yankees:{submitted:false,lineup:originalTeams.Yankees.map((p,i)=>freshPlayer(p,i,"Y")),pitcherStats:{outs:0,h:0,k:0,bb:0,er:0}}
 };
 let coachTeam="Brewers"; let editorTeam="Brewers";
+let profilePlayerRef=null; let profileTeamRef=null;
 let gameStarted=false;
 let extraPlayerSeq=100;
 Object.entries(teams).forEach(([teamName,t])=>{
@@ -3369,9 +3402,92 @@ function stealSelectedRunner(){if(blockIfGameOver())return;if(!selectedBase||sel
 function scoreSelectedRunner(){if(blockIfGameOver())return;if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];state.bases[selectedBase]=null;scoreRunner(r,false);closeRunnerModal();renderGame()}
 function outSelectedRunner(){if(blockIfGameOver())return;if(!selectedBase)return;saveHistory();const r=state.bases[selectedBase];state.bases[selectedBase]=null;state.outs++;pitcherStats().outs++;addLog(`${r.name} est retiré sur les buts`);closeRunnerModal();endHalfIfNeeded();renderGame()}
 
-function openPlayerProfile(p,team){$("profileTitle").textContent=p.name;$("profileSub").textContent=team+" • "+p.pos;$("profileStats").innerHTML=[statCell("MOY",avg(p)),statCell("H",p.h),statCell("HR",p.hr),statCell("RBI",p.rbi),statCell("R",p.r),statCell("BV",p.bv)].join("");$("profileNote").textContent="";$("profileModal").classList.add("show")}
-function openPitcherProfile(p,team){const ps=teams[team].pitcherStats;$("profileTitle").textContent=p?p.name:"Lanceur";$("profileSub").textContent=team+" • L";$("profileStats").innerHTML=[statCell("IP",`${Math.floor(ps.outs/3)}.${ps.outs%3}`),statCell("ERA",era(ps)),statCell("K",ps.k),statCell("BB",ps.bb)].join("");$("profileNote").textContent="ERA provisoire : points mérités/non mérités non distingués."; $("profileModal").classList.add("show")}
-function closeProfile(){$("profileModal").classList.remove("show")}
+function samePlayer(a,b){
+  if(!a||!b)return false;
+  return String(a.id||a.name)===String(b.id||b.name);
+}
+
+function openPlayerProfile(p,team){
+  profilePlayerRef=p;
+  profileTeamRef=team;
+
+  $("profileTitle").textContent=p.name;
+  $("profileSub").textContent=team+" • "+p.pos;
+  $("profileStats").innerHTML=[
+    statCell("MOY",avg(p)),
+    statCell("H",p.h),
+    statCell("HR",p.hr),
+    statCell("RBI",p.rbi),
+    statCell("R",p.r),
+    statCell("BV",p.bv)
+  ].join("");
+  $("profileNote").textContent="";
+
+  const btn=$("profileChangeBtn");
+  if(btn){
+    const current=batter();
+    const canChange=currentRole==="official" &&
+      gameStarted &&
+      team===currentBattingTeam() &&
+      samePlayer(p,current);
+    btn.classList.toggle("hidden",!canChange);
+  }
+
+  $("profileModal").classList.add("show");
+}
+
+function openPitcherProfile(p,team){
+  profilePlayerRef=null;
+  profileTeamRef=null;
+
+  const ps=teams[team].pitcherStats;
+  $("profileTitle").textContent=p?p.name:"Lanceur";
+  $("profileSub").textContent=team+" • L";
+  $("profileStats").innerHTML=[
+    statCell("IP",`${Math.floor(ps.outs/3)}.${ps.outs%3}`),
+    statCell("ERA",era(ps)),
+    statCell("K",ps.k),
+    statCell("BB",ps.bb)
+  ].join("");
+  $("profileNote").textContent="ERA provisoire : points mérités/non mérités non distingués.";
+
+  if($("profileChangeBtn"))$("profileChangeBtn").classList.add("hidden");
+  $("profileModal").classList.add("show");
+}
+
+function openBatterChangeFromProfile(){
+  if(currentRole!=="official" || !gameStarted || !profilePlayerRef || !profileTeamRef)return;
+
+  const player=profilePlayerRef;
+  const teamName=profileTeamRef;
+  const outIndex=teams[teamName].lineup.findIndex(p=>samePlayer(p,player));
+
+  closeProfile();
+
+  editorTeam=teamName;
+  coachTeam=teamName;
+  backToPregame();
+  showCoach(teamName);
+
+  const panel=$("substitutionPanel");
+  if(panel){
+    panel.classList.remove("hidden");
+    selectedSubBenchIndex=null;
+    refreshSubstitutionOptions();
+
+    const outSel=$("subOut");
+    if(outSel && outIndex>=0)outSel.value=String(outIndex);
+
+    setTimeout(()=>panel.scrollIntoView({behavior:"smooth",block:"center"}),60);
+  }
+
+  toast(`Changement pour ${player.name}`);
+}
+
+function closeProfile(){
+  $("profileModal").classList.remove("show");
+  if($("profileChangeBtn"))$("profileChangeBtn").classList.add("hidden");
+}
 
 function undo(){
   if(!state.history || !state.history.length){
@@ -3730,7 +3846,7 @@ function renderViewer(){
   $("viewerStatsBody").innerHTML=rows.join("");
 }
 
-// L'accueil par rôles est l'écran initial de v0.11.15.
+// L'accueil par rôles est l'écran initial de v0.11.16.
 
 renderLineupEditor();
 
@@ -3776,7 +3892,10 @@ document.querySelectorAll(".action-btn,.kbtn").forEach(btn=>{
 
 <div class="modal" id="leagueInfoModal">
   <div class="sheet">
-    <h3 id="leagueInfoTitle">Horaire</h3>
+    <div class="league-info-header">
+  <h3 id="leagueInfoTitle">Horaire</h3>
+  <button type="button" class="league-info-close-top" onclick="closeLeagueInfo()">FERMER</button>
+</div>
     <div id="leagueSchedulePanel" class="league-tab-panel active">
       <div class="readonly-note"><b>Horaire</b><br>Les matchs à venir apparaîtront ici lorsque le calendrier de la ligue sera connecté.</div>
     </div>

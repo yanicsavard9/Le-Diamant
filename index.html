@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.14.3</title>
+<title>Diamond v0.14.4</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.14.3 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.14.4 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.14.3 — corrige la bande noire à droite sur iPhone */
+/* v0.14.4 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.14.3 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.14.4 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.3 — enlève toute ligne sous le lanceur */
+/* v0.14.4 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.3 — correctifs ciblés après vérification du HTML réel */
+/* v0.14.4 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.3 — changements rapides + fermeture Horaire en haut */
+/* v0.14.4 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.3 — formats de match 3/4/5/7/9 manches */
+/* v0.14.4 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.3 */
+/* v0.14.4 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -1128,10 +1128,41 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0144-captain-team-borders">
+/* Contours cohérents pour les 6 équipes dans la page Capitaine */
+#captainLeagueStrip .team-card{
+  border-width:2px!important;
+  border-style:solid!important;
+  transition:border-color .16s ease, box-shadow .16s ease, transform .16s ease, filter .16s ease;
+}
+
+#captainLeagueStrip .team-card.brewers{border-color:#2f78c4!important;}
+#captainLeagueStrip .team-card.yankees{border-color:#d84a4a!important;}
+#captainLeagueStrip .team-card.sox{border-color:#9aa3ad!important;}
+#captainLeagueStrip .team-card.expos{border-color:#79bdf2!important;}
+#captainLeagueStrip .team-card.indiens{border-color:#d94a4a!important;}
+#captainLeagueStrip .team-card.bananes{border-color:#f2cf42!important;}
+
+/* Équipe sélectionnée : contour plus fort et léger glow */
+#captainLeagueStrip .team-card.selected-team{
+  border-width:3px!important;
+  transform:translateY(-1px);
+  filter:brightness(1.08);
+}
+
+#captainLeagueStrip .team-card.brewers.selected-team{box-shadow:0 0 0 2px rgba(47,120,196,.24),0 0 16px rgba(47,120,196,.30)!important;}
+#captainLeagueStrip .team-card.yankees.selected-team{box-shadow:0 0 0 2px rgba(216,74,74,.24),0 0 16px rgba(216,74,74,.30)!important;}
+#captainLeagueStrip .team-card.sox.selected-team{box-shadow:0 0 0 2px rgba(154,163,173,.22),0 0 16px rgba(154,163,173,.26)!important;}
+#captainLeagueStrip .team-card.expos.selected-team{box-shadow:0 0 0 2px rgba(121,189,242,.24),0 0 16px rgba(121,189,242,.30)!important;}
+#captainLeagueStrip .team-card.indiens.selected-team{box-shadow:0 0 0 2px rgba(217,74,74,.24),0 0 16px rgba(217,74,74,.30)!important;}
+#captainLeagueStrip .team-card.bananes.selected-team{box-shadow:0 0 0 2px rgba(242,207,66,.22),0 0 16px rgba(242,207,66,.28)!important;}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.14.3 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.14.4 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -4326,7 +4357,7 @@ function renderViewer(){
   renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.14.3.
+// L'accueil par rôles est l'écran initial de v0.14.4.
 
 renderLineupEditor();
 

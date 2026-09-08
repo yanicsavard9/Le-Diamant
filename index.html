@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.13.5</title>
+<title>Diamond v0.13.8</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.13.5 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.13.8 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.13.5 — corrige la bande noire à droite sur iPhone */
+/* v0.13.8 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.13.5 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.13.8 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.5 — enlève toute ligne sous le lanceur */
+/* v0.13.8 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.5 — correctifs ciblés après vérification du HTML réel */
+/* v0.13.8 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.5 — changements rapides + fermeture Horaire en haut */
+/* v0.13.8 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.5 — formats de match 3/4/5/7/9 manches */
+/* v0.13.8 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.5 */
+/* v0.13.8 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -1009,10 +1009,58 @@ button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingle
 body.role-viewer #viewerStandings{display:none!important}
 </style>
 
+
+<style id="diamond-v0136-captain-cleanup">
+body.role-captain #viewerLiveDiamondCard{display:none!important}
+body.role-official #viewerLiveDiamondCard{display:none!important}
+body.role-viewer #viewerLiveDiamondCard{display:block!important}
+</style>
+
+
+<style id="diamond-v0137-viewer-layout">
+body.role-viewer #viewerStandings,
+body.role-viewer .viewer-standings-card,
+body.role-viewer [data-viewer-section="standings"]{
+  display:none!important;
+}
+body.role-viewer #viewerLiveDiamondCard{
+  display:block!important;
+  order:20;
+}
+</style>
+
+
+<style id="diamond-v0138-logos">
+.team-logo-inline{
+  width:var(--logo-size,46px);height:var(--logo-size,46px);
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 auto;vertical-align:middle;
+}
+.team-logo-inline svg{width:100%;height:100%;display:block}
+.team-logo-only-card{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  min-height:76px!important;
+}
+#leagueTeamsStrip .league-team-chip{padding:8px!important}
+#leagueTeamsStrip .league-team-chip .dot,
+#leagueTeamsStrip .league-team-chip > div:last-child{display:none!important}
+#captainLeagueStrip .team-card .team-head{
+  justify-content:center!important;min-height:58px!important;
+}
+.logo-matchup{display:flex;align-items:center;justify-content:center;gap:12px}
+.logo-score{display:flex;align-items:center;justify-content:center;gap:8px;font-weight:900;font-size:18px}
+.logo-vs{font-weight:900;color:#a9b8ca}
+.logo-table-cell{text-align:left!important}
+.logo-table-wrap{display:flex;align-items:center;gap:8px}
+.logo-tab{display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:8px!important}
+#awayTeam .name,#homeTeam .name{display:flex!important;align-items:center;justify-content:center!important;min-height:44px}
+.viewer-team-card .team-copy b{display:none!important}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.5 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.8 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1021,12 +1069,12 @@ body.role-viewer #viewerStandings{display:none!important}
       <h2>Choisissez votre accès</h2>
       <div class="muted">Une seule application, trois expériences adaptées au rôle de chacun.
     <div id="leagueTeamsStrip" aria-label="Équipes de la ligue">
-      <div class="league-team-chip brewers"><div class="dot">B</div><div>Brewers</div></div>
-      <div class="league-team-chip yankees"><div class="dot">Y</div><div>Yankees</div></div>
-      <div class="league-team-chip sox"><div class="dot">S</div><div>Sox</div></div>
-      <div class="league-team-chip expos"><div class="dot">E</div><div>Expos</div></div>
-      <div class="league-team-chip indiens"><div class="dot">I</div><div>Indiens</div></div>
-      <div class="league-team-chip bananes"><div class="dot">B</div><div>Bananes</div></div>
+      <div class="league-team-chip brewers team-logo-only-card" title="Brewers"><span class="home-logo-slot" data-team="Brewers"></span></div>
+      <div class="league-team-chip yankees team-logo-only-card" title="Yankees"><span class="home-logo-slot" data-team="Yankees"></span></div>
+      <div class="league-team-chip sox team-logo-only-card" title="Sox"><span class="home-logo-slot" data-team="Sox"></span></div>
+      <div class="league-team-chip expos team-logo-only-card" title="Expos"><span class="home-logo-slot" data-team="Expos"></span></div>
+      <div class="league-team-chip indiens team-logo-only-card" title="Indiens"><span class="home-logo-slot" data-team="Indiens"></span></div>
+      <div class="league-team-chip bananes team-logo-only-card" title="Bananes"><span class="home-logo-slot" data-team="Bananes"></span></div>
     </div></div>
       <div class="role-grid">
         <button class="role-card" data-role="viewer" type="button" onclick="selectRole('viewer')">
@@ -1144,7 +1192,7 @@ body.role-viewer #viewerStandings{display:none!important}
   
     <div class="bottom-tabs">
       <button type="button" onclick="openLeagueInfo('schedule')">📅 HORAIRE</button>
-      <button type="button" onclick="openLeagueInfo('standings')">🏆 CLASSEMENT</button>
+      <button type="button" class="viewer-flow-tab" onclick="document.getElementById('viewerLiveDiamondCard')?.scrollIntoView({behavior:'smooth',block:'start'})">⚾ DÉROULEMENT</button>
       <button type="button" onclick="openLeagueInfo('stats')">📊 STATISTIQUES</button>
     </div>
 </section>
@@ -1161,22 +1209,40 @@ body.role-viewer #viewerStandings{display:none!important}
     </div>
 
     <div id="captainLeagueStrip" class="team-strip six-team-strip">
-      <div class="team-card brewers" onclick="showCoach('Brewers')"><div class="team-head">⚾ Brewers</div><div class="status" id="brewersStatus">Alignement non soumis</div></div>
-      <div class="team-card yankees" onclick="showCoach('Yankees')"><div class="team-head">⚾ Yankees</div><div class="status" id="yankeesStatus">Alignement non soumis</div></div>
-      <div class="team-card sox" onclick="showCoach('Sox')"><div class="team-head">⚾ Sox</div><div class="status" id="soxStatus">Alignement non soumis</div></div>
-      <div class="team-card expos" onclick="showCoach('Expos')"><div class="team-head">⚾ Expos</div><div class="status" id="exposStatus">Alignement non soumis</div></div>
-      <div class="team-card indiens" onclick="showCoach('Indiens')"><div class="team-head">⚾ Indiens</div><div class="status" id="indiensStatus">Alignement non soumis</div></div>
-      <div class="team-card bananes" onclick="showCoach('Bananes')"><div class="team-head">⚾ Bananes</div><div class="status" id="bananesStatus">Alignement non soumis</div></div>
+      <div class="team-card brewers" onclick="showCoach('Brewers')" title="Brewers">
+      <div class="team-head"><span class="captain-logo-slot" data-team="Brewers"></span></div>
+      <div class="status" id="brewersStatus">Alignement non soumis</div>
+    </div>
+      <div class="team-card yankees" onclick="showCoach('Yankees')" title="Yankees">
+      <div class="team-head"><span class="captain-logo-slot" data-team="Yankees"></span></div>
+      <div class="status" id="yankeesStatus">Alignement non soumis</div>
+    </div>
+      <div class="team-card sox" onclick="showCoach('Sox')" title="Sox">
+      <div class="team-head"><span class="captain-logo-slot" data-team="Sox"></span></div>
+      <div class="status" id="soxStatus">Alignement non soumis</div>
+    </div>
+      <div class="team-card expos" onclick="showCoach('Expos')" title="Expos">
+      <div class="team-head"><span class="captain-logo-slot" data-team="Expos"></span></div>
+      <div class="status" id="exposStatus">Alignement non soumis</div>
+    </div>
+      <div class="team-card indiens" onclick="showCoach('Indiens')" title="Indiens">
+      <div class="team-head"><span class="captain-logo-slot" data-team="Indiens"></span></div>
+      <div class="status" id="indiensStatus">Alignement non soumis</div>
+    </div>
+      <div class="team-card bananes" onclick="showCoach('Bananes')" title="Bananes">
+      <div class="team-head"><span class="captain-logo-slot" data-team="Bananes"></span></div>
+      <div class="status" id="bananesStatus">Alignement non soumis</div>
+    </div>
     </div>
 
     <div class="card">
       <div class="coach-tabs six-coach-tabs">
-        <button id="tabBrewers" class="active" onclick="showCoach('Brewers')">BREWERS</button>
-        <button id="tabYankees" onclick="showCoach('Yankees')">YANKEES</button>
-        <button id="tabSox" onclick="showCoach('Sox')">SOX</button>
-        <button id="tabExpos" onclick="showCoach('Expos')">EXPOS</button>
-        <button id="tabIndiens" onclick="showCoach('Indiens')">INDIENS</button>
-        <button id="tabBananes" onclick="showCoach('Bananes')">BANANES</button>
+        <button id="tabBrewers" class="active" onclick="showCoach('Brewers')"><span class="coach-tab-logo" data-team="Brewers"></span></button>
+        <button id="tabYankees" onclick="showCoach('Yankees')"><span class="coach-tab-logo" data-team="Yankees"></span></button>
+        <button id="tabSox" onclick="showCoach('Sox')"><span class="coach-tab-logo" data-team="Sox"></span></button>
+        <button id="tabExpos" onclick="showCoach('Expos')"><span class="coach-tab-logo" data-team="Expos"></span></button>
+        <button id="tabIndiens" onclick="showCoach('Indiens')"><span class="coach-tab-logo" data-team="Indiens"></span></button>
+        <button id="tabBananes" onclick="showCoach('Bananes')"><span class="coach-tab-logo" data-team="Bananes"></span></button>
       </div>
       <div class="section-title" id="coachTitle">Alignement Brewers</div>
       <div class="muted" style="font-size:12px;margin-bottom:7px">Touchez le nom d’un joueur dans l’alignement pour ouvrir la liste des joueurs de cette équipe.</div>
@@ -1566,6 +1632,43 @@ const originalTeams={
     {name:"Adam Turcotte",pos:"DH"},{name:"Benjamin Larouche",pos:"L"},{name:"Félix Dallaire",pos:"Piton"}
   ]
 };
+
+const TEAM_LOGO_SVGS={
+  Brewers:`<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="#102f55" stroke="#f4c542" stroke-width="5"/>
+    <path d="M25 30v38c0 8 7 14 15 14h20c10 0 18-8 18-18 0-8-5-14-12-17 5-3 8-8 8-14 0-9-7-16-16-16H44v13h13c4 0 7 3 7 7s-3 7-7 7H44V30z" fill="#f4c542"/>
+    <circle cx="56" cy="60" r="10" fill="#102f55"/>
+  </svg>`,
+  Yankees:`<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="#ffffff" stroke="#cfd6df" stroke-width="3"/>
+    <path d="M30 22l12 22 10-22h13L51 52v26H39V52L17 22h13zm27 0h12l14 56H70l-4-18H52l-4 18H36l13-56h8zm2 16l-5 13h10z" fill="#17365d"/>
+  </svg>`,
+  Sox:`<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="#050505" stroke="#d7d7d7" stroke-width="3"/>
+    <path d="M63 20c-6-5-16-7-24-4-9 3-15 11-15 20 0 12 8 17 21 21 9 3 12 5 12 10 0 5-4 8-10 8-7 0-13-4-17-9l-9 9c6 8 15 13 26 13 15 0 25-9 25-22 0-14-10-19-23-23-8-2-11-4-11-8 0-4 4-7 9-7 5 0 10 2 14 6z" fill="#fff"/>
+  </svg>`,
+  Expos:`<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="#fff" stroke="#2870b8" stroke-width="4"/>
+    <path d="M18 57c0-18 10-31 25-31 11 0 18 6 22 15 4-9 11-15 20-15v16c-7 0-11 4-11 12v19H61V55c0-8-3-13-9-13s-9 5-9 13v18H30V58c0-10-3-16-12-16z" fill="#2e72bb"/>
+    <path d="M55 38c7-8 14-12 25-12v14c-8 0-13 4-16 10z" fill="#e63737"/>
+    <circle cx="71" cy="67" r="8" fill="#e63737"/>
+  </svg>`,
+  Indiens:`<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="#142f55" stroke="#d64545" stroke-width="4"/>
+    <path d="M72 28c-6-6-13-9-22-9-18 0-31 13-31 31s13 31 31 31c9 0 17-3 23-9l-9-11c-4 4-8 6-14 6-10 0-17-7-17-17s7-17 17-17c5 0 10 2 13 6z" fill="#e23b3b"/>
+  </svg>`,
+  Bananes:`<svg viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="47" fill="#183a5a" stroke="#f0c928" stroke-width="4"/>
+    <path d="M25 35c12 3 24 2 35-3 3-1 6 2 4 5-8 14-20 24-35 29-9 3-16-2-15-10 1-8 5-15 11-21z" fill="#f4cf2f" stroke="#fff1a6" stroke-width="3"/>
+    <path d="M62 31c4-2 8-2 12-1" stroke="#f4cf2f" stroke-width="7" stroke-linecap="round"/>
+  </svg>`
+};
+
+function teamLogo(team,size=46,extraClass=""){
+  const svg=TEAM_LOGO_SVGS[team]||`<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="#22364b"/><text x="50" y="62" text-anchor="middle" font-size="42" font-family="Arial" font-weight="800" fill="white">${(team||"?")[0]}</text></svg>`;
+  return `<span class="team-logo-inline ${extraClass}" title="${team}" aria-label="${team}" style="--logo-size:${size}px">${svg}</span>`;
+}
+
 function freshPlayer(p,i,team){return {id:team+"_"+i,name:p.name,pos:p.pos,active:true,ab:0,h:0,hr:0,rbi:0,r:0,bv:0,bb:0,hbp:0,k:0}}
 const TEAM_CODES={Brewers:"B",Yankees:"Y",Sox:"S",Expos:"E",Indiens:"I",Bananes:"N"};
 let teams={};
@@ -2497,11 +2600,11 @@ function renderGame(){
   const awayBox=$("awayTeam"),homeBox=$("homeTeam");
 
   if(awayBox){
-    const n=awayBox.querySelector(".name");if(n)n.textContent=activeAwayTeam.toUpperCase();
+    const n=awayBox.querySelector(".name");if(n)n.innerHTML=teamLogo(activeAwayTeam,42);
     awayBox.classList.toggle("active",state.top);
   }
   if(homeBox){
-    const n=homeBox.querySelector(".name");if(n)n.textContent=activeHomeTeam.toUpperCase();
+    const n=homeBox.querySelector(".name");if(n)n.innerHTML=teamLogo(activeHomeTeam,42);
     homeBox.classList.toggle("active",!state.top);
   }
 
@@ -2624,6 +2727,7 @@ function saveFinalGameToLocalSeason(){
 
   renderSchedule();
   renderStandings();
+  hydrateTeamLogos();
   renderOfficialGames();
 }
 
@@ -2684,11 +2788,11 @@ function renderOfficialGames(){
         <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px"
           onclick="openCompletedGame('${finalGame.id}')">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-            <strong>${g.time} — ${g.away} vs ${g.home}</strong>
+            <strong>${g.time}</strong><span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
             <span style="font-weight:900">FINAL</span>
           </div>
           <div style="margin-top:7px;font-size:14px">
-            <strong>${finalGame.awayTeam} ${finalGame.awayRuns} – ${finalGame.homeTeam} ${finalGame.homeRuns}</strong>
+            <div class="logo-score">${teamLogo(finalGame.awayTeam,32)} ${finalGame.awayRuns} – ${finalGame.homeRuns} ${teamLogo(finalGame.homeTeam,32)}</div>
           </div>
           <div class="muted" style="font-size:12px;margin-top:4px">
             Touchez pour voir le résumé et les statistiques du match
@@ -2708,7 +2812,7 @@ function renderOfficialGames(){
       <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px"
         onclick="openOfficialGame('${key}')">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-          <strong>${g.time} — ${g.away} vs ${g.home}</strong>
+          <strong>${g.time}</strong><span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
           <span>›</span>
         </div>
         <div style="margin-top:6px;font-size:12px">
@@ -2725,7 +2829,7 @@ function openOfficialGame(key){
   if(!g)return;
 
   $("officialGamesModal").classList.remove("show");
-  $("officialGameTitle").textContent=`${g.away} vs ${g.home}`;
+  $("officialGameTitle").innerHTML=`<span class="logo-matchup">${teamLogo(g.away,44)}<span class="logo-vs">@</span>${teamLogo(g.home,44)}</span>`;
   $("officialGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
   renderOfficialGameStatus();
   $("officialGameDetailModal").classList.add("show");
@@ -3025,11 +3129,7 @@ function renderSchedule(){
   document.body.style.overflowY="auto";
   document.documentElement.style.overflowY="auto";
 
-  const candidates=[
-    $("viewerSchedule"),
-    $("officialSchedule"),
-    $("leagueSchedulePanel")
-  ].filter(Boolean);
+  const candidates=[$("viewerSchedule"),$("officialSchedule"),$("leagueSchedulePanel")].filter(Boolean);
 
   const fmtDate=(iso)=>{
     const [y,m,d]=iso.split("-").map(Number);
@@ -3049,15 +3149,15 @@ function renderSchedule(){
     const games=grouped[date].map(g=>{
       const key=scheduleGameKey(g);
       const finalGame=completedGames.find(game=>game.scheduleKey===key);
+      const matchup=`<div class="logo-matchup">${teamLogo(g.away,52)}<span class="logo-vs">@</span>${teamLogo(g.home,52)}</div>`;
 
       if(finalGame){
         return `
-          <button type="button" class="readonly-note"
-            style="width:100%;text-align:left;margin-bottom:7px"
+          <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:7px"
             onclick="openCompletedGame('${finalGame.id}')">
             <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-              <strong>${g.away} ${finalGame.awayRuns} – ${g.home} ${finalGame.homeRuns}</strong>
-              <strong>FINAL</strong>
+              ${matchup}
+              <strong>${finalGame.awayRuns} – ${finalGame.homeRuns} • FINAL</strong>
             </div>
             <div class="muted" style="font-size:12px;margin-top:4px">
               Touchez pour voir le pointage par manche et les statistiques des joueurs
@@ -3068,28 +3168,23 @@ function renderSchedule(){
       return `
         <div class="readonly-note" style="margin-bottom:7px">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-            <strong>${g.away} vs ${g.home}</strong>
+            ${matchup}
             <span class="muted">${g.time}</span>
           </div>
           <div class="muted" style="font-size:12px;margin-top:3px">À venir</div>
         </div>`;
     }).join("");
 
-    return `
-      <div style="margin-top:14px">
-        <div class="section-title">${fmtDate(date).toUpperCase()}</div>
-        ${games}
-      </div>`;
+    return `<div style="margin-top:14px"><div class="section-title">${fmtDate(date).toUpperCase()}</div>${games}</div>`;
   }).join("");
 
-  // Fallback only for a completed match that wasn't launched from a scheduled game.
   const unlinked=completedGames.filter(game=>!game.scheduleKey);
   const unlinkedHtml=unlinked.length
     ? `<div class="section-title" style="margin-top:14px">AUTRES MATCHS TERMINÉS</div>`+
       unlinked.map(game=>`
         <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:8px"
           onclick="openCompletedGame('${game.id}')">
-          <strong>${game.awayTeam} ${game.awayRuns} – ${game.homeTeam} ${game.homeRuns}</strong><br>
+          <div class="logo-score">${teamLogo(game.awayTeam,38)} ${game.awayRuns} – ${game.homeRuns} ${teamLogo(game.homeTeam,38)}</div>
           <span class="muted">FINAL • Touchez pour voir les statistiques du match</span>
         </button>`).join("")
     : "";
@@ -3110,7 +3205,7 @@ function renderStandings(){
   const rows=ordered.map((s,index)=>`
     <tr>
       <td><strong>${index+1}</strong></td>
-      <td>${s.team}</td>
+      <td class="logo-table-cell"><div class="logo-table-wrap">${teamLogo(s.team,38)}</div></td>
       <td>${s.W||0}</td>
       <td>${s.L||0}</td>
       <td><strong>${s.PTS}</strong></td>
@@ -4043,10 +4138,10 @@ function renderViewer(){
 
   const awayCard=$("viewerTeamBrewers"),homeCard=$("viewerTeamYankees");
   if(awayCard){
-    const label=awayCard.querySelector(".team-copy b");if(label)label.textContent=activeAwayTeam.toUpperCase();
+    const slot=awayCard.querySelector(".viewer-logo-slot");if(slot)slot.innerHTML=teamLogo(activeAwayTeam,52);
   }
   if(homeCard){
-    const label=homeCard.querySelector(".team-copy b");if(label)label.textContent=activeHomeTeam.toUpperCase();
+    const slot=homeCard.querySelector(".viewer-logo-slot");if(slot)slot.innerHTML=teamLogo(activeHomeTeam,52);
   }
 
   const batting=mode==="live"?currentBattingTeam():null;
@@ -4105,8 +4200,8 @@ function renderViewer(){
   if(logoHost)logoHost.innerHTML=`<div style="font-size:30px">⚾</div>`;
 
   const b=$("viewerBrewersTab"),y=$("viewerYankeesTab");
-  if(b){b.textContent=activeAwayTeam.toUpperCase();b.onclick=()=>setViewerTeam(activeAwayTeam);b.classList.toggle("active",team===activeAwayTeam);}
-  if(y){y.textContent=activeHomeTeam.toUpperCase();y.onclick=()=>setViewerTeam(activeHomeTeam);y.classList.toggle("active",team===activeHomeTeam);}
+  if(b){b.innerHTML=teamLogo(activeAwayTeam,32);b.classList.add("logo-tab");b.onclick=()=>setViewerTeam(activeAwayTeam);b.classList.toggle("active",team===activeAwayTeam);}
+  if(y){y.innerHTML=teamLogo(activeHomeTeam,32);y.classList.add("logo-tab");y.onclick=()=>setViewerTeam(activeHomeTeam);y.classList.toggle("active",team===activeHomeTeam);}
 
   const rows=teamData.lineup.map(p=>`
     <tr>
@@ -4118,7 +4213,7 @@ function renderViewer(){
   renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.13.5.
+// L'accueil par rôles est l'écran initial de v0.13.8.
 
 renderLineupEditor();
 
@@ -4181,5 +4276,29 @@ document.querySelectorAll(".action-btn,.kbtn").forEach(btn=>{
     <button type="button" style="width:100%;margin-top:12px" onclick="closeLeagueInfo()">FERMER</button>
   </div>
 </div>
+<script>
+function hydrateTeamLogos(){
+  document.querySelectorAll("[data-team].home-logo-slot,[data-team].captain-logo-slot,[data-team].coach-tab-logo").forEach(el=>{
+    const team=el.dataset.team;
+    const size=el.classList.contains("coach-tab-logo")?36:(el.classList.contains("home-logo-slot")?48:54);
+    el.innerHTML=teamLogo(team,size);
+  });
+
+  ["Brewers","Yankees"].forEach((team,idx)=>{
+    const card=document.getElementById(idx===0?"viewerTeamBrewers":"viewerTeamYankees");
+    if(card){
+      let img=card.querySelector("img");
+      if(img){img.style.display="none";}
+      if(!card.querySelector(".viewer-logo-slot")){
+        const slot=document.createElement("div");
+        slot.className="viewer-logo-slot";
+        slot.innerHTML=teamLogo(team,52);
+        card.insertBefore(slot,card.firstChild);
+      }
+    }
+  });
+}
+document.addEventListener("DOMContentLoaded",hydrateTeamLogos);
+</script>
 </body>
 </html>

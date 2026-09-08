@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.13.4</title>
+<title>Diamond v0.13.5</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.13.4 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.13.5 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.13.4 — corrige la bande noire à droite sur iPhone */
+/* v0.13.5 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.13.4 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.13.5 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.4 — enlève toute ligne sous le lanceur */
+/* v0.13.5 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.4 — correctifs ciblés après vérification du HTML réel */
+/* v0.13.5 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.4 — changements rapides + fermeture Horaire en haut */
+/* v0.13.5 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.4 — formats de match 3/4/5/7/9 manches */
+/* v0.13.5 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.13.4 */
+/* v0.13.5 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -955,10 +955,64 @@ button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingle
 #leagueTeamsStrip,#leagueTeamsStrip *{pointer-events:none!important}
 </style>
 
+
+<style id="diamond-v0135-team-colors">
+:root{
+  --team-brewers:#1f4f7d;
+  --team-yankees:#f4f4f4;
+  --team-indiens:#d94a4a;
+  --team-bananes:#f2cf42;
+  --team-sox:#9aa3ad;
+  --team-expos:#79bdf2;
+}
+#captainLeagueStrip .team-card.brewers .team-head{color:var(--team-brewers)!important}
+#captainLeagueStrip .team-card.yankees .team-head{color:var(--team-yankees)!important}
+#captainLeagueStrip .team-card.indiens .team-head{color:var(--team-indiens)!important}
+#captainLeagueStrip .team-card.bananes .team-head{color:var(--team-bananes)!important}
+#captainLeagueStrip .team-card.sox .team-head{color:var(--team-sox)!important}
+#captainLeagueStrip .team-card.expos .team-head{color:var(--team-expos)!important}
+
+.team-brewers{color:#5fa2e0!important}
+.team-yankees{color:#fff!important}
+.team-indiens{color:#ef6767!important}
+.team-bananes{color:#f6d95b!important}
+.team-sox{color:#b8c0c8!important}
+.team-expos{color:#8cc8f4!important}
+</style>
+
+
+<style id="diamond-v0135-batter-card">
+#plateAppearanceCard{border:1px solid #243a51!important}
+#plateAppearanceCard.accent-brewers{border-color:#2e6ea9!important;box-shadow:inset 4px 0 0 #2e6ea9}
+#plateAppearanceCard.accent-yankees{border-color:#d8d8d8!important;box-shadow:inset 4px 0 0 #d8d8d8}
+#plateAppearanceCard.accent-indiens{border-color:#d94a4a!important;box-shadow:inset 4px 0 0 #d94a4a}
+#plateAppearanceCard.accent-bananes{border-color:#f2cf42!important;box-shadow:inset 4px 0 0 #f2cf42}
+#plateAppearanceCard.accent-sox{border-color:#9aa3ad!important;box-shadow:inset 4px 0 0 #9aa3ad}
+#plateAppearanceCard.accent-expos{border-color:#79bdf2!important;box-shadow:inset 4px 0 0 #79bdf2}
+</style>
+
+
+<style id="diamond-v0135-viewer-diamond">
+.viewer-live-diamond{margin-top:14px}
+.viewer-diamond-wrap{position:relative;height:260px;max-width:360px;margin:0 auto}
+.viewer-base,.viewer-home{
+  position:absolute;width:82px;height:82px;display:flex;align-items:center;justify-content:center;
+  border-radius:18px;border:1px solid #35506c;background:#1a2b3e;color:#9fb0c4;
+  text-align:center;padding:6px;font-size:14px;overflow:hidden;
+}
+.viewer-base.occupied{color:#fff;font-weight:800;border-width:2px}
+.viewer-base.base2{top:8px;left:50%;transform:translateX(-50%)}
+.viewer-base.base3{left:18px;top:105px}
+.viewer-base.base1{right:18px;top:105px}
+.viewer-home{bottom:4px;left:50%;transform:translateX(-50%)}
+.viewer-batter-now{margin-top:10px;text-align:center;font-size:16px;font-weight:800}
+body.role-viewer #viewerStandings{display:none!important}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.4 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.13.5 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1185,7 +1239,19 @@ button.primary,.primary-btn,#startOfficialPreparedGameBtn,#officialApproveSingle
     </div>
 
     
-    <div class="bottom-tabs official-bottom-tabs">
+    
+<div id="viewerLiveDiamondCard" class="card viewer-live-diamond">
+  <div class="section-title">Déroulement de la partie</div>
+  <div class="muted" style="font-size:12px;margin-bottom:12px">Coureurs présents sur les buts en temps réel</div>
+  <div class="viewer-diamond-wrap">
+    <div id="viewerBase2" class="viewer-base base2">2e</div>
+    <div id="viewerBase3" class="viewer-base base3">3e</div>
+    <div id="viewerBase1" class="viewer-base base1">1er</div>
+    <div id="viewerHome" class="viewer-home">Marbre</div>
+  </div>
+  <div id="viewerBatterNow" class="viewer-batter-now"></div>
+</div>
+<div class="bottom-tabs official-bottom-tabs">
       <button type="button" onclick="openLeagueInfo('schedule')">📅 HORAIRE</button>
       <button type="button" onclick="openLeagueInfo('standings')">🏆 CLASSEMENT</button>
       <button type="button" onclick="openLeagueInfo('stats')">📊 STATISTIQUES</button>
@@ -2417,6 +2483,15 @@ function saveHistory(){
 function getPlayer(ref){return teams[ref.team].lineup.find(p=>p.id===ref.id)}
 function runnerRef(p,team){return {id:p.id,name:p.name,team}}
 
+
+function applyCurrentTeamAccent(){
+  const team=currentBattingTeam();
+  const card=document.getElementById("plateAppearanceCard");
+  if(!card)return;
+  ["brewers","yankees","indiens","bananes","sox","expos"].forEach(t=>card.classList.remove("accent-"+t));
+  card.classList.add("accent-"+team.toLowerCase());
+}
+
 function renderGame(){
   const batting=currentBattingTeam();
   const awayBox=$("awayTeam"),homeBox=$("homeTeam");
@@ -2479,6 +2554,7 @@ function renderGame(){
     ?state.log.slice().reverse().map(x=>`<div>${x}</div>`).join("")
     :"<div>Aucune action enregistrée.</div>";
 
+  applyCurrentTeamAccent();
   keepLiveGameLocked();
 
   if(state.gameOver){
@@ -3023,39 +3099,27 @@ function renderSchedule(){
 }
 
 function renderStandings(){
-  const candidates=[
-    $("viewerStandings"),
-    $("officialStandings"),
-    $("leagueStandingsPanel")
-  ].filter(Boolean);
-
+  const candidates=[$("viewerStandings"),$("officialStandings"),$("leagueStandingsPanel")].filter(Boolean);
   const ordered=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"]
     .map(team=>{
       const s=standings[team];
       return {team,...s,PTS:(s.W||0)*2,DIFF:(s.RF||0)-(s.RA||0)};
     })
-    .sort((a,b)=>
-      b.PTS-a.PTS ||
-      b.W-a.W ||
-      b.DIFF-a.DIFF ||
-      b.RF-a.RF ||
-      a.team.localeCompare(b.team,"fr")
-    );
+    .sort((a,b)=>b.PTS-a.PTS || b.W-a.W || b.DIFF-a.DIFF || b.RF-a.RF || a.team.localeCompare(b.team,"fr"));
 
-  const rows=ordered.map((s,index)=>{
-    const pct=(s.W+s.L)?(s.W/(s.W+s.L)).toFixed(3).replace(/^0/,""):"—";
-    return `<tr>
+  const rows=ordered.map((s,index)=>`
+    <tr>
       <td><strong>${index+1}</strong></td>
       <td>${s.team}</td>
+      <td>${s.W||0}</td>
+      <td>${s.L||0}</td>
       <td><strong>${s.PTS}</strong></td>
-      <td>${s.W}</td>
-      <td>${s.L}</td>
-      <td>${pct}</td>
-    </tr>`;
-  }).join("");
+      <td>${s.RF||0}</td>
+      <td>${s.RA||0}</td>
+    </tr>`).join("");
 
   const html=`<table class="viewer-table">
-    <thead><tr><th>#</th><th>Équipe</th><th>PTS</th><th>V</th><th>D</th><th>%</th></tr></thead>
+    <thead><tr><th>#</th><th>Équipe</th><th>V</th><th>D</th><th>PTS</th><th>PP</th><th>PC</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 
@@ -3934,6 +3998,28 @@ function setViewerTeam(teamName){
   renderViewer();
 }
 
+
+function renderViewerDiamond(){
+  const map={1:"viewerBase1",2:"viewerBase2",3:"viewerBase3"};
+  [1,2,3].forEach(base=>{
+    const el=document.getElementById(map[base]);
+    if(!el)return;
+    const r=state.bases?.[base];
+    el.className="viewer-base base"+base+(r?" occupied team-"+r.team.toLowerCase():"");
+    el.textContent=r?r.name:(base===1?"1er":base+"e");
+  });
+  const batterEl=document.getElementById("viewerBatterNow");
+  if(!batterEl)return;
+  if(gameStarted&&!state.gameOver){
+    const b=batter();
+    batterEl.className="viewer-batter-now team-"+currentBattingTeam().toLowerCase();
+    batterEl.textContent="Au bâton : "+b.name+" • "+currentBattingTeam();
+  }else{
+    batterEl.className="viewer-batter-now";
+    batterEl.textContent="";
+  }
+}
+
 function renderViewer(){
   const st=state;
   $("pregame").classList.add("hidden");
@@ -4029,9 +4115,10 @@ function renderViewer(){
     </tr>`);
 
   $("viewerStatsBody").innerHTML=rows.join("");
+  renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.13.4.
+// L'accueil par rôles est l'écran initial de v0.13.5.
 
 renderLineupEditor();
 

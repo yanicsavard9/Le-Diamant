@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.15.0</title>
+<title>Diamond v0.15.1</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.15.0 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.15.1 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.15.0 — corrige la bande noire à droite sur iPhone */
+/* v0.15.1 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.15.0 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.15.1 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.15.0 — enlève toute ligne sous le lanceur */
+/* v0.15.1 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.15.0 — correctifs ciblés après vérification du HTML réel */
+/* v0.15.1 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.15.0 — changements rapides + fermeture Horaire en haut */
+/* v0.15.1 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.15.0 — formats de match 3/4/5/7/9 manches */
+/* v0.15.1 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.15.0 */
+/* v0.15.1 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -1198,10 +1198,41 @@ body.role-viewer .strike-count{
 @media(max-width:520px){.manager-settings-grid{grid-template-columns:1fr}}
 </style>
 
+
+<style id="diamond-v0151-manager-settings">
+#leagueSettingsModal .sheet,
+#managerScheduleModal .sheet,
+#managerGameModal .sheet{
+  max-height:88vh;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.manager-section-title{
+  grid-column:1/-1;
+  margin:4px 0 0;
+  padding:10px 2px 4px;
+  font-size:13px;
+  font-weight:950;
+  letter-spacing:.05em;
+  color:#9fd7ff;
+  text-transform:uppercase;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.manager-actions-sticky{
+  position:sticky;
+  bottom:0;
+  margin:14px -16px -20px;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(23,33,43,.15),#17212b 20%);
+  z-index:2;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.15.0 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.15.1 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1804,6 +1835,7 @@ body.role-viewer .strike-count{
 <div class="toast" id="toast"></div>
 
 
+
 <div class="modal" id="leagueSettingsModal">
   <div class="sheet">
     <div class="league-info-header">
@@ -1812,10 +1844,56 @@ body.role-viewer .strike-count{
     </div>
 
     <div class="manager-settings-grid">
+
       <div class="manager-setting full">
         <label>Nom de la ligue</label>
         <input id="mgrLeagueName" type="text" value="Ligue Diamond">
       </div>
+
+      <div class="manager-section-title">⚾ Règles des matchs</div>
+
+      <div class="manager-setting">
+        <label>Nombre de manches réglementaires</label>
+        <select id="mgrRegInnings">
+          <option value="3">3 manches</option>
+          <option value="4">4 manches</option>
+          <option value="5">5 manches</option>
+          <option value="7" selected>7 manches</option>
+          <option value="9">9 manches</option>
+        </select>
+      </div>
+
+      <div class="manager-setting">
+        <label>
+          <input id="mgrExtraInnings" type="checkbox" checked onchange="toggleLeagueSettingDependencies()">
+          Prolongations si le match est égal
+        </label>
+        <div class="muted" style="font-size:11px;margin-top:5px">
+          Si désactivé, le match peut se terminer à égalité après les manches réglementaires.
+        </div>
+      </div>
+
+      <div class="manager-setting full">
+        <label>
+          <input id="mgrAutoRunner" type="checkbox" onchange="toggleLeagueSettingDependencies()">
+          Ajouter automatiquement un coureur sur les sentiers en prolongation
+        </label>
+        <div class="manager-settings-grid" style="margin-top:8px">
+          <div>
+            <label>But de départ du coureur</label>
+            <select id="mgrAutoRunnerBase">
+              <option value="1">1er but</option>
+              <option value="2" selected>2e but</option>
+              <option value="3">3e but</option>
+            </select>
+          </div>
+          <div class="readonly-note" style="font-size:11px">
+            Diamond choisira le joueur qui précède le premier frappeur de la manche dans l’ordre offensif.
+          </div>
+        </div>
+      </div>
+
+      <div class="manager-section-title">👥 Équipes et calendrier</div>
 
       <div class="manager-setting">
         <label>Nombre d’équipes</label>
@@ -1824,36 +1902,12 @@ body.role-viewer .strike-count{
       </div>
 
       <div class="manager-setting">
-        <label>Manches réglementaires</label>
-        <select id="mgrRegInnings">
-          <option value="3">3 manches</option><option value="4">4 manches</option>
-          <option value="5">5 manches</option><option value="7" selected>7 manches</option>
-          <option value="9">9 manches</option>
-        </select>
-      </div>
-
-      <div class="manager-setting">
-        <label><input id="mgrExtraInnings" type="checkbox" checked onchange="toggleLeagueSettingDependencies()"> Prolongations en cas d’égalité</label>
-        <div class="muted" style="font-size:11px">Diamond demandera au marqueur d’ajouter une manche supplémentaire.</div>
-      </div>
-
-      <div class="manager-setting">
-        <label><input id="mgrAutoRunner" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Coureur automatique en prolongation</label>
-        <select id="mgrAutoRunnerBase" style="margin-top:7px">
-          <option value="1">Départ au 1er but</option>
-          <option value="2" selected>Départ au 2e but</option>
-          <option value="3">Départ au 3e but</option>
-        </select>
-        <div class="muted" style="font-size:11px;margin-top:5px">Le joueur précédant le premier frappeur de la manche dans l’ordre offensif sera placé sur le but choisi.</div>
-      </div>
-
-      <div class="manager-setting">
-        <label>Matchs contre chaque adversaire</label>
+        <label>Nombre de matchs contre chaque adversaire</label>
         <input id="mgrGamesPerOpponent" type="number" min="1" max="20" value="2">
       </div>
 
       <div class="manager-setting full">
-        <label>Jours de match</label>
+        <label>Jours de la semaine où les matchs peuvent être joués</label>
         <div class="manager-checks">
           <label><input class="mgrWeekday" type="checkbox" value="1" checked> Lun</label>
           <label><input class="mgrWeekday" type="checkbox" value="2" checked> Mar</label>
@@ -1868,21 +1922,28 @@ body.role-viewer .strike-count{
       <div class="manager-setting full">
         <label>Heures des matchs</label>
         <input id="mgrGameTimes" type="text" value="18:30, 19:45, 21:00">
-        <div class="muted" style="font-size:11px;margin-top:5px">Séparez les heures par une virgule.</div>
+        <div class="muted" style="font-size:11px;margin-top:5px">
+          Exemple : 18:30, 19:45, 21:00
+        </div>
       </div>
 
+      <div class="manager-section-title">🗓️ Saison et pause</div>
+
       <div class="manager-setting">
-        <label>Début de saison</label>
+        <label>Date de début de la saison</label>
         <input id="mgrSeasonStart" type="date" value="2026-09-07">
       </div>
 
       <div class="manager-setting">
-        <label>Fin de saison</label>
+        <label>Date de fin de la saison</label>
         <input id="mgrSeasonEnd" type="date" value="2026-10-31">
       </div>
 
       <div class="manager-setting full">
-        <label><input id="mgrSeasonPause" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Pause dans la saison</label>
+        <label>
+          <input id="mgrSeasonPause" type="checkbox" onchange="toggleLeagueSettingDependencies()">
+          Il y aura une pause dans la saison
+        </label>
         <div class="manager-settings-grid" style="margin-top:8px">
           <div>
             <label>Début de la pause</label>
@@ -1894,13 +1955,16 @@ body.role-viewer .strike-count{
           </div>
         </div>
         <div class="muted" style="font-size:11px;margin-top:6px">
-          Aucun match ne sera généré automatiquement pendant la pause. Le gestionnaire pourra quand même y replanifier manuellement un match remis.
+          Diamond ne générera aucun match automatiquement pendant cette période.
+          Le gestionnaire pourra tout de même y replanifier manuellement un match remis.
         </div>
       </div>
     </div>
 
-    <button type="button" class="primary" style="width:100%;margin-top:14px" onclick="saveLeagueSettings()">ENREGISTRER LES PARAMÈTRES</button>
-    <button type="button" style="width:100%;margin-top:8px" onclick="generateLeagueScheduleFromSettings()">GÉNÉRER UN NOUVEL HORAIRE</button>
+    <div class="manager-actions-sticky">
+      <button type="button" class="primary" style="width:100%" onclick="saveLeagueSettings()">ENREGISTRER LES PARAMÈTRES</button>
+      <button type="button" style="width:100%;margin-top:8px" onclick="generateLeagueScheduleFromSettings()">GÉNÉRER UN NOUVEL HORAIRE</button>
+    </div>
   </div>
 </div>
 
@@ -4949,7 +5013,7 @@ function renderViewer(){
   renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.15.0.
+// L'accueil par rôles est l'écran initial de v0.15.1.
 
 renderLineupEditor();
 

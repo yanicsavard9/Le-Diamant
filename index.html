@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.14.4</title>
+<title>Diamond v0.15.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.14.4 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.15.0 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.14.4 — corrige la bande noire à droite sur iPhone */
+/* v0.15.0 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.14.4 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.15.0 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.4 — enlève toute ligne sous le lanceur */
+/* v0.15.0 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.4 — correctifs ciblés après vérification du HTML réel */
+/* v0.15.0 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.4 — changements rapides + fermeture Horaire en haut */
+/* v0.15.0 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.4 — formats de match 3/4/5/7/9 manches */
+/* v0.15.0 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.14.4 */
+/* v0.15.0 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -1159,17 +1159,56 @@ body.role-viewer .strike-count{
 #captainLeagueStrip .team-card.bananes.selected-team{box-shadow:0 0 0 2px rgba(242,207,66,.22),0 0 16px rgba(242,207,66,.28)!important;}
 </style>
 
+
+<style id="diamond-v0150-league-manager">
+#managerHub .hub-card{margin-bottom:12px}
+.manager-settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.manager-settings-grid .full{grid-column:1/-1}
+.manager-setting{
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  padding:11px;
+}
+.manager-setting label{display:block;font-size:12px;font-weight:900;margin-bottom:6px;color:#dce8f5}
+.manager-setting input,.manager-setting select{
+  width:100%;box-sizing:border-box;min-height:42px;border-radius:10px;
+}
+.manager-checks{display:flex;flex-wrap:wrap;gap:7px}
+.manager-checks label{
+  display:flex;align-items:center;gap:5px;padding:7px 9px;border-radius:10px;
+  background:rgba(255,255,255,.045);font-size:12px;font-weight:800;margin:0
+}
+.manager-checks input{width:auto;min-height:auto}
+.manager-status{
+  display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:900;
+  border:1px solid rgba(255,255,255,.15)
+}
+.manager-status.scheduled{color:#8dd7ff;border-color:#4da7d8}
+.manager-status.postponed-rain{color:#ffd76a;border-color:#c79c35}
+.manager-status.cancelled{color:#ff8b8b;border-color:#cf5c5c}
+.manager-status.suspended{color:#d5b5ff;border-color:#956ac9}
+.manager-schedule-card{
+  width:100%;text-align:left;margin-bottom:9px;padding:11px;border-radius:13px;
+  border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:inherit
+}
+.tie-score{
+  font-size:28px;font-weight:950;text-align:center;margin:10px 0 4px
+}
+@media(max-width:520px){.manager-settings-grid{grid-template-columns:1fr}}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.14.4 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.15.0 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
     <div class="card">
       <div class="section-title">Bienvenue dans Diamond</div>
       <h2>Choisissez votre accès</h2>
-      <div class="muted">Une seule application, trois expériences adaptées au rôle de chacun.
+      <div class="muted">Une seule application, quatre expériences adaptées au rôle de chacun.
     <div id="leagueTeamsStrip" aria-label="Équipes de la ligue">
       <div class="league-team-chip brewers team-logo-only-card" title="Brewers"><span class="home-logo-slot" data-team="Brewers"></span></div>
       <div class="league-team-chip yankees team-logo-only-card" title="Yankees"><span class="home-logo-slot" data-team="Yankees"></span></div>
@@ -1179,6 +1218,10 @@ body.role-viewer .strike-count{
       <div class="league-team-chip bananes team-logo-only-card" title="Bananes"><span class="home-logo-slot" data-team="Bananes"></span></div>
     </div></div>
       <div class="role-grid">
+        <button class="role-card" data-role="manager" type="button" onclick="selectRole('manager')">
+          <strong>⚙️ Gestionnaire de la ligue</strong>
+          <small>Règles de la ligue, calendrier, pauses de saison, reprises et gestion des matchs.</small>
+        </button>
         <button class="role-card" data-role="viewer" type="button" onclick="selectRole('viewer')">
           <strong>👤 Joueur / Spectateur</strong>
           <small>Match en direct, statistiques des joueurs, résultats et classement.</small>
@@ -1188,8 +1231,42 @@ body.role-viewer .strike-count{
           <small>Liste de joueurs, alignement, positions, banc et soumission de l’alignement.</small>
         </button>
         <button class="role-card" data-role="official" type="button" onclick="selectRole('official')">
-          <strong>📋 Marqueur / Gestionnaire</strong>
-          <small>Approbation, verrouillage, pointage en direct, fin et sauvegarde du match.</small>
+          <strong>📋 Marqueur</strong>
+          <small>Approbation des alignements, pointage en direct, substitutions et fin du match.</small>
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="managerHub" class="hidden">
+    <div class="role-topbar">
+      <div>
+        <b>⚙️ Gestionnaire de la ligue</b>
+        <div class="muted" style="font-size:12px">Configure les règles et administre le calendrier de la saison.</div>
+      </div>
+      <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Administration de la ligue</div>
+      <h2>Que voulez-vous gérer?</h2>
+      <div class="role-grid">
+        <button class="role-card" type="button" onclick="openLeagueSettings()">
+          <strong>⚙️ Paramètres de la ligue</strong>
+          <small>Manches, prolongations, coureur automatique, saison, pause et génération de l’horaire.</small>
+        </button>
+        <button class="role-card" type="button" onclick="openManagerSchedule()">
+          <strong>📅 Gestion de l’horaire</strong>
+          <small>Reporter pour pluie, annuler, suspendre ou replanifier un match manuellement.</small>
+        </button>
+        <button class="role-card" type="button" onclick="openLeagueInfo('standings')">
+          <strong>🏆 Classement</strong>
+          <small>Consulter le classement actuel de la ligue.</small>
+        </button>
+        <button class="role-card" type="button" onclick="openLeagueInfo('stats')">
+          <strong>📊 Statistiques</strong>
+          <small>Consulter les statistiques cumulatives.</small>
         </button>
       </div>
     </div>
@@ -1198,7 +1275,7 @@ body.role-viewer .strike-count{
   <section id="officialHub" class="hidden">
     <div class="role-topbar">
       <div>
-        <b>📋 Marqueur / Gestionnaire</b>
+        <b>📋 Marqueur</b>
         <div class="muted" style="font-size:12px">Choisissez ce que vous voulez consulter ou gérer.</div>
       </div>
       <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
@@ -1725,6 +1802,156 @@ body.role-viewer .strike-count{
 </div>
 
 <div class="toast" id="toast"></div>
+
+
+<div class="modal" id="leagueSettingsModal">
+  <div class="sheet">
+    <div class="league-info-header">
+      <h3>⚙️ Paramètres de la ligue</h3>
+      <button type="button" class="league-info-close-top" onclick="closeLeagueSettings()">FERMER</button>
+    </div>
+
+    <div class="manager-settings-grid">
+      <div class="manager-setting full">
+        <label>Nom de la ligue</label>
+        <input id="mgrLeagueName" type="text" value="Ligue Diamond">
+      </div>
+
+      <div class="manager-setting">
+        <label>Nombre d’équipes</label>
+        <input id="mgrTeamCount" type="number" value="6" disabled>
+        <div class="muted" style="font-size:11px;margin-top:5px">Le prototype actuel contient 6 équipes.</div>
+      </div>
+
+      <div class="manager-setting">
+        <label>Manches réglementaires</label>
+        <select id="mgrRegInnings">
+          <option value="3">3 manches</option><option value="4">4 manches</option>
+          <option value="5">5 manches</option><option value="7" selected>7 manches</option>
+          <option value="9">9 manches</option>
+        </select>
+      </div>
+
+      <div class="manager-setting">
+        <label><input id="mgrExtraInnings" type="checkbox" checked onchange="toggleLeagueSettingDependencies()"> Prolongations en cas d’égalité</label>
+        <div class="muted" style="font-size:11px">Diamond demandera au marqueur d’ajouter une manche supplémentaire.</div>
+      </div>
+
+      <div class="manager-setting">
+        <label><input id="mgrAutoRunner" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Coureur automatique en prolongation</label>
+        <select id="mgrAutoRunnerBase" style="margin-top:7px">
+          <option value="1">Départ au 1er but</option>
+          <option value="2" selected>Départ au 2e but</option>
+          <option value="3">Départ au 3e but</option>
+        </select>
+        <div class="muted" style="font-size:11px;margin-top:5px">Le joueur précédant le premier frappeur de la manche dans l’ordre offensif sera placé sur le but choisi.</div>
+      </div>
+
+      <div class="manager-setting">
+        <label>Matchs contre chaque adversaire</label>
+        <input id="mgrGamesPerOpponent" type="number" min="1" max="20" value="2">
+      </div>
+
+      <div class="manager-setting full">
+        <label>Jours de match</label>
+        <div class="manager-checks">
+          <label><input class="mgrWeekday" type="checkbox" value="1" checked> Lun</label>
+          <label><input class="mgrWeekday" type="checkbox" value="2" checked> Mar</label>
+          <label><input class="mgrWeekday" type="checkbox" value="3"> Mer</label>
+          <label><input class="mgrWeekday" type="checkbox" value="4" checked> Jeu</label>
+          <label><input class="mgrWeekday" type="checkbox" value="5"> Ven</label>
+          <label><input class="mgrWeekday" type="checkbox" value="6"> Sam</label>
+          <label><input class="mgrWeekday" type="checkbox" value="0"> Dim</label>
+        </div>
+      </div>
+
+      <div class="manager-setting full">
+        <label>Heures des matchs</label>
+        <input id="mgrGameTimes" type="text" value="18:30, 19:45, 21:00">
+        <div class="muted" style="font-size:11px;margin-top:5px">Séparez les heures par une virgule.</div>
+      </div>
+
+      <div class="manager-setting">
+        <label>Début de saison</label>
+        <input id="mgrSeasonStart" type="date" value="2026-09-07">
+      </div>
+
+      <div class="manager-setting">
+        <label>Fin de saison</label>
+        <input id="mgrSeasonEnd" type="date" value="2026-10-31">
+      </div>
+
+      <div class="manager-setting full">
+        <label><input id="mgrSeasonPause" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Pause dans la saison</label>
+        <div class="manager-settings-grid" style="margin-top:8px">
+          <div>
+            <label>Début de la pause</label>
+            <input id="mgrPauseStart" type="date">
+          </div>
+          <div>
+            <label>Fin de la pause</label>
+            <input id="mgrPauseEnd" type="date">
+          </div>
+        </div>
+        <div class="muted" style="font-size:11px;margin-top:6px">
+          Aucun match ne sera généré automatiquement pendant la pause. Le gestionnaire pourra quand même y replanifier manuellement un match remis.
+        </div>
+      </div>
+    </div>
+
+    <button type="button" class="primary" style="width:100%;margin-top:14px" onclick="saveLeagueSettings()">ENREGISTRER LES PARAMÈTRES</button>
+    <button type="button" style="width:100%;margin-top:8px" onclick="generateLeagueScheduleFromSettings()">GÉNÉRER UN NOUVEL HORAIRE</button>
+  </div>
+</div>
+
+<div class="modal" id="managerScheduleModal">
+  <div class="sheet">
+    <div class="league-info-header">
+      <h3>📅 Gestion de l’horaire</h3>
+      <button type="button" class="league-info-close-top" onclick="closeManagerSchedule()">FERMER</button>
+    </div>
+    <div class="readonly-note" style="margin-bottom:10px">
+      Un match <b>reporté – pluie</b> reste dans l’historique et peut être replanifié plus tard, même pendant une pause de saison.
+    </div>
+    <div id="managerScheduleList"></div>
+  </div>
+</div>
+
+<div class="modal" id="managerGameModal">
+  <div class="sheet">
+    <div class="league-info-header">
+      <h3 id="managerGameTitle">Gérer le match</h3>
+      <button type="button" class="league-info-close-top" onclick="closeManagerGame()">FERMER</button>
+    </div>
+    <div id="managerGameMatchup" class="readonly-note"></div>
+
+    <div class="manager-settings-grid" style="margin-top:12px">
+      <div class="manager-setting">
+        <label>Nouvelle date</label>
+        <input id="managerGameDate" type="date">
+      </div>
+      <div class="manager-setting">
+        <label>Nouvelle heure</label>
+        <input id="managerGameTime" type="time">
+      </div>
+    </div>
+
+    <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="saveManagerGameReschedule()">REPLANIFIER / REMETTRE PRÉVU</button>
+    <button type="button" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('postponed-rain')">🌧️ REPORTÉ — PLUIE</button>
+    <button type="button" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('suspended')">⏸️ SUSPENDU</button>
+    <button type="button" class="danger" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('cancelled')">ANNULER LE MATCH</button>
+  </div>
+</div>
+
+<div class="modal" id="tieGameModal">
+  <div class="sheet">
+    <h3>🤝 MATCH À ÉGALITÉ</h3>
+    <div id="tieGameScore" class="tie-score">0 – 0</div>
+    <div id="tieGameMessage" class="readonly-note"></div>
+    <div id="tieGameRule" class="readonly-note" style="margin-top:8px"></div>
+    <button type="button" id="tieGamePrimaryBtn" class="primary" style="width:100%;margin-top:14px">AJOUTER UNE MANCHE</button>
+  </div>
+</div>
 
 <script>
 const BREWERS_LOGO="data:image/jpeg;base64,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";
@@ -2673,7 +2900,7 @@ function resetStatsOnly(){
   Object.values(teams).forEach(t=>{t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=p.bb=p.hbp=p.k=0});t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0};});
   displayedInnings=regulationInnings;
   const batterIndex={},inningRuns={};Object.keys(teams).forEach(n=>{batterIndex[n]=0;inningRuns[n]={};});
-  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex,bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns,gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};
+  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex,bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns,gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};pendingTieInning=null;
 }
 function serializableState(){
   const stateWithoutHistory={
@@ -2773,7 +3000,7 @@ function renderGame(){
 
   if(state.gameOver){
     const banner=$("atBatTeam");
-    if(banner)banner.textContent=`MATCH TERMINÉ • ${state.winner.toUpperCase()} GAGNENT`;
+    if(banner)banner.textContent=state.winner?`MATCH TERMINÉ • ${state.winner.toUpperCase()} GAGNENT`:"MATCH TERMINÉ • ÉGALITÉ";
   }
 
   document.querySelectorAll("#plateAppearanceCard button,#interactiveDiamondCard button").forEach(btn=>{
@@ -2811,7 +3038,7 @@ function getTeamRuns(teamName){return teamName===activeAwayTeam?state.awayRuns:s
 function getOpponent(teamName){return teamName===activeAwayTeam?activeHomeTeam:activeAwayTeam}
 
 function makeCompletedGameSnapshot(){
-  const id="game-"+Date.now(),winner=state.winner,loser=getOpponent(winner),snapshotTeams={},matchStats={};
+  const id="game-"+Date.now(),winner=state.winner,loser=winner?getOpponent(winner):null,snapshotTeams={},matchStats={};
   [activeAwayTeam,activeHomeTeam].forEach(teamName=>{
     const t=teams[teamName],combined=[...(t.lineup||[]),...(t.bench||[])],seen=new Set(),matchPlayers=[];
     combined.forEach(p=>{if(!p)return;const k=String(p.id||p.name);if(seen.has(k))return;seen.add(k);matchPlayers.push(clonePlain(p));});
@@ -2824,7 +3051,7 @@ function makeCompletedGameSnapshot(){
 function updateStandingsFromGame(game){
   const a=game.awayTeam,h=game.homeTeam,ar=game.awayRuns,hr=game.homeRuns;
   standings[a].RF+=ar;standings[a].RA+=hr;standings[h].RF+=hr;standings[h].RA+=ar;
-  if(ar>hr){standings[a].W++;standings[h].L++;}else if(hr>ar){standings[h].W++;standings[a].L++;}
+  if(ar>hr){standings[a].W++;standings[h].L++;}else if(hr>ar){standings[h].W++;standings[a].L++;} // égalité: aucun V/D ajouté
 }
 
 function saveFinalGameToLocalSeason(){
@@ -2844,7 +3071,7 @@ function saveFinalGameToLocalSeason(){
 
 
 function scheduleGameKey(g){
-  return g.date+"|"+g.time+"|"+g.away+"|"+g.home;
+  return g.id || (g.date+"|"+g.time+"|"+g.away+"|"+g.home);
 }
 
 function formatScheduleDate(iso){
@@ -2857,7 +3084,7 @@ function formatScheduleDate(iso){
 
 function getOfficialNightGames(){
   // Prototype: show the earliest schedule date that still has scheduled games.
-  const sorted=[...leagueSchedule].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const sorted=leagueSchedule.filter(g=>(g.status||"scheduled")==="scheduled").sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
   if(!sorted.length)return [];
   const firstDate=sorted[0].date;
   return sorted.filter(g=>g.date===firstDate);
@@ -3152,7 +3379,7 @@ function prepareSelectedOfficialGame(){
 
   $("officialGameDetailModal").classList.remove("show");
 
-  officialPrepInnings=regulationInnings||7;
+  officialPrepInnings=leagueSettings.regulationInnings||regulationInnings||7;
 
   $("officialPreGameTitle").textContent=`PRÉPARER • ${g.away} vs ${g.home}`;
   $("officialPreGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
@@ -3218,7 +3445,7 @@ function startPreparedOfficialGame(){
   if(!s?.awayLocked||!s?.homeLocked){toast("Les deux alignements doivent être verrouillés");return;}
   activeAwayTeam=g.away;activeHomeTeam=g.home;
   $("officialPreGameModal").classList.remove("show");currentRole="official";
-  document.body.classList.remove("role-viewer","role-captain","role-official");document.body.classList.add("role-official");
+  document.body.classList.remove("role-viewer","role-captain","role-official","role-manager");document.body.classList.add("role-official");
   $("roleHome").classList.add("hidden");if($("officialHub"))$("officialHub").classList.add("hidden");$("viewerView").classList.add("hidden");$("pregame").classList.add("hidden");$("game").classList.remove("hidden");
   regulationInnings=officialPrepInnings;displayedInnings=officialPrepInnings;resetStatsOnly();regulationInnings=officialPrepInnings;displayedInnings=officialPrepInnings;
   [activeAwayTeam,activeHomeTeam].forEach(teamName=>{teams[teamName].submitted=true;(teams[teamName].lineup||[]).forEach(p=>{p.lockedStarter=true;p.lockedStarterTeam=teamName;p.wasUsedInGame=true;});});
@@ -3276,13 +3503,20 @@ function renderSchedule(){
           </button>`;
       }
 
+      const status=g.status||"scheduled";
+      const statusLabels={
+        "scheduled":"À venir",
+        "postponed-rain":"🌧️ Reporté — pluie",
+        "cancelled":"Annulé",
+        "suspended":"⏸️ Suspendu"
+      };
       return `
         <div class="readonly-note" style="margin-bottom:7px">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
             ${matchup}
             <span class="muted">${g.time}</span>
           </div>
-          <div class="muted" style="font-size:12px;margin-top:3px">À venir</div>
+          <div class="muted" style="font-size:12px;margin-top:3px">${statusLabels[status]||"À venir"}</div>
         </div>`;
     }).join("");
 
@@ -3582,6 +3816,11 @@ function blockIfEndDecisionPending(){
 }
 
 function blockIfGameOver(){
+  if(pendingTieInning!==null){
+    const modal=$("tieGameModal");if(modal)modal.classList.add("show");
+    toast("Décidez d’abord de la prolongation");
+    return true;
+  }
   if(state.gameOver){
     toast("Le match est terminé");
     return true;
@@ -3616,8 +3855,13 @@ function endHalfIfNeeded(){
   if(!endingTop&&inningJustPlayed>=regulationInnings&&state.awayRuns>state.homeRuns){
     state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];proposeGameOver(activeAwayTeam,`${activeAwayTeam} mènent après la fin de la manche prévue.`);return;
   }
+  if(!endingTop&&inningJustPlayed>=regulationInnings&&state.awayRuns===state.homeRuns){
+    showTieAfterInningPrompt(inningJustPlayed);
+    return;
+  }
   state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];state.top=!state.top;
   if(state.top){state.inning++;if(state.inning>displayedInnings)displayedInnings=state.inning;}
+  applyAutomaticExtraRunnerIfNeeded();
   const p=currentPitcher();addLog("Changement de demi-manche • "+(p?p.name:"Aucun lanceur")+" au monticule");
 }
 function blockIfPending(){if(state.pending.length){toast("Confirmez d’abord les coureurs");return true}return false}
@@ -3883,7 +4127,7 @@ function confirmReset(){
   // Retour au tableau du marqueur : aucun nom d'équipe ni pointage affiché
   // tant qu'un nouveau match n'est pas choisi et préparé.
   currentRole="official";
-  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.remove("role-viewer","role-captain","role-official","role-manager");
   document.body.classList.add("role-official");
 
   $("roleHome").classList.add("hidden");
@@ -3906,6 +4150,23 @@ function confirmReset(){
 
 
 let currentRole=null;
+let managerSelectedGameId=null;
+let pendingTieInning=null;
+let leagueSettings={
+  name:"Ligue Diamond",
+  regulationInnings:7,
+  extraInnings:true,
+  autoExtraRunner:false,
+  autoRunnerBase:2,
+  gamesPerOpponent:2,
+  weekdays:[1,2,4],
+  times:["18:30","19:45","21:00"],
+  seasonStart:"2026-09-07",
+  seasonEnd:"2026-10-31",
+  seasonPause:false,
+  pauseStart:"",
+  pauseEnd:""
+};
 let viewerSelectedTeam=null;
 let pendingGameOver=null;
 let completedGames=[];
@@ -3946,9 +4207,14 @@ const leagueSchedule=[
   {date:"2026-09-17",time:"21:00",away:"Indiens",home:"Yankees"}
 ];
 
+leagueSchedule.forEach((g,i)=>{
+  if(!g.id)g.id="G"+String(i+1).padStart(3,"0");
+  if(!g.status)g.status="scheduled";
+});
+
 const officialGameSubmissions={};
 leagueSchedule.forEach(g=>{
-  officialGameSubmissions[g.date+"|"+g.time+"|"+g.away+"|"+g.home]={
+  officialGameSubmissions[scheduleGameKey(g)]={
     awaySubmitted:false,
     homeSubmitted:false,
     awayLocked:false,
@@ -3957,6 +4223,321 @@ leagueSchedule.forEach(g=>{
 });
 
 
+
+
+
+function toggleLeagueSettingDependencies(){
+  const extra=!!$("mgrExtraInnings")?.checked;
+  const auto=$("mgrAutoRunner");
+  const base=$("mgrAutoRunnerBase");
+  if(auto)auto.disabled=!extra;
+  if(base)base.disabled=!extra||!auto?.checked;
+
+  const pause=!!$("mgrSeasonPause")?.checked;
+  if($("mgrPauseStart"))$("mgrPauseStart").disabled=!pause;
+  if($("mgrPauseEnd"))$("mgrPauseEnd").disabled=!pause;
+}
+
+function fillLeagueSettingsForm(){
+  $("mgrLeagueName").value=leagueSettings.name||"Ligue Diamond";
+  $("mgrRegInnings").value=String(leagueSettings.regulationInnings||7);
+  $("mgrExtraInnings").checked=!!leagueSettings.extraInnings;
+  $("mgrAutoRunner").checked=!!leagueSettings.autoExtraRunner;
+  $("mgrAutoRunnerBase").value=String(leagueSettings.autoRunnerBase||2);
+  $("mgrGamesPerOpponent").value=leagueSettings.gamesPerOpponent||2;
+  $("mgrGameTimes").value=(leagueSettings.times||[]).join(", ");
+  $("mgrSeasonStart").value=leagueSettings.seasonStart||"";
+  $("mgrSeasonEnd").value=leagueSettings.seasonEnd||"";
+  $("mgrSeasonPause").checked=!!leagueSettings.seasonPause;
+  $("mgrPauseStart").value=leagueSettings.pauseStart||"";
+  $("mgrPauseEnd").value=leagueSettings.pauseEnd||"";
+  document.querySelectorAll(".mgrWeekday").forEach(cb=>cb.checked=(leagueSettings.weekdays||[]).includes(Number(cb.value)));
+  toggleLeagueSettingDependencies();
+}
+
+function readLeagueSettingsForm(){
+  const weekdays=[...document.querySelectorAll(".mgrWeekday:checked")].map(cb=>Number(cb.value));
+  const times=String($("mgrGameTimes").value||"").split(",").map(x=>x.trim()).filter(Boolean);
+  const s={
+    name:String($("mgrLeagueName").value||"Ligue Diamond").trim()||"Ligue Diamond",
+    regulationInnings:Number($("mgrRegInnings").value)||7,
+    extraInnings:!!$("mgrExtraInnings").checked,
+    autoExtraRunner:!!$("mgrExtraInnings").checked && !!$("mgrAutoRunner").checked,
+    autoRunnerBase:Number($("mgrAutoRunnerBase").value)||2,
+    gamesPerOpponent:Math.max(1,Number($("mgrGamesPerOpponent").value)||1),
+    weekdays,
+    times,
+    seasonStart:$("mgrSeasonStart").value,
+    seasonEnd:$("mgrSeasonEnd").value,
+    seasonPause:!!$("mgrSeasonPause").checked,
+    pauseStart:$("mgrPauseStart").value,
+    pauseEnd:$("mgrPauseEnd").value
+  };
+  if(!s.weekdays.length){alert("Sélectionnez au moins un jour de match.");return null}
+  if(!s.times.length){alert("Entrez au moins une heure de match.");return null}
+  if(!s.seasonStart||!s.seasonEnd||s.seasonEnd<s.seasonStart){alert("Vérifiez les dates de début et de fin de saison.");return null}
+  if(s.seasonPause && (!s.pauseStart||!s.pauseEnd||s.pauseEnd<s.pauseStart)){alert("Vérifiez les dates de la pause.");return null}
+  return s;
+}
+
+function openLeagueSettings(){
+  fillLeagueSettingsForm();
+  $("leagueSettingsModal").classList.add("show");
+}
+function closeLeagueSettings(){ $("leagueSettingsModal").classList.remove("show"); }
+
+function saveLeagueSettings(){
+  const s=readLeagueSettingsForm();if(!s)return false;
+  leagueSettings=s;
+  if(!gameStarted){
+    regulationInnings=s.regulationInnings;
+    displayedInnings=s.regulationInnings;
+    officialPrepInnings=s.regulationInnings;
+  }
+  toggleLeagueSettingDependencies();
+  toast("Paramètres de la ligue enregistrés");
+  return true;
+}
+
+function isoDateAddDays(iso,days){
+  const [y,m,d]=iso.split("-").map(Number);
+  const dt=new Date(y,m-1,d+days);
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,"0")}-${String(dt.getDate()).padStart(2,"0")}`;
+}
+
+function isDateInLeaguePause(iso,s=leagueSettings){
+  return !!(s.seasonPause&&s.pauseStart&&s.pauseEnd&&iso>=s.pauseStart&&iso<=s.pauseEnd);
+}
+
+function availableLeagueDates(s){
+  const out=[];
+  for(let d=s.seasonStart;d<=s.seasonEnd;d=isoDateAddDays(d,1)){
+    const [y,m,day]=d.split("-").map(Number);
+    const dow=new Date(y,m-1,day).getDay();
+    if(s.weekdays.includes(dow)&&!isDateInLeaguePause(d,s))out.push(d);
+  }
+  return out;
+}
+
+function roundRobinRounds(names){
+  const a=[...names];
+  if(a.length%2)a.push(null);
+  const rounds=[];
+  for(let r=0;r<a.length-1;r++){
+    const pairs=[];
+    for(let i=0;i<a.length/2;i++){
+      const x=a[i],y=a[a.length-1-i];
+      if(x&&y)pairs.push([x,y]);
+    }
+    rounds.push(pairs);
+    a.splice(1,0,a.pop());
+  }
+  return rounds;
+}
+
+function generateLeagueScheduleFromSettings(){
+  const s=readLeagueSettingsForm();if(!s)return;
+  const teamNames=Object.keys(teams);
+  const baseRounds=roundRobinRounds(teamNames);
+  const neededRounds=baseRounds.length*s.gamesPerOpponent;
+  const dates=availableLeagueDates(s);
+  const gamesPerRound=Math.floor(teamNames.length/2);
+
+  if(s.times.length<gamesPerRound){
+    alert(`Avec ${teamNames.length} équipes, il faut au moins ${gamesPerRound} heures de match par journée.`);
+    return;
+  }
+  if(dates.length<neededRounds){
+    alert(`La période choisie ne contient que ${dates.length} journées disponibles, mais ${neededRounds} sont nécessaires. Allongez la saison ou ajoutez des jours de match.`);
+    return;
+  }
+  if(!confirm("Générer un nouvel horaire remplacera l’horaire actuel du prototype. Continuer?"))return;
+
+  leagueSettings=s;
+  leagueSchedule.length=0;
+  Object.keys(officialGameSubmissions).forEach(k=>delete officialGameSubmissions[k]);
+
+  let idSeq=1,dateIndex=0;
+  for(let cycle=0;cycle<s.gamesPerOpponent;cycle++){
+    baseRounds.forEach((pairs,roundIndex)=>{
+      const date=dates[dateIndex++];
+      pairs.forEach((pair,i)=>{
+        let [a,b]=pair;
+        const swap=((cycle+roundIndex+i)%2)===1;
+        const away=swap?b:a,home=swap?a:b;
+        const g={
+          id:"G"+String(idSeq++).padStart(3,"0"),
+          date,time:s.times[i],away,home,status:"scheduled"
+        };
+        leagueSchedule.push(g);
+        officialGameSubmissions[scheduleGameKey(g)]={
+          awaySubmitted:false,homeSubmitted:false,awayLocked:false,homeLocked:false
+        };
+      });
+    });
+  }
+
+  regulationInnings=s.regulationInnings;
+  displayedInnings=s.regulationInnings;
+  officialPrepInnings=s.regulationInnings;
+  renderSchedule();
+  renderOfficialGames();
+  renderManagerSchedule();
+  closeLeagueSettings();
+  toast(`${leagueSchedule.length} matchs générés`);
+}
+
+function managerStatusLabel(status){
+  return {
+    "scheduled":"PRÉVU",
+    "postponed-rain":"REPORTÉ — PLUIE",
+    "cancelled":"ANNULÉ",
+    "suspended":"SUSPENDU"
+  }[status||"scheduled"]||"PRÉVU";
+}
+
+function openManagerSchedule(){
+  renderManagerSchedule();
+  $("managerScheduleModal").classList.add("show");
+}
+function closeManagerSchedule(){ $("managerScheduleModal").classList.remove("show"); }
+
+function renderManagerSchedule(){
+  const el=$("managerScheduleList");if(!el)return;
+  const sorted=[...leagueSchedule].sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  if(!sorted.length){el.innerHTML='<div class="readonly-note">Aucun match à l’horaire.</div>';return}
+  el.innerHTML=sorted.map(g=>{
+    const st=g.status||"scheduled";
+    return `<button type="button" class="manager-schedule-card" onclick="openManagerGame('${scheduleGameKey(g)}')">
+      <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+        <span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
+        <span class="manager-status ${st}">${managerStatusLabel(st)}</span>
+      </div>
+      <div class="muted" style="font-size:12px;margin-top:6px">${formatScheduleDate(g.date)} • ${g.time}</div>
+    </button>`;
+  }).join("");
+}
+
+function openManagerGame(key){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===key);if(!g)return;
+  managerSelectedGameId=key;
+  $("managerGameTitle").textContent="GÉRER LE MATCH";
+  $("managerGameMatchup").innerHTML=`<div class="logo-matchup">${teamLogo(g.away,46)}<span class="logo-vs">@</span>${teamLogo(g.home,46)}</div>
+    <div style="margin-top:6px"><b>${managerStatusLabel(g.status)}</b> • ${formatScheduleDate(g.date)} • ${g.time}</div>`;
+  $("managerGameDate").value=g.date;
+  $("managerGameTime").value=g.time;
+  $("managerScheduleModal").classList.remove("show");
+  $("managerGameModal").classList.add("show");
+}
+
+function closeManagerGame(){
+  $("managerGameModal").classList.remove("show");
+  renderManagerSchedule();
+  $("managerScheduleModal").classList.add("show");
+}
+
+function setManagerGameStatus(status){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===managerSelectedGameId);if(!g)return;
+  if(status==="cancelled"&&!confirm("Annuler ce match? Il restera visible dans l’historique de l’horaire."))return;
+  g.status=status;
+  renderSchedule();
+  renderOfficialGames();
+  openManagerGame(scheduleGameKey(g));
+  toast(managerStatusLabel(status));
+}
+
+function saveManagerGameReschedule(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===managerSelectedGameId);if(!g)return;
+  const date=$("managerGameDate").value,time=$("managerGameTime").value;
+  if(!date||!time){alert("Choisissez une date et une heure.");return}
+  if(isDateInLeaguePause(date)){
+    const ok=confirm("Cette date se trouve pendant une pause de la saison.\n\nVoulez-vous quand même programmer ce match?");
+    if(!ok)return;
+  }
+  g.date=date;g.time=time;g.status="scheduled";
+  renderSchedule();
+  renderOfficialGames();
+  openManagerGame(scheduleGameKey(g));
+  toast("Match replanifié");
+}
+
+function automaticExtraRunner(){
+  const team=currentBattingTeam();
+  const lineup=activeLineup(team);
+  if(!lineup.length)return null;
+  const idx=Number(state.batterIndex?.[team]||0)%lineup.length;
+  return lineup[(idx-1+lineup.length)%lineup.length];
+}
+
+function applyAutomaticExtraRunnerIfNeeded(){
+  if(state.inning<=regulationInnings||!leagueSettings.extraInnings||!leagueSettings.autoExtraRunner)return;
+  const base=Number(leagueSettings.autoRunnerBase||2);
+  if(state.bases[base])return;
+  const p=automaticExtraRunner();if(!p)return;
+  const team=currentBattingTeam();
+  state.bases[base]=runnerRef(p,team);
+  addLog(`${p.name} débute la prolongation au ${base===1?"1er":base+"e"} but selon les règles de la ligue`);
+}
+
+function showTieAfterInningPrompt(inning){
+  pendingTieInning=inning;
+  if($("tieGameScore"))$("tieGameScore").textContent=`${state.awayRuns} – ${state.homeRuns}`;
+  if($("tieGameMessage"))$("tieGameMessage").textContent=
+    `Le match est à égalité après ${inning} manche${inning>1?"s":""}.`;
+
+  const rule=$("tieGameRule"),btn=$("tieGamePrimaryBtn");
+  if(leagueSettings.extraInnings){
+    const next=inning+1;
+    const runnerText=leagueSettings.autoExtraRunner
+      ?` Selon les règles de la ligue, un coureur débutera chaque demi-manche de prolongation au ${leagueSettings.autoRunnerBase===1?"1er":leagueSettings.autoRunnerBase+"e"} but.`
+      :" Aucun coureur automatique n’est prévu.";
+    if(rule)rule.textContent=`Une prolongation est prévue.${runnerText}`;
+    if(btn){
+      btn.textContent=`AJOUTER LA ${next}e MANCHE`;
+      btn.onclick=startExtraInningFromTie;
+    }
+  }else{
+    if(rule)rule.textContent="Selon les règles de la ligue, aucune prolongation n’est prévue. Le match se termine à égalité.";
+    if(btn){
+      btn.textContent="TERMINER À ÉGALITÉ";
+      btn.onclick=confirmTieGame;
+    }
+  }
+  $("tieGameModal").classList.add("show");
+}
+
+function startExtraInningFromTie(){
+  if(pendingTieInning===null)return;
+  const previous=pendingTieInning;
+  pendingTieInning=null;
+  $("tieGameModal").classList.remove("show");
+
+  state.outs=0;
+  state.bases={1:null,2:null,3:null};
+  state.pending=[];
+  state.top=true;
+  state.inning=previous+1;
+  displayedInnings=Math.max(displayedInnings,state.inning);
+  addLog(`PROLONGATION • début de la ${state.inning}e manche`);
+  applyAutomaticExtraRunnerIfNeeded();
+  renderLineScores();
+  renderGame();
+  toast(`${state.inning}e manche ajoutée`);
+}
+
+function confirmTieGame(){
+  if(pendingTieInning===null)return;
+  pendingTieInning=null;
+  $("tieGameModal").classList.remove("show");
+  state.gameOver=true;
+  state.winner=null;
+  state.gameOverReason="Match terminé à égalité selon les règles de la ligue.";
+  state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];
+  addLog(`FIN DU MATCH • ÉGALITÉ ${state.awayRuns}-${state.homeRuns}`);
+  saveFinalGameToLocalSeason();
+  renderGame();
+  toast("Match terminé à égalité");
+}
 
 
 function openLeagueInfo(tab){
@@ -4089,16 +4670,24 @@ function setRoleBadge(label){
 function selectRole(role){
   currentRole=role;
 
-  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.remove("role-viewer","role-captain","role-official","role-manager");
   document.body.classList.add("role-"+role);
 
   $("roleHome").classList.add("hidden");
+  if($("managerHub"))$("managerHub").classList.add("hidden");
+  if($("managerHub"))$("managerHub").classList.add("hidden");
   if($("officialHub"))$("officialHub").classList.add("hidden");
   $("viewerView").classList.add("hidden");
   $("pregame").classList.add("hidden");
   $("game").classList.add("hidden");
 
   if($("gameLogCard"))$("gameLogCard").classList.toggle("hidden",role!=="official");
+
+  if(role==="manager"){
+    setRoleBadge("GESTIONNAIRE");
+    if($("managerHub"))$("managerHub").classList.remove("hidden");
+    return;
+  }
 
   if(role==="viewer"){
     setRoleBadge("JOUEUR");
@@ -4127,17 +4716,18 @@ function selectRole(role){
 
 function openOfficialPregameWorkspace(){
   currentRole="official";
-  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.remove("role-viewer","role-captain","role-official","role-manager");
   document.body.classList.add("role-official");
 
   $("roleHome").classList.add("hidden");
+  if($("managerHub"))$("managerHub").classList.add("hidden");
   if($("officialHub"))$("officialHub").classList.add("hidden");
   $("viewerView").classList.add("hidden");
   $("game").classList.add("hidden");
   $("pregame").classList.remove("hidden");
 
   setRoleBadge("MARQUEUR");
-  $("workspaceRoleTitle").textContent="📋 Marqueur / Gestionnaire";
+  $("workspaceRoleTitle").textContent="📋 Marqueur";
   $("workspaceRoleSub").textContent="Match préparé — vérification finale avant le début.";
   if($("officialPregameCard"))$("officialPregameCard").classList.remove("hidden");
 
@@ -4147,12 +4737,14 @@ function openOfficialPregameWorkspace(){
 
 function backToRoleHome(){
   currentRole=null;
-  document.body.classList.remove("role-viewer","role-captain","role-official");
+  document.body.classList.remove("role-viewer","role-captain","role-official","role-manager");
   setRoleBadge("");
   $("viewerView").classList.add("hidden");
   $("pregame").classList.add("hidden");
   $("game").classList.add("hidden");
   $("roleHome").classList.remove("hidden");
+  if($("managerHub"))$("managerHub").classList.add("hidden");
+  if($("officialHub"))$("officialHub").classList.add("hidden");
   if($("gameLogCard"))$("gameLogCard").classList.add("hidden");
 }
 
@@ -4357,7 +4949,7 @@ function renderViewer(){
   renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.14.4.
+// L'accueil par rôles est l'écran initial de v0.15.0.
 
 renderLineupEditor();
 

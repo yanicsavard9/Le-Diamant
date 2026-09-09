@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.16.3</title>
+<title>Diamond v0.16.4</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.16.3 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.16.4 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.16.3 — corrige la bande noire à droite sur iPhone */
+/* v0.16.4 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.16.3 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.16.4 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.3 — enlève toute ligne sous le lanceur */
+/* v0.16.4 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.3 — correctifs ciblés après vérification du HTML réel */
+/* v0.16.4 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.3 — changements rapides + fermeture Horaire en haut */
+/* v0.16.4 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.3 — formats de match 3/4/5/7/9 manches */
+/* v0.16.4 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.3 */
+/* v0.16.4 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -1397,7 +1397,7 @@ body.role-viewer .strike-count{
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.16.3 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.16.4 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1415,8 +1415,8 @@ body.role-viewer .strike-count{
     </div></div>
       <div class="role-grid">
         <button class="role-card" data-role="manager" type="button" onclick="selectRole('manager')">
-          <strong>⚙️ Gestionnaire de la ligue</strong>
-          <small>Règles de la ligue, calendrier, pauses de saison, reprises et gestion des matchs.</small>
+          <strong>⚙️ Gestionnaire de ligue / tournoi</strong>
+          <small>Création de la ligue ou du tournoi, équipes, règles, calendrier et gestion des matchs.</small>
         </button>
         <button class="role-card" data-role="viewer" type="button" onclick="selectRole('viewer')">
           <strong>👤 Joueur / Spectateur</strong>
@@ -1438,23 +1438,23 @@ body.role-viewer .strike-count{
   <section id="managerHub" class="hidden">
     <div class="role-topbar">
       <div>
-        <b>⚙️ Gestionnaire de la ligue</b>
-        <div class="muted" style="font-size:12px">Configure les règles et administre le calendrier de la saison.</div>
+        <b>⚙️ Gestionnaire de ligue / tournoi</b>
+        <div class="muted" style="font-size:12px">Crée et administre la ligue ou le tournoi, ses équipes, ses règles et son calendrier.</div>
       </div>
       <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
     </div>
 
     <div class="card">
-      <div class="section-title">Administration de la ligue</div>
+      <div class="section-title">Administration de la ligue / du tournoi</div>
       <h2>Que voulez-vous gérer?</h2>
       <div class="role-grid">
+        <button class="role-card" type="button" onclick="openTeamManager()">
+          <strong>🏟️ Ligue / tournoi et équipes</strong>
+          <small>Commencez ici : nom de la ligue ou du tournoi, nombre d’équipes, noms, logos et couleurs.</small>
+        </button>
         <button class="role-card" type="button" onclick="openLeagueSettings()">
           <strong>⚙️ Règles et calendrier automatique</strong>
-          <small>Manches, prolongations, structure hebdomadaire, saison, pause et génération automatique.</small>
-        </button>
-        <button class="role-card" type="button" onclick="openTeamManager()">
-          <strong>🏟️ Équipes de la ligue</strong>
-          <small>Nombre d’équipes, nom, logo et couleur de chacune.</small>
+          <small>Manches, retraits, prolongations, structure hebdomadaire, saison, pause et génération automatique.</small>
         </button>
         <button class="role-card" type="button" onclick="openManagerSchedule()">
           <strong>📅 Gestion de l’horaire</strong>
@@ -1955,13 +1955,9 @@ body.role-viewer .strike-count{
     <div class="section-title" style="margin-top:12px">ALIGNEMENTS REÇUS</div>
     <div id="officialPreGameLineups"></div>
 
-    <div class="section-title" style="margin-top:14px">NOMBRE DE MANCHES</div>
-    <div class="inning-format">
-      <button type="button" id="prep3Btn" onclick="setOfficialPrepInnings(3)">3 MANCHES</button>
-      <button type="button" id="prep4Btn" onclick="setOfficialPrepInnings(4)">4 MANCHES</button>
-      <button type="button" id="prep5Btn" onclick="setOfficialPrepInnings(5)">5 MANCHES</button>
-      <button type="button" id="prep7Btn" onclick="setOfficialPrepInnings(7)">7 MANCHES</button>
-      <button type="button" id="prep9Btn" onclick="setOfficialPrepInnings(9)">9 MANCHES</button>
+    <div class="section-title" style="margin-top:14px">RÈGLES DU MATCH</div>
+    <div id="officialPreGameRules" class="readonly-note">
+      Format défini par le gestionnaire.
     </div>
 
     <button type="button" class="primary" id="officialApproveLockBtn" style="width:100%;margin-top:14px" onclick="startPreparedOfficialGame()">
@@ -2029,19 +2025,28 @@ body.role-viewer .strike-count{
     </div>
 
     <div class="manager-settings-grid">
-      <div class="manager-setting full">
-        <label>Nom de la ligue</label>
-        <input id="mgrLeagueName" type="text" value="Ligue Diamond">
-      </div>
-
       <div class="manager-section-title">⚾ Règles des matchs</div>
 
       <div class="manager-setting">
         <label>Nombre de manches réglementaires</label>
         <select id="mgrRegInnings">
-          <option value="3">3 manches</option><option value="4">4 manches</option>
-          <option value="5">5 manches</option><option value="7" selected>7 manches</option>
+          <option value="1">1 manche</option>
+          <option value="2">2 manches</option>
+          <option value="3">3 manches</option>
+          <option value="4">4 manches</option>
+          <option value="5">5 manches</option>
+          <option value="6">6 manches</option>
+          <option value="7" selected>7 manches</option>
+          <option value="8">8 manches</option>
           <option value="9">9 manches</option>
+        </select>
+      </div>
+
+      <div class="manager-setting">
+        <label>Retraits par demi-manche</label>
+        <select id="mgrOutsPerHalf">
+          <option value="3" selected>3 retraits</option>
+          <option value="unlimited">Illimité</option>
         </select>
       </div>
 
@@ -2167,7 +2172,7 @@ body.role-viewer .strike-count{
     </div>
 
     <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px">
-      <input id="leagueSearchInput" type="search" placeholder="Nom de la ligue" onkeydown="if(event.key==='Enter')searchLeagueByName()">
+      <input id="leagueSearchInput" type="search" placeholder="Nom de la ligue / du tournoi" onkeydown="if(event.key==='Enter')searchLeagueByName()">
       <button type="button" class="primary" onclick="searchLeagueByName()">RECHERCHER</button>
     </div>
 
@@ -2212,7 +2217,12 @@ body.role-viewer .strike-count{
       <button type="button" class="league-info-close-top" onclick="closeTeamManager()">FERMER</button>
     </div>
     <div class="manager-setting">
-      <label>Nombre d’équipes dans la ligue</label>
+      <label>Nom de la ligue / du tournoi</label>
+      <input id="mgrLeagueNameTeam" type="text" value="Ligue Diamond" placeholder="Ex. Ligue de baseball Saguenay">
+    </div>
+
+    <div class="manager-setting">
+      <label>Nombre d’équipes</label>
       <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px">
         <input id="mgrActiveTeamCount" type="number" min="2" max="12" value="6">
         <button type="button" onclick="applyLeagueTeamCount()">APPLIQUER</button>
@@ -2474,7 +2484,7 @@ Object.entries(teams).forEach(([teamName,t])=>{
   t.roster=t.lineup.map(p=>({...p}));
 });
 let regulationInnings=7; let displayedInnings=7;
-let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}},gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};
+let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,halfBatters:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}},gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};
 let selectedBase=null;
 let selectedLineupSlot=null;
 let selectedBenchSlot=null;
@@ -3350,7 +3360,7 @@ function resetStatsOnly(){
   Object.values(teams).forEach(t=>{t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=p.bb=p.hbp=p.k=0});t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0};});
   displayedInnings=regulationInnings;
   const batterIndex={},inningRuns={};Object.keys(teams).forEach(n=>{batterIndex[n]=0;inningRuns[n]={};});
-  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,batterIndex,bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns,gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};pendingTieInning=null;
+  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,halfBatters:0,batterIndex,bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns,gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};pendingTieInning=null;
 }
 function serializableState(){
   const stateWithoutHistory={
@@ -3459,7 +3469,13 @@ function renderGame(){
   });
 }
 function addLog(t){state.log.push(`${state.top?"▲":"▼"} ${ordinal(state.inning)} — ${t}`)}
-function nextBatter(){const t=currentBattingTeam(),a=activeLineup(t);state.batterIndex[t]=(state.batterIndex[t]+1)%a.length}
+function nextBatter(){
+  const t=currentBattingTeam(),a=activeLineup(t);
+  if(!a.length)return;
+  state.batterIndex[t]=(state.batterIndex[t]+1)%a.length;
+  state.halfBatters=(state.halfBatters||0)+1;
+  endHalfIfNeeded();
+}
 
 function keepLiveGameLocked(){
   if(!gameStarted)return;
@@ -3857,13 +3873,13 @@ function renderOfficialPreGame(){
       </div>`;
   }
 
-  [3,4,5,7,9].forEach(n=>{
-    const btn=$("prep"+n+"Btn");
-    if(btn){
-      btn.classList.toggle("active",officialPrepInnings===n);
-      btn.disabled=false;
-    }
-  });
+
+  const rulesEl=$("officialPreGameRules");
+  if(rulesEl){
+    const outsLabel=leagueSettings.outsPerHalf==="unlimited"?"Retraits illimités":"3 retraits";
+    rulesEl.innerHTML=`<b>${officialPrepInnings} manche${officialPrepInnings>1?"s":""}</b> • ${outsLabel}<br>
+      <span class="muted">Ces règles sont définies par le Gestionnaire de ligue / tournoi.</span>`;
+  }
 
   const approveBtn=$("officialApproveLockBtn");
   if(approveBtn)approveBtn.classList.add("hidden");
@@ -3879,7 +3895,7 @@ function renderOfficialPreGame(){
 }
 
 function setOfficialPrepInnings(n){
-  if(![3,4,5,7,9].includes(n))return;
+  if(!Number.isInteger(n)||n<1||n>9)return;
   officialPrepInnings=n;
   renderOfficialPreGame();
 }
@@ -3897,9 +3913,10 @@ function startPreparedOfficialGame(){
   $("officialPreGameModal").classList.remove("show");currentRole="official";
   document.body.classList.remove("role-viewer","role-captain","role-official","role-manager");document.body.classList.add("role-official");
   $("roleHome").classList.add("hidden");if($("officialHub"))$("officialHub").classList.add("hidden");$("viewerView").classList.add("hidden");$("pregame").classList.add("hidden");$("game").classList.remove("hidden");
+  officialPrepInnings=leagueSettings.regulationInnings||7;
   regulationInnings=officialPrepInnings;displayedInnings=officialPrepInnings;resetStatsOnly();regulationInnings=officialPrepInnings;displayedInnings=officialPrepInnings;
   [activeAwayTeam,activeHomeTeam].forEach(teamName=>{teams[teamName].submitted=true;(teams[teamName].lineup||[]).forEach(p=>{p.lockedStarter=true;p.lockedStarterTeam=teamName;p.wasUsedInGame=true;});});
-  gameStarted=true;state.gameOver=false;state.winner=null;state.gameOverReason="";state._finalGameSaved=false;setRoleBadge("MARQUEUR");renderGame();toast(`${activeAwayTeam} vs ${activeHomeTeam} • ${officialPrepInnings} manches`);
+  gameStarted=true;state.gameOver=false;state.winner=null;state.gameOverReason="";state._finalGameSaved=false;setRoleBadge("MARQUEUR");renderGame();toast(`${teamDisplayName(activeAwayTeam)} vs ${teamDisplayName(activeHomeTeam)} • ${officialPrepInnings} manches`);
 }
 
 function closeOfficialPreGame(){
@@ -4297,22 +4314,49 @@ function currentTeamRunsAdd(){
 }
 function scoreRunner(r,rbi=true){currentTeamRunsAdd();const p=getPlayer(r);if(p)p.r++;if(rbi)batter().rbi++;addLog(`${r.name} marque${rbi?" • RBI à "+batter().name:""}`)}
 function endHalfIfNeeded(){
-  if(state.outs<3||state.gameOver)return;
+  if(state.gameOver)return false;
+
+  const unlimited=leagueSettings.outsPerHalf==="unlimited";
+  const battingLineup=activeLineup(currentBattingTeam());
+  const halfDone=unlimited
+    ? (battingLineup.length>0 && (state.halfBatters||0)>=battingLineup.length)
+    : state.outs>=3;
+
+  if(!halfDone)return false;
+
   const endingTop=state.top,inningJustPlayed=state.inning;
+
   if(endingTop&&inningJustPlayed>=regulationInnings&&state.homeRuns>state.awayRuns){
-    state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];proposeGameOver(activeHomeTeam,`${activeHomeTeam} mènent après le haut de la dernière manche.`);return;
+    state.outs=0;state.halfBatters=0;state.bases={1:null,2:null,3:null};state.pending=[];
+    proposeGameOver(activeHomeTeam,`${activeHomeTeam} mènent après le haut de la dernière manche.`);
+    return true;
   }
+
   if(!endingTop&&inningJustPlayed>=regulationInnings&&state.awayRuns>state.homeRuns){
-    state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];proposeGameOver(activeAwayTeam,`${activeAwayTeam} mènent après la fin de la manche prévue.`);return;
+    state.outs=0;state.halfBatters=0;state.bases={1:null,2:null,3:null};state.pending=[];
+    proposeGameOver(activeAwayTeam,`${activeAwayTeam} mènent après la fin de la manche prévue.`);
+    return true;
   }
+
   if(!endingTop&&inningJustPlayed>=regulationInnings&&state.awayRuns===state.homeRuns){
+    state.halfBatters=0;
     showTieAfterInningPrompt(inningJustPlayed);
-    return;
+    return true;
   }
-  state.outs=0;state.bases={1:null,2:null,3:null};state.pending=[];state.top=!state.top;
-  if(state.top){state.inning++;if(state.inning>displayedInnings)displayedInnings=state.inning;}
+
+  state.outs=0;
+  state.halfBatters=0;
+  state.bases={1:null,2:null,3:null};
+  state.pending=[];
+  state.top=!state.top;
+  if(state.top){
+    state.inning++;
+    if(state.inning>displayedInnings)displayedInnings=state.inning;
+  }
   applyAutomaticExtraRunnerIfNeeded();
-  const p=currentPitcher();addLog("Changement de demi-manche • "+(p?p.name:"Aucun lanceur")+" au monticule");
+  const p=currentPitcher();
+  addLog("Changement de demi-manche • "+(p?p.name:"Aucun lanceur")+" au monticule");
+  return true;
 }
 function blockIfPending(){if(state.pending.length){toast("Confirmez d’abord les coureurs");return true}return false}
 
@@ -4337,7 +4381,13 @@ function resolvePending(dest){if(blockIfGameOver())return;
   if(dest===0){state.outs++;pitcherStats().outs++;addLog(`${r.name} est retiré sur les buts`)}
   else if(dest===4)scoreRunner(r,true);
   else{if(state.bases[dest]){toast("Ce but est déjà occupé");state.pending.unshift(item);return}state.bases[dest]=r;addLog(`${r.name} avance au ${dest===2?"2e":"3e"} but`)}
-  $("pendingModal").classList.remove("show");endHalfIfNeeded();if(state.outs<3&&state.pending.length)showPending();else if(state.outs<3&&!state.pending.length)nextBatter();renderGame()
+  $("pendingModal").classList.remove("show");
+  const halfEnded=endHalfIfNeeded();
+  if(!halfEnded){
+    if(state.pending.length)showPending();
+    else nextBatter();
+  }
+  renderGame()
 }
 function recordHR(){if(blockIfGameOver())return;
   if(blockIfPending())return;saveHistory();const b=batter(),bt=currentBattingTeam();b.ab++;b.h++;b.hr++;pitcherStats().h++;
@@ -4608,6 +4658,7 @@ let leagueSettings={
   name:"Ligue Diamond",
   teamCount:6,
   regulationInnings:7,
+  outsPerHalf:"3",
   extraInnings:true,
   autoExtraRunner:false,
   autoRunnerBase:2,
@@ -4766,7 +4817,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.16.3 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.16.4 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -4860,8 +4911,8 @@ function updateScheduleMathPreview(){
 }
 
 function fillLeagueSettingsForm(){
-  $("mgrLeagueName").value=leagueSettings.name||"Ligue Diamond";
   $("mgrRegInnings").value=String(leagueSettings.regulationInnings||7);
+  $("mgrOutsPerHalf").value=leagueSettings.outsPerHalf||"3";
   $("mgrExtraInnings").checked=!!leagueSettings.extraInnings;
   $("mgrAutoRunner").checked=!!leagueSettings.autoExtraRunner;
   $("mgrAutoRunnerBase").value=String(leagueSettings.autoRunnerBase||2);
@@ -4880,9 +4931,10 @@ function readLeagueSettingsForm(){
   const weeklySlots=readWeeklySlotsFromForm();
   const s={
     ...leagueSettings,
-    name:String($("mgrLeagueName").value||"Ligue Diamond").trim()||"Ligue Diamond",
+    name:leagueSettings.name||"Ligue Diamond",
     teamCount:leagueTeamIds().length,
     regulationInnings:Number($("mgrRegInnings").value)||7,
+    outsPerHalf:$("mgrOutsPerHalf").value==="unlimited"?"unlimited":"3",
     extraInnings:!!$("mgrExtraInnings").checked,
     autoExtraRunner:!!$("mgrExtraInnings").checked && !!$("mgrAutoRunner").checked,
     autoRunnerBase:Number($("mgrAutoRunnerBase").value)||2,
@@ -4991,16 +5043,27 @@ function generateLeagueScheduleFromSettings(){
     return;
   }
 
-  // Greedy placement: avoid scheduling the same team twice on the same date.
+  // Placement avec contraintes souples :
+  // Diamond préfère les matchs sans conflit avec les demandes des équipes,
+  // mais peut utiliser une plage moins favorable si nécessaire.
   const remaining=[...required];
   const proposed=[];
+  const preferenceExceptions=[];
   let currentDate=null,usedToday=new Set();
   for(const slot of slots){
     if(slot.date!==currentDate){currentDate=slot.date;usedToday=new Set();}
-    const idx=remaining.findIndex(g=>!usedToday.has(g.away)&&!usedToday.has(g.home));
-    if(idx<0)continue;
-    const g=remaining.splice(idx,1)[0];
-    proposed.push({...g,date:slot.date,time:slot.time,status:"scheduled"});
+    const candidates=remaining
+      .map((g,i)=>({g,i,conflicts:requestConflictsForGame(g.away,g.home,slot.date)}))
+      .filter(x=>!usedToday.has(x.g.away)&&!usedToday.has(x.g.home))
+      .sort((a,b)=>a.conflicts.length-b.conflicts.length);
+    if(!candidates.length)continue;
+    const choice=candidates[0];
+    const g=remaining.splice(choice.i,1)[0];
+    proposed.push({...g,date:slot.date,time:slot.time,status:"scheduled",
+      preferenceExceptions:choice.conflicts.map(r=>r.id)});
+    if(choice.conflicts.length){
+      preferenceExceptions.push({game:g,date:slot.date,conflicts:choice.conflicts});
+    }
     usedToday.add(g.away);usedToday.add(g.home);
     if(!remaining.length)break;
   }
@@ -5025,6 +5088,12 @@ function generateLeagueScheduleFromSettings(){
   officialPrepInnings=s.regulationInnings;
   renderSchedule();renderOfficialGames();renderManagerSchedule();
   closeLeagueSettings();
+  if(preferenceExceptions.length){
+    const sample=preferenceExceptions.slice(0,4).map(x=>
+      `${teamDisplayName(x.game.away)} vs ${teamDisplayName(x.game.home)} • ${x.date}`
+    ).join("\n");
+    alert(`Horaire généré avec ${preferenceExceptions.length} exception${preferenceExceptions.length>1?"s":""} aux demandes des équipes.\n\n${sample}${preferenceExceptions.length>4?"\n…":""}\n\nLes demandes sont des préférences souples : Diamond les évite autant que possible.`);
+  }
   toast(`${leagueSchedule.length} matchs générés`);
 }
 
@@ -5207,6 +5276,7 @@ function handleJoinFromUrl(){
 
 function openTeamManager(){
   $("mgrActiveTeamCount").value=leagueTeamIds().length;
+  if($("mgrLeagueNameTeam"))$("mgrLeagueNameTeam").value=leagueSettings.name||"Ligue Diamond";
   renderManagerTeamList();
   $("teamManagerModal").classList.add("show");
 }
@@ -5266,6 +5336,8 @@ function handleTeamLogoFile(team,input){
 }
 
 function saveAllTeamConfigs(){
+  const leagueName=String($("mgrLeagueNameTeam")?.value||"").trim();
+  if(leagueName)leagueSettings.name=leagueName;
   leagueTeamIds().forEach(team=>{
     const id=teamSafeId(team);
     const name=String($(`teamName_${id}`)?.value||teamDisplayName(team)).trim();
@@ -5273,10 +5345,11 @@ function saveAllTeamConfigs(){
     leagueTeamMeta[team].displayName=name||teamDisplayName(team);
     leagueTeamMeta[team].color=color;
   });
+  ensureLeagueInvite();
   renderLeagueTeamVisuals();
   renderCaptainTeamSelectors();
   renderSchedule();renderStandings();renderManagerSchedule();
-  toast("Équipes enregistrées");
+  toast("Ligue / tournoi et équipes enregistrés");
   closeTeamManager();
 }
 
@@ -5619,6 +5692,7 @@ function startExtraInningFromTie(){
   $("tieGameModal").classList.remove("show");
 
   state.outs=0;
+  state.halfBatters=0;
   state.bases={1:null,2:null,3:null};
   state.pending=[];
   state.top=true;
@@ -6055,7 +6129,7 @@ function renderViewer(){
   renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.16.3.
+// L'accueil par rôles est l'écran initial de v0.16.4.
 
 renderLineupEditor();
 

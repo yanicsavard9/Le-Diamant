@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.17.0</title>
+<title>Diamond v0.17.3</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1489,10 +1489,44 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0172-official-date-nav">
+.official-date-nav{
+  display:grid;
+  grid-template-columns:1fr 1.15fr 1fr;
+  gap:7px;
+}
+.official-date-nav button{
+  min-height:44px;
+  padding:8px 6px;
+  font-size:11px;
+  font-weight:900;
+}
+#officialGamesDate{
+  width:100%;
+  min-height:48px;
+  box-sizing:border-box;
+  border-radius:11px;
+}
+.official-date-empty{
+  text-align:center;
+  padding:18px 12px;
+}
+@media(max-width:430px){
+  .official-date-nav{
+    grid-template-columns:1fr 1fr;
+  }
+  .official-date-nav button:nth-child(2){
+    grid-column:1/-1;
+    grid-row:2;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.17.0 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.17.3 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1590,8 +1624,8 @@ body.role-viewer .strike-count{
 
       <div class="role-grid">
         <button class="role-card" type="button" onclick="openOfficialGames()">
-          <strong>📅 Matchs de la journée</strong>
-          <small>Recevoir, vérifier et verrouiller les alignements avant chaque match.</small>
+          <strong>📅 Matchs par date</strong>
+          <small>Voir les matchs d’aujourd’hui, de la veille, du lendemain ou choisir n’importe quelle date.</small>
         </button>
 
         <button class="role-card" type="button" onclick="openLeagueInfo('stats')">
@@ -1992,6 +2026,14 @@ body.role-viewer .strike-count{
       <div id="liveInningFormatStatus" class="readonly-note" style="margin-top:8px"></div>
     </div>
 
+    <div id="finishInningOption" class="hidden" style="margin-top:12px">
+      <div class="readonly-note" style="margin-bottom:8px">
+        🧮 PP / PC : si le règlement du tournoi exige de compléter la manche,
+        le marqueur peut continuer jusqu’à la fin de cette manche avant de confirmer le résultat.
+      </div>
+      <button type="button" style="width:100%" onclick="finishCurrentInningFromEndPrompt()">TERMINER LA MANCHE</button>
+    </div>
+
     <div class="sheet-grid" style="margin-top:12px">
       <button type="button" onclick="continueGameFromEndPrompt()">CONTINUER LE MATCH</button>
       <button type="button" class="primary" onclick="confirmGameOver()">CONFIRMER LA FIN</button>
@@ -2004,11 +2046,27 @@ body.role-viewer .strike-count{
 
 <div class="modal" id="officialGamesModal">
   <div class="sheet">
-    <h3>⚾ MATCHS DE LA JOURNÉE</h3>
+    <h3>⚾ MATCHS PAR DATE</h3>
+
     <div class="readonly-note">
-      Sélectionnez un match pour voir les alignements reçus et préparer la partie.
+      Consultez les matchs d’une autre journée sans quitter l’espace Marqueur.
     </div>
+
+    <div class="official-date-nav" style="margin-top:12px">
+      <button type="button" onclick="changeOfficialGamesDate(-1)">‹ VEILLE</button>
+      <button type="button" onclick="setOfficialGamesToday()">AUJOURD’HUI</button>
+      <button type="button" onclick="changeOfficialGamesDate(1)">LENDEMAIN ›</button>
+    </div>
+
+    <div class="manager-setting" style="margin-top:10px">
+      <label>Choisir une date</label>
+      <input id="officialGamesDate" type="date" onchange="selectOfficialGamesDate(this.value)">
+    </div>
+
+    <div id="officialGamesDateLabel" class="manager-summary" style="margin-top:10px"></div>
+
     <div id="officialGamesList" style="margin-top:12px"></div>
+
     <button type="button" style="width:100%;margin-top:14px" onclick="closeOfficialGames()">FERMER</button>
   </div>
 </div>
@@ -2187,7 +2245,7 @@ body.role-viewer .strike-count{
             <input id="mgrFieldCount" type="number" min="1" max="12" value="1" onchange="renderFieldConfig()">
           </div>
           <div class="readonly-note">
-            Plusieurs terrains permettent de programmer des matchs à la même heure.
+            Ajoutez les terrains ici. Ils deviennent immédiatement disponibles dans les journées ci-dessous, même avant d’enregistrer.
           </div>
         </div>
         <div id="fieldNamesContainer"></div>
@@ -2197,7 +2255,7 @@ body.role-viewer .strike-count{
 
       <div class="manager-setting full">
         <div class="muted" style="font-size:12px;margin-bottom:9px">
-          Choisissez le nombre de matchs par journée. Pour chaque match, sélectionnez ensuite l’heure et le terrain.
+          Choisissez le nombre de matchs par journée. Pour chaque match, sélectionnez ensuite l’heure et l’un des terrains configurés plus haut.
         </div>
         <div id="weeklyDayRows"></div>
         <div class="native-time-note">
@@ -2676,7 +2734,7 @@ Object.entries(teams).forEach(([teamName,t])=>{
   t.roster=t.lineup.map(p=>({...p}));
 });
 let regulationInnings=7; let displayedInnings=7;
-let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,halfBatters:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}},gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};
+let state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,halfBatters:0,batterIndex:{Brewers:0,Yankees:0},bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns:{Brewers:{},Yankees:{}},gameOver:false,winner:null,gameOverReason:"",finishInningMode:null,_finalGameSaved:false};
 let selectedBase=null;
 let selectedLineupSlot=null;
 let selectedBenchSlot=null;
@@ -3552,7 +3610,7 @@ function resetStatsOnly(){
   Object.values(teams).forEach(t=>{t.lineup.forEach(p=>{p.ab=p.h=p.hr=p.rbi=p.r=p.bv=p.bb=p.hbp=p.k=0});t.pitcherStats={outs:0,h:0,k:0,bb:0,er:0};});
   displayedInnings=regulationInnings;
   const batterIndex={},inningRuns={};Object.keys(teams).forEach(n=>{batterIndex[n]=0;inningRuns[n]={};});
-  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,halfBatters:0,batterIndex,bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns,gameOver:false,winner:null,gameOverReason:"",_finalGameSaved:false};pendingTieInning=null;
+  state={awayRuns:0,homeRuns:0,inning:1,top:true,outs:0,halfBatters:0,batterIndex,bases:{1:null,2:null,3:null},history:[],log:[],pending:[],inningRuns,gameOver:false,winner:null,gameOverReason:"",finishInningMode:null,_finalGameSaved:false};pendingTieInning=null;
 }
 function serializableState(){
   const stateWithoutHistory={
@@ -3759,16 +3817,50 @@ function formatScheduleDate(iso){
   return `${days[dt.getDay()]} ${d} ${months[m-1]}`;
 }
 
-function getOfficialNightGames(){
-  // Prototype: show the earliest schedule date that still has scheduled games.
-  const sorted=leagueSchedule.filter(g=>(g.status||"scheduled")==="scheduled").sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  if(!sorted.length)return [];
-  const firstDate=sorted[0].date;
-  return sorted.filter(g=>g.date===firstDate);
+
+function localTodayISO(){
+  const d=new Date();
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function shiftISODate(iso,delta){
+  const [y,m,d]=String(iso||localTodayISO()).split("-").map(Number);
+  const dt=new Date(y,m-1,d);
+  dt.setDate(dt.getDate()+delta);
+  const yy=dt.getFullYear();
+  const mm=String(dt.getMonth()+1).padStart(2,"0");
+  const dd=String(dt.getDate()).padStart(2,"0");
+  return `${yy}-${mm}-${dd}`;
+}
+
+function officialGamesForDate(iso){
+  return leagueSchedule
+    .filter(g=>g.date===iso)
+    .sort((a,b)=>(a.time||"").localeCompare(b.time||""));
+}
+
+function selectOfficialGamesDate(iso){
+  if(!iso)return;
+  officialSelectedDate=iso;
+  renderOfficialGames();
+}
+
+function changeOfficialGamesDate(delta){
+  officialSelectedDate=shiftISODate(officialSelectedDate||localTodayISO(),delta);
+  renderOfficialGames();
+}
+
+function setOfficialGamesToday(){
+  officialSelectedDate=localTodayISO();
+  renderOfficialGames();
 }
 
 function openOfficialGames(){
   currentRole="official";
+  if(!officialSelectedDate)officialSelectedDate=localTodayISO();
   renderOfficialGames();
   $("officialGamesModal").classList.add("show");
 }
@@ -3781,9 +3873,34 @@ function renderOfficialGames(){
   const list=$("officialGamesList");
   if(!list)return;
 
-  const games=getOfficialNightGames();
+  if(!officialSelectedDate)officialSelectedDate=localTodayISO();
+
+  const dateInput=$("officialGamesDate");
+  if(dateInput)dateInput.value=officialSelectedDate;
+
+  const dateLabel=$("officialGamesDateLabel");
+  if(dateLabel){
+    const today=localTodayISO();
+    const relative=officialSelectedDate===today
+      ?"Aujourd’hui"
+      :officialSelectedDate===shiftISODate(today,-1)
+        ?"Hier"
+        :officialSelectedDate===shiftISODate(today,1)
+          ?"Demain"
+          :"Date sélectionnée";
+    dateLabel.innerHTML=`<b>${relative}</b><br>${formatScheduleDate(officialSelectedDate)}`;
+  }
+
+  const games=officialGamesForDate(officialSelectedDate);
+
   if(!games.length){
-    list.innerHTML='<div class="readonly-note">Aucun match prévu.</div>';
+    list.innerHTML=`
+      <div class="readonly-note official-date-empty">
+        <b>Aucun match prévu le ${formatScheduleDate(officialSelectedDate)}.</b>
+        <div class="muted" style="margin-top:6px">
+          Utilisez VEILLE, LENDEMAIN ou le sélecteur de date pour consulter une autre journée.
+        </div>
+      </div>`;
     return;
   }
 
@@ -3797,22 +3914,53 @@ function renderOfficialGames(){
     };
 
     const finalGame=completedGames.find(game=>game.scheduleKey===key);
+    const status=g.status||"scheduled";
+    const fieldLine=g.field?` • ${g.field}`:"";
 
-    if(finalGame){
+    if(finalGame || status==="completed"){
+      if(finalGame){
+        return `
+          <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px"
+            onclick="openCompletedGame('${finalGame.id}')">
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+              <strong>${g.time}${fieldLine}</strong>
+              <span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
+              <span style="font-weight:900">FINAL</span>
+            </div>
+            <div style="margin-top:7px;font-size:14px">
+              <div class="logo-score">${teamLogo(finalGame.awayTeam,32)} ${finalGame.awayRuns} – ${finalGame.homeRuns} ${teamLogo(finalGame.homeTeam,32)}</div>
+            </div>
+            <div class="muted" style="font-size:12px;margin-top:4px">
+              Touchez pour voir le résumé et les statistiques du match
+            </div>
+          </button>`;
+      }
+
       return `
-        <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px"
-          onclick="openCompletedGame('${finalGame.id}')">
+        <div class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-            <strong>${g.time}</strong><span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
-            <span style="font-weight:900">FINAL</span>
+            <strong>${g.time}${fieldLine}</strong>
+            <span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
+            <span style="font-weight:900">TERMINÉ</span>
           </div>
-          <div style="margin-top:7px;font-size:14px">
-            <div class="logo-score">${teamLogo(finalGame.awayTeam,32)} ${finalGame.awayRuns} – ${finalGame.homeRuns} ${teamLogo(finalGame.homeTeam,32)}</div>
+        </div>`;
+    }
+
+    if(status!=="scheduled"){
+      const labels={
+        rain:"REPORTÉ • PLUIE",
+        postponed:"REPORTÉ",
+        cancelled:"ANNULÉ",
+        suspended:"SUSPENDU"
+      };
+      return `
+        <div class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px;opacity:.82">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+            <strong>${g.time}${fieldLine}</strong>
+            <span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
+            <span style="font-weight:900">${labels[status]||status.toUpperCase()}</span>
           </div>
-          <div class="muted" style="font-size:12px;margin-top:4px">
-            Touchez pour voir le résumé et les statistiques du match
-          </div>
-        </button>`;
+        </div>`;
     }
 
     const awayState=s.awayLocked
@@ -3827,7 +3975,8 @@ function renderOfficialGames(){
       <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px"
         onclick="openOfficialGame('${key}')">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-          <strong>${g.time}</strong><span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
+          <strong>${g.time}${fieldLine}</strong>
+          <span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
           <span>›</span>
         </div>
         <div style="margin-top:6px;font-size:12px">
@@ -3845,7 +3994,7 @@ function openOfficialGame(key){
 
   $("officialGamesModal").classList.remove("show");
   $("officialGameTitle").innerHTML=`<span class="logo-matchup">${teamLogo(g.away,44)}<span class="logo-vs">@</span>${teamLogo(g.home,44)}</span>`;
-  $("officialGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
+  $("officialGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}${g.field?` • ${g.field}`:""}`;
   renderOfficialGameStatus();
   $("officialGameDetailModal").classList.add("show");
 }
@@ -3921,7 +4070,7 @@ function openOfficialTeamAlignment(side){
 
   $("officialGameDetailModal").classList.remove("show");
   $("officialAlignmentReviewTitle").textContent=`ALIGNEMENT ${teamName.toUpperCase()}`;
-  $("officialAlignmentReviewMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
+  $("officialAlignmentReviewMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}${g.field?` • ${g.field}`:""}`;
 
   renderOfficialSingleLineupReview();
   $("officialAlignmentReviewModal").classList.add("show");
@@ -4059,7 +4208,7 @@ function prepareSelectedOfficialGame(){
   officialPrepInnings=leagueSettings.regulationInnings||regulationInnings||7;
 
   $("officialPreGameTitle").textContent=`PRÉPARER • ${g.away} vs ${g.home}`;
-  $("officialPreGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}`;
+  $("officialPreGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}${g.field?` • ${g.field}`:""}`;
 
   renderOfficialPreGame();
   $("officialPreGameModal").classList.add("show");
@@ -4375,10 +4524,15 @@ function renderCompletedPitchingStats(teamData,teamName){
   </table></div>`;
 }
 
-function proposeGameOver(winner,reason){
+function proposeGameOver(winner,reason,options={}){
   if(state.gameOver)return;
 
-  pendingGameOver={winner,reason:reason||""};
+  pendingGameOver={
+    winner,
+    reason:reason||"",
+    canFinishInning:!!options.canFinishInning,
+    finishMode:options.finishMode||null
+  };
 
   const msg=$("gameOverMessage");
   const detail=$("gameOverDetail");
@@ -4388,10 +4542,55 @@ function proposeGameOver(winner,reason){
   const adjust=$("gameOverInningAdjust");
   if(adjust)adjust.classList.add("hidden");
 
+  const finishOption=$("finishInningOption");
+  if(finishOption)finishOption.classList.toggle("hidden",!pendingGameOver.canFinishInning);
+
   updateLiveInningFormatStatus();
 
   const modal=$("gameOverModal");
   if(modal)modal.classList.add("show");
+}
+
+function finishCurrentInningFromEndPrompt(){
+  if(currentRole!=="official"){
+    toast("Seul le marqueur peut terminer la manche");
+    return;
+  }
+  if(!pendingGameOver?.canFinishInning){
+    toast("La manche est déjà complétée");
+    return;
+  }
+
+  const mode=pendingGameOver.finishMode;
+  const winner=pendingGameOver.winner;
+  const inning=state.inning;
+
+  state.finishInningMode={
+    inning,
+    expectedWinner:winner,
+    mode
+  };
+
+  pendingGameOver=null;
+  closeGameOverModal();
+
+  // Si le gagnant est déjà connu après le haut de la dernière manche,
+  // on permet quand même à l'équipe locale de jouer le bas au complet.
+  if(mode==="playBottom"){
+    state.outs=0;
+    state.halfBatters=0;
+    state.bases={1:null,2:null,3:null};
+    state.pending=[];
+    state.top=false;
+    addLog(`PP / PC • Le bas de la ${inning}e manche sera joué au complet`);
+  }else{
+    // Walk-off potentiel : on reste dans le bas de la manche et on continue
+    // jusqu'à 3 retraits (ou jusqu'au tour complet si retraits illimités).
+    addLog(`PP / PC • La ${inning}e manche sera complétée avant la fin du match`);
+  }
+
+  renderGame();
+  toast("Terminez la manche avant de confirmer la fin");
 }
 
 function confirmGameOver(){
@@ -4409,6 +4608,7 @@ function confirmGameOver(){
   saveFinalGameToLocalSeason();
 
   pendingGameOver=null;
+  state.finishInningMode=null;
   closeGameOverModal();
   renderGame();
   toast("Fin du match confirmée");
@@ -4439,6 +4639,7 @@ function setLiveRegulationInnings(n){
 
   regulationInnings=n;
   displayedInnings=Math.max(displayedInnings,n,state.inning);
+  state.finishInningMode=null;
   pendingGameOver=null;
 
   closeGameOverModal();
@@ -4455,6 +4656,7 @@ function continueWithExtraInning(){
 
   displayedInnings=Math.max(displayedInnings,state.inning,regulationInnings)+1;
   regulationInnings=Math.max(regulationInnings,displayedInnings);
+  state.finishInningMode=null;
   pendingGameOver=null;
 
   closeGameOverModal();
@@ -4477,8 +4679,13 @@ function closeGameOverModal(){
 
 function checkWalkOff(){
   if(state.gameOver)return true;
+  if(state.finishInningMode)return false;
   if(!state.top&&isFinalOrExtraInning()&&state.homeRuns>state.awayRuns){
-    if(!pendingGameOver)proposeGameOver(activeHomeTeam,`${activeHomeTeam} ont pris l’avance en fin de la dernière manche. Confirmez la fin du match ou continuez la rencontre.`);
+    if(!pendingGameOver)proposeGameOver(
+      activeHomeTeam,
+      `${activeHomeTeam} ont pris l’avance en fin de la dernière manche. Confirmez la fin du match ou terminez la manche si les PP / PC doivent être comptabilisés.`,
+      {canFinishInning:true,finishMode:"currentBottom"}
+    );
     return false;
   } return false;
 }
@@ -4537,9 +4744,41 @@ function endHalfIfNeeded(){
 
   const endingTop=state.top,inningJustPlayed=state.inning;
 
+  // Mode PP / PC : une fois le bas de la manche réellement complété,
+  // on présente à nouveau la confirmation de fin avec le pointage final de la manche.
+  if(state.finishInningMode && !endingTop && inningJustPlayed===state.finishInningMode.inning){
+    state.outs=0;
+    state.halfBatters=0;
+    state.bases={1:null,2:null,3:null};
+    state.pending=[];
+
+    const winner=state.homeRuns>state.awayRuns
+      ? activeHomeTeam
+      : state.awayRuns>state.homeRuns
+        ? activeAwayTeam
+        : null;
+
+    state.finishInningMode=null;
+
+    if(winner){
+      proposeGameOver(
+        winner,
+        `La ${inningJustPlayed}e manche a été complétée pour comptabiliser les PP / PC.`,
+        {canFinishInning:false}
+      );
+    }else{
+      showTieAfterInningPrompt(inningJustPlayed);
+    }
+    return true;
+  }
+
   if(endingTop&&inningJustPlayed>=regulationInnings&&state.homeRuns>state.awayRuns){
     state.outs=0;state.halfBatters=0;state.bases={1:null,2:null,3:null};state.pending=[];
-    proposeGameOver(activeHomeTeam,`${activeHomeTeam} mènent après le haut de la dernière manche.`);
+    proposeGameOver(
+      activeHomeTeam,
+      `${activeHomeTeam} mènent après le haut de la dernière manche.`,
+      {canFinishInning:true,finishMode:"playBottom"}
+    );
     return true;
   }
 
@@ -4848,6 +5087,7 @@ function confirmReset(){
   if($("officialHub"))$("officialHub").classList.remove("hidden");
 
   setRoleBadge("MARQUEUR");
+  officialSelectedDate=localTodayISO();
   renderOfficialGames();
 
   // Les alignements déjà soumis/verrouillés restent disponibles.
@@ -4930,6 +5170,7 @@ let standings={};leagueTeamOrder.forEach(n=>standings[n]={W:0,L:0,RF:0,RA:0});
 let selectedCompletedGameId=null;
 
 let officialSelectedGameId=null;
+let officialSelectedDate=null;
 let activeScheduleGameKey=null;
 let officialPrepInnings=7;
 let officialPrepLocked=false;
@@ -5038,7 +5279,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.17.0 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.17.3 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -5084,6 +5325,22 @@ function defaultSlotTime(index){
 }
 
 function getConfiguredFields(){
+  // If the terrain editor is currently present in the DOM, use its live values.
+  // This lets the weekly schedule immediately offer newly added terrains
+  // without forcing the manager to save/close/reopen first.
+  const countEl=$("mgrFieldCount");
+  const firstFieldInput=$("fieldName0");
+
+  if(countEl && firstFieldInput){
+    const count=Math.max(1,Math.min(12,Number(countEl.value)||1));
+    const live=[];
+    for(let i=0;i<count;i++){
+      const raw=String($(`fieldName${i}`)?.value || leagueSettings.fields?.[i] || `Terrain ${i+1}`).trim();
+      live.push(raw || `Terrain ${i+1}`);
+    }
+    return live;
+  }
+
   const fields=(leagueSettings.fields||[]).map(x=>String(x||"").trim()).filter(Boolean);
   return fields.length?fields:["Terrain 1"];
 }
@@ -5275,19 +5532,65 @@ function updateScheduleMathPreview(){
 }
 
 
+function refreshWeeklyFieldOptions(){
+  const fields=getConfiguredFields();
+  for(let dow=0;dow<7;dow++){
+    const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
+    for(let i=0;i<count;i++){
+      const sel=$(`weekField${dow}_${i}`);
+      if(!sel)continue;
+
+      const previous=sel.value;
+      sel.innerHTML=fields.map(f=>`<option value="${f}">${f}</option>`).join("");
+
+      if(fields.includes(previous)){
+        sel.value=previous;
+      }else{
+        sel.value=fields[i%fields.length] || fields[0];
+      }
+    }
+    if(weeklyDraftSlots && weeklyDraftSlots[dow]){
+      syncWeeklySlotDraft(dow);
+    }
+  }
+  updateScheduleMathPreview();
+}
+
+function updateFieldNameDraft(){
+  refreshWeeklyFieldOptions();
+}
+
 function renderFieldConfig(){
   const root=$("fieldNamesContainer");if(!root)return;
   const count=Math.max(1,Math.min(12,Number($("mgrFieldCount")?.value)||1));
-  const current=readCurrentFieldNames();
-  while(current.length<count)current.push(`Terrain ${current.length+1}`);
-  root.innerHTML=current.slice(0,count).map((name,i)=>`
-    <div class="field-row">
-      <div class="slot-number">${i+1}</div>
-      <div>
-        <label>Nom du terrain</label>
-        <input id="fieldName${i}" type="text" value="${String(name).replace(/"/g,"&quot;")}" placeholder="Terrain ${i+1}">
-      </div>
-    </div>`).join("");
+
+  // Capture the names currently typed BEFORE rebuilding the rows.
+  const current=[];
+  for(let i=0;i<12;i++){
+    const existing=$(`fieldName${i}`);
+    if(existing){
+      current[i]=String(existing.value||"").trim();
+    }else if(leagueSettings.fields?.[i]){
+      current[i]=String(leagueSettings.fields[i]).trim();
+    }
+  }
+
+  root.innerHTML=Array.from({length:count},(_,i)=>{
+    const name=current[i] || `Terrain ${i+1}`;
+    return `
+      <div class="field-row">
+        <div class="slot-number">${i+1}</div>
+        <div>
+          <label>Nom du terrain</label>
+          <input id="fieldName${i}" type="text"
+                 value="${String(name).replace(/"/g,"&quot;")}"
+                 placeholder="Terrain ${i+1}"
+                 oninput="updateFieldNameDraft()">
+        </div>
+      </div>`;
+  }).join("");
+
+  refreshWeeklyFieldOptions();
 }
 
 function readCurrentFieldNames(){

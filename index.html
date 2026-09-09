@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.16.4</title>
+<title>Diamond v0.16.5</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1397,7 +1397,7 @@ body.role-viewer .strike-count{
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.16.4 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.16.5 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1841,7 +1841,6 @@ body.role-viewer .strike-count{
         <button type="button" class="action-btn" onclick="recordHit(3)">TRIPLE</button>
         <button type="button" class="action-btn" onclick="recordHR()">CIRCUIT</button>
         <button type="button" class="action-btn" onclick="recordOut()">RETRAIT</button>
-        <button type="button" class="kbtn" onclick="recordStrikeout()">K • RETRAIT AU BÂTON</button>
         <button type="button" class="action-btn" onclick="recordWalk()">BB</button>
         <button type="button" class="action-btn" onclick="recordHBP()">HBP</button>
         <button type="button" class="action-btn" onclick="recordError()">ERREUR</button>
@@ -2454,6 +2453,41 @@ function teamDisplayName(team){
 }
 function teamAccent(team){
   return leagueTeamMeta?.[team]?.color || "#6f91ad";
+}
+function hexToRgb(hex){
+  const value=String(hex||"").trim().replace("#","");
+  const clean=value.length===3 ? value.split("").map(ch=>ch+ch).join("") : value;
+  if(!/^[0-9a-fA-F]{6}$/.test(clean))return {r:111,g:145,b:173};
+  return {r:parseInt(clean.slice(0,2),16),g:parseInt(clean.slice(2,4),16),b:parseInt(clean.slice(4,6),16)};
+}
+function rgbaFromHex(hex,alpha=.12){
+  const {r,g,b}=hexToRgb(hex);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+function applyDynamicTeamCardStyles(el,team,isActive=false){
+  if(!el)return;
+  const accent=teamAccent(team);
+  el.style.borderColor=accent;
+  el.style.background=isActive ? rgbaFromHex(accent,.18) : rgbaFromHex(accent,.10);
+  el.style.boxShadow=isActive ? `0 0 0 2px ${rgbaFromHex(accent,.20)}, 0 0 16px ${rgbaFromHex(accent,.22)}` : "none";
+  const runsEl=el.querySelector(".runs");
+  if(runsEl)runsEl.style.color=accent;
+}
+function styleAtBatBanner(team){
+  const banner=$("atBatTeam");
+  if(!banner)return;
+  const accent=teamAccent(team);
+  banner.style.borderColor=accent;
+  banner.style.background=rgbaFromHex(accent,.12);
+  banner.style.color=accent;
+  banner.style.boxShadow=`inset 0 0 0 1px ${rgbaFromHex(accent,.10)}`;
+}
+function styleOccupiedBase(el,team){
+  if(!el)return;
+  const accent=teamAccent(team);
+  el.style.borderColor=accent;
+  el.style.background=rgbaFromHex(accent,.18);
+  el.style.color=accent;
 }
 function teamLogo(team,size=46,extraClass=""){
   const meta=leagueTeamMeta?.[team]||{};
@@ -3390,7 +3424,9 @@ function applyCurrentTeamAccent(){
   const card=document.getElementById("plateAppearanceCard");
   if(!card)return;
   ["brewers","yankees","indiens","bananes","sox","expos"].forEach(t=>card.classList.remove("accent-"+t));
-  card.classList.add("accent-"+team.toLowerCase());
+  const accent=teamAccent(team);
+  card.style.borderColor=accent;
+  card.style.boxShadow=`inset 4px 0 0 ${accent}`;
 }
 
 function renderGame(){
@@ -3398,12 +3434,16 @@ function renderGame(){
   const awayBox=$("awayTeam"),homeBox=$("homeTeam");
 
   if(awayBox){
-    const n=awayBox.querySelector(".name");if(n)n.innerHTML=teamLogo(activeAwayTeam,42);
+    awayBox.className="team";
     awayBox.classList.toggle("active",state.top);
+    const n=awayBox.querySelector(".name");if(n)n.innerHTML=teamLogo(activeAwayTeam,42);
+    applyDynamicTeamCardStyles(awayBox,activeAwayTeam,state.top);
   }
   if(homeBox){
-    const n=homeBox.querySelector(".name");if(n)n.innerHTML=teamLogo(activeHomeTeam,42);
+    homeBox.className="team";
     homeBox.classList.toggle("active",!state.top);
+    const n=homeBox.querySelector(".name");if(n)n.innerHTML=teamLogo(activeHomeTeam,42);
+    applyDynamicTeamCardStyles(homeBox,activeHomeTeam,!state.top);
   }
 
   if(!$("viewerView").classList.contains("hidden"))renderViewer();
@@ -3414,6 +3454,7 @@ function renderGame(){
   renderLineScores();
 
   $("atBatTeam").textContent="AU BÂTON : "+currentBattingTeam().toUpperCase();
+  styleAtBatBanner(currentBattingTeam());
   $("outsText").textContent=state.outs+" retrait"+(state.outs>1?"s":"");
   [1,2,3].forEach(i=>$("outBall"+i).classList.toggle("filled",state.outs>=i));
 
@@ -3423,12 +3464,14 @@ function renderGame(){
   const b=batter(),n=nextBatterObj();
   $("batterName").textContent=b.name+" • "+b.pos;
   $("batterName").className="batter-name player-link team-"+currentBattingTeam().toLowerCase();
+  $("batterName").style.color=teamAccent(currentBattingTeam());
   $("batterName").onclick=()=>openPlayerProfile(b,currentBattingTeam());
 
   const homeBatter=$("homeBatterName");
   if(homeBatter){
     homeBatter.textContent=b.name;
     homeBatter.className="player-link team-"+currentBattingTeam().toLowerCase();
+    homeBatter.style.color=teamAccent(currentBattingTeam());
     homeBatter.onclick=()=>openPlayerProfile(b,currentBattingTeam());
   }
 
@@ -3436,6 +3479,7 @@ function renderGame(){
   const p=currentPitcher(),ft=currentFieldingTeam();
   $("pitcherName").textContent="⚾ "+(p?p.name:"Aucun lanceur")+" • "+ft;
   $("pitcherName").className="player-link team-"+ft.toLowerCase();
+  $("pitcherName").style.color=teamAccent(ft);
   $("pitcherName").onclick=()=>openPitcherProfile(p,ft);
   $("pendingNote").classList.toggle("show",state.pending.length>0);
 
@@ -3444,10 +3488,19 @@ function renderGame(){
     if(r){
       el.className="base team-"+r.team.toLowerCase();
       el.innerHTML=`<button class="player-link" aria-label="Déplacer ${r.name}">${r.name.split(" ")[0]}</button>`;
-      el.querySelector("button").onclick=e=>{e.stopPropagation();openRunnerControls(base);};
+      styleOccupiedBase(el,r.team);
+      const runnerBtn=el.querySelector("button");
+      if(runnerBtn){
+        runnerBtn.style.color=teamAccent(r.team);
+        runnerBtn.onclick=e=>{e.stopPropagation();openRunnerControls(base);};
+      }
     }else{
       el.className="base empty";
       el.textContent=base===1?"1er":base+"e";
+      el.style.borderColor="";
+      el.style.background="";
+      el.style.color="";
+      el.style.boxShadow="";
     }
   });
 
@@ -4817,7 +4870,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.16.4 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.16.5 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){

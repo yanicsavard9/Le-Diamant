@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.16.5</title>
+<title>Diamond v0.17.0</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1394,10 +1394,105 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0170-competition-scheduler">
+.manager-subsection{
+  grid-column:1/-1;
+  padding:10px 11px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+}
+.manager-inline-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.field-row,.pool-name-row,.pool-assignment-row,.weekly-slot-row{
+  display:grid;
+  gap:8px;
+  align-items:end;
+  margin-top:8px;
+}
+.field-row{grid-template-columns:52px minmax(0,1fr)}
+.pool-name-row{grid-template-columns:52px minmax(0,1fr)}
+.pool-assignment-row{grid-template-columns:minmax(0,1fr) 150px}
+.weekly-slot-row{grid-template-columns:44px minmax(0,1fr) minmax(0,1fr)}
+.weekly-slot-row input[type="time"],
+.weekly-slot-row select,
+.field-row input,
+.pool-name-row input,
+.pool-assignment-row select{
+  width:100%;
+  min-height:44px;
+  box-sizing:border-box;
+  border-radius:10px;
+}
+.slot-number{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:950;
+  border-radius:10px;
+  background:#17222d;
+  border:1px solid #40566b;
+}
+.pool-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 9px;
+  border-radius:999px;
+  border:1px solid rgba(121,189,242,.30);
+  background:rgba(121,189,242,.07);
+  font-size:11px;
+  font-weight:900;
+  margin:3px 4px 3px 0;
+}
+.pool-summary{
+  margin-top:8px;
+  padding:10px;
+  border:1px solid rgba(121,189,242,.22);
+  border-radius:12px;
+  background:rgba(121,189,242,.05);
+  font-size:12px;
+  line-height:1.45;
+}
+.native-time-note{
+  font-size:11px;
+  color:#aebed0;
+  margin-top:6px;
+  line-height:1.35;
+}
+.request-embedded{
+  padding:10px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+}
+.request-embedded .manager-form-grid{margin-top:8px}
+.competition-warning{
+  padding:10px;
+  border-radius:12px;
+  border:1px solid rgba(255,215,106,.28);
+  background:rgba(255,215,106,.06);
+  color:#e7d7a4;
+  font-size:11px;
+  line-height:1.4;
+}
+@media(max-width:520px){
+  .manager-inline-grid{grid-template-columns:1fr}
+  .weekly-slot-row{grid-template-columns:40px 1fr}
+  .weekly-slot-row .slot-field-col{grid-column:2}
+  .pool-assignment-row{grid-template-columns:1fr}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.16.5 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.17.0 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1454,15 +1549,11 @@ body.role-viewer .strike-count{
         </button>
         <button class="role-card" type="button" onclick="openLeagueSettings()">
           <strong>⚙️ Règles et calendrier automatique</strong>
-          <small>Manches, retraits, prolongations, structure hebdomadaire, saison, pause et génération automatique.</small>
+          <small>Manches, retraits, pools, terrains, disponibilités des équipes, structure hebdomadaire, saison et génération automatique.</small>
         </button>
         <button class="role-card" type="button" onclick="openManagerSchedule()">
           <strong>📅 Gestion de l’horaire</strong>
           <small>Ajouter un match manuellement, reporter pour pluie, annuler, suspendre ou replanifier.</small>
-        </button>
-        <button class="role-card" type="button" onclick="openTeamRequests()">
-          <strong>📩 Demandes des équipes</strong>
-          <small>Indisponibilités, demandes de déplacement et préférences avant de placer un match.</small>
         </button>
         <button class="role-card" type="button" onclick="openManagerAccess()">
           <strong>👥 Accès gestionnaires</strong>
@@ -2017,14 +2108,16 @@ body.role-viewer .strike-count{
 
 
 
+
 <div class="modal" id="leagueSettingsModal">
   <div class="sheet">
     <div class="league-info-header">
-      <h3>⚙️ Règles et horaire automatique</h3>
+      <h3>⚙️ Règles et calendrier automatique</h3>
       <button type="button" class="league-info-close-top" onclick="closeLeagueSettings()">FERMER</button>
     </div>
 
     <div class="manager-settings-grid">
+
       <div class="manager-section-title">⚾ Règles des matchs</div>
 
       <div class="manager-setting">
@@ -2055,37 +2148,118 @@ body.role-viewer .strike-count{
         <div class="muted" style="font-size:11px;margin-top:5px">Si désactivé, le match peut se terminer à égalité.</div>
       </div>
 
-      <div class="manager-setting full">
+      <div class="manager-setting">
         <label><input id="mgrAutoRunner" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Coureur automatique en prolongation</label>
-        <div class="manager-settings-grid" style="margin-top:8px">
-          <div>
-            <label>But de départ</label>
-            <select id="mgrAutoRunnerBase">
-              <option value="1">1er but</option>
-              <option value="2" selected>2e but</option>
-              <option value="3">3e but</option>
-            </select>
-          </div>
-          <div class="readonly-note" style="font-size:11px">
-            Le joueur précédant le premier frappeur de la manche dans l’ordre offensif sera utilisé.
-          </div>
+        <div style="margin-top:8px">
+          <label>But de départ</label>
+          <select id="mgrAutoRunnerBase">
+            <option value="1">1er but</option>
+            <option value="2" selected>2e but</option>
+            <option value="3">3e but</option>
+          </select>
         </div>
       </div>
 
-      <div class="manager-section-title">🔁 Confrontations</div>
+      <div class="manager-section-title">👥 Pools / sections et confrontations</div>
+
+      <div class="manager-setting full" id="poolRulesCard">
+        <div id="poolRulesSummary" class="readonly-note"></div>
+        <div id="poolPlayModeWrap" style="margin-top:9px">
+          <label>Confrontations</label>
+          <select id="mgrPoolPlayMode" onchange="updateScheduleMathPreview()">
+            <option value="within">Chaque équipe joue seulement dans son pool</option>
+            <option value="all">Toutes les équipes peuvent s’affronter</option>
+          </select>
+        </div>
+      </div>
 
       <div class="manager-setting full">
-        <label>Nombre de matchs contre chaque autre équipe</label>
+        <label>Nombre de matchs contre chaque adversaire admissible</label>
         <input id="mgrGamesPerOpponent" type="number" min="1" max="20" value="2" oninput="updateScheduleMathPreview()">
       </div>
 
+      <div class="manager-section-title">🏟️ Terrains</div>
+
+      <div class="manager-setting full">
+        <div class="manager-inline-grid">
+          <div>
+            <label>Nombre de terrains</label>
+            <input id="mgrFieldCount" type="number" min="1" max="12" value="1" onchange="renderFieldConfig()">
+          </div>
+          <div class="readonly-note">
+            Plusieurs terrains permettent de programmer des matchs à la même heure.
+          </div>
+        </div>
+        <div id="fieldNamesContainer"></div>
+      </div>
+
       <div class="manager-section-title">📅 Structure hebdomadaire</div>
+
       <div class="manager-setting full">
         <div class="muted" style="font-size:12px;margin-bottom:9px">
-          Chaque journée peut avoir une capacité différente. Exemple : lundi 3 matchs, mercredi 3 matchs, jeudi 2 matchs.
+          Choisissez le nombre de matchs par journée. Pour chaque match, sélectionnez ensuite l’heure et le terrain.
         </div>
         <div id="weeklyDayRows"></div>
-        <div id="scheduleMathPreview" class="manager-summary"></div>
+        <div class="native-time-note">
+          📱 Sur iPhone, toucher une heure ouvre le sélecteur d’heure natif d’iOS.
+        </div>
+        <div id="scheduleMathPreview" class="manager-summary" style="margin-top:10px"></div>
+      </div>
+
+      <div class="manager-section-title" id="embeddedTeamRequests">📩 Demandes / disponibilités des équipes</div>
+
+      <div class="manager-setting full request-embedded">
+        <div class="readonly-note">
+          Entrez les indisponibilités et préférences <b>avant</b> de générer l’horaire.
+          Diamond les traite comme des contraintes souples et essaie de les respecter au maximum.
+        </div>
+
+        <div class="manager-form-grid">
+          <div>
+            <label>Équipe</label>
+            <select id="requestTeam"></select>
+          </div>
+          <div>
+            <label>Type de demande</label>
+            <select id="requestType">
+              <option value="unavailable">Indisponible</option>
+              <option value="move">Demande de déplacement</option>
+              <option value="preference">Préférence</option>
+              <option value="note">Autre note</option>
+            </select>
+          </div>
+          <div>
+            <label>Fréquence</label>
+            <select id="requestFrequency" onchange="toggleRequestFrequencyFields()">
+              <option value="date">Date précise</option>
+              <option value="weekly">Chaque semaine</option>
+            </select>
+          </div>
+          <div id="requestDateWrap">
+            <label>Date concernée</label>
+            <input id="requestDate" type="date">
+          </div>
+          <div id="requestWeekdayWrap" class="hidden">
+            <label>Jour récurrent</label>
+            <select id="requestWeekday">
+              <option value="1">Tous les lundis</option>
+              <option value="2">Tous les mardis</option>
+              <option value="3">Tous les mercredis</option>
+              <option value="4">Tous les jeudis</option>
+              <option value="5">Tous les vendredis</option>
+              <option value="6">Tous les samedis</option>
+              <option value="0">Tous les dimanches</option>
+            </select>
+          </div>
+          <div class="full">
+            <label>Détail</label>
+            <textarea id="requestNote" placeholder="Ex. Les Brewers préfèrent ne pas jouer les jeudis."></textarea>
+          </div>
+        </div>
+
+        <button type="button" class="primary" style="width:100%;margin-top:10px" onclick="addTeamRequest()">AJOUTER LA DEMANDE</button>
+        <div class="section-title" style="margin-top:14px">Demandes enregistrées</div>
+        <div id="teamRequestsList"></div>
       </div>
 
       <div class="manager-section-title">🗓️ Saison et pause</div>
@@ -2102,7 +2276,7 @@ body.role-viewer .strike-count{
 
       <div class="manager-setting full">
         <label><input id="mgrSeasonPause" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Il y aura une pause dans la saison</label>
-        <div class="manager-settings-grid" style="margin-top:8px">
+        <div class="manager-inline-grid" style="margin-top:8px">
           <div><label>Début de la pause</label><input id="mgrPauseStart" type="date"></div>
           <div><label>Fin de la pause</label><input id="mgrPauseEnd" type="date"></div>
         </div>
@@ -2110,6 +2284,26 @@ body.role-viewer .strike-count{
           Aucun match ne sera généré automatiquement pendant la pause. Un match remis peut quand même y être replanifié manuellement.
         </div>
       </div>
+
+      <div class="manager-section-title">🏆 Qualification / séries</div>
+
+      <div class="manager-setting full">
+        <label><input id="mgrUsePlayoffs" type="checkbox" onchange="togglePlayoffFields()"> Prévoir une phase éliminatoire</label>
+        <div id="playoffFieldsWrap" class="manager-inline-grid hidden" style="margin-top:8px">
+          <div>
+            <label>Qualifiés par pool</label>
+            <input id="mgrQualifyPerPool" type="number" min="1" max="8" value="2" oninput="updateScheduleMathPreview()">
+          </div>
+          <div>
+            <label>Meilleurs suivants / wildcards</label>
+            <input id="mgrWildcardCount" type="number" min="0" max="16" value="0" oninput="updateScheduleMathPreview()">
+          </div>
+        </div>
+        <div class="muted" style="font-size:11px;margin-top:6px">
+          Ces paramètres servent à préparer la qualification. Le tableau éliminatoire automatique sera la prochaine étape du moteur de tournoi.
+        </div>
+      </div>
+
     </div>
 
     <div class="manager-actions-sticky">
@@ -2118,8 +2312,6 @@ body.role-viewer .strike-count{
     </div>
   </div>
 </div>
-
-
 
 <div class="modal" id="leagueInviteModal">
   <div class="sheet">
@@ -2224,13 +2416,44 @@ body.role-viewer .strike-count{
     <div class="manager-setting">
       <label>Nombre d’équipes</label>
       <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px">
-        <input id="mgrActiveTeamCount" type="number" min="2" max="12" value="6">
+        <input id="mgrActiveTeamCount" type="number" min="2" max="32" value="6">
         <button type="button" onclick="applyLeagueTeamCount()">APPLIQUER</button>
       </div>
-      <div class="muted" style="font-size:11px;margin-top:5px">Diamond peut préparer jusqu’à 12 équipes dans ce prototype.</div>
+      <div class="muted" style="font-size:11px;margin-top:5px">Diamond peut préparer jusqu’à 32 équipes dans ce prototype.</div>
     </div>
     <div id="managerTeamList" class="manager-team-list"></div>
-    <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="saveAllTeamConfigs()">ENREGISTRER LES ÉQUIPES</button>
+
+    <div class="manager-section-title" style="margin-top:14px">👥 Pools / sections</div>
+    <div class="manager-setting">
+      <label>
+        <input id="mgrUsePools" type="checkbox" onchange="togglePoolSetup()">
+        Cette compétition utilise des pools / sections
+      </label>
+
+      <div id="poolSetupWrap" class="hidden" style="margin-top:10px">
+        <div class="manager-inline-grid">
+          <div>
+            <label>Nombre de pools</label>
+            <input id="mgrPoolCount" type="number" min="2" max="8" value="3" onchange="renderPoolSetup()">
+          </div>
+          <div>
+            <label>Répartition des équipes</label>
+            <select id="mgrPoolAssignmentMode" onchange="renderPoolAssignments()">
+              <option value="balanced">Automatique et équilibrée</option>
+              <option value="manual">Manuelle</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:12px">Nom des pools</div>
+        <div id="poolNamesContainer"></div>
+
+        <div class="section-title" style="margin-top:12px">Répartition</div>
+        <div id="poolAssignmentsContainer"></div>
+      </div>
+    </div>
+
+    <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="saveAllTeamConfigs()">ENREGISTRER LA COMPÉTITION ET LES ÉQUIPES</button>
   </div>
 </div>
 
@@ -2245,83 +2468,13 @@ body.role-viewer .strike-count{
       <div><label>Équipe locale</label><select id="manualHomeTeam"></select></div>
       <div><label>Date</label><input id="manualGameDate" type="date"></div>
       <div><label>Heure</label><input id="manualGameTime" type="time"></div>
-      <div class="full"><label>Terrain (optionnel)</label><input id="manualGameField" type="text" placeholder="Ex. Terrain 1"></div>
+      <div class="full"><label>Terrain</label><select id="manualGameField"></select></div>
     </div>
     <div id="manualGameWarning" class="readonly-note" style="margin-top:10px"></div>
     <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="addManualLeagueGame()">AJOUTER À L’HORAIRE</button>
   </div>
 </div>
 
-
-<div class="modal" id="teamRequestsModal">
-  <div class="sheet">
-    <div class="league-info-header">
-      <h3>📩 Demandes des équipes</h3>
-      <button type="button" class="league-info-close-top" onclick="closeTeamRequests()">FERMER</button>
-    </div>
-
-    <div class="readonly-note" style="margin-bottom:10px">
-      Une demande peut viser une <b>date précise</b> ou revenir <b>chaque semaine</b>, par exemple : « indisponible tous les lundis ».
-      Diamond avertira le gestionnaire lorsqu’un match entre en conflit, sans bloquer sa décision.
-    </div>
-
-    <div class="manager-form-grid">
-      <div>
-        <label>Équipe</label>
-        <select id="requestTeam"></select>
-      </div>
-
-      <div>
-        <label>Type de demande</label>
-        <select id="requestType">
-          <option value="unavailable">Indisponible</option>
-          <option value="move">Demande de déplacement</option>
-          <option value="preference">Préférence</option>
-          <option value="note">Autre note</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Fréquence</label>
-        <select id="requestFrequency" onchange="toggleRequestFrequencyFields()">
-          <option value="date">Date précise</option>
-          <option value="weekly">Chaque semaine</option>
-        </select>
-      </div>
-
-      <div id="requestDateWrap">
-        <label>Date concernée</label>
-        <input id="requestDate" type="date">
-      </div>
-
-      <div id="requestWeekdayWrap" class="hidden">
-        <label>Jour récurrent</label>
-        <select id="requestWeekday">
-          <option value="1">Tous les lundis</option>
-          <option value="2">Tous les mardis</option>
-          <option value="3">Tous les mercredis</option>
-          <option value="4">Tous les jeudis</option>
-          <option value="5">Tous les vendredis</option>
-          <option value="6">Tous les samedis</option>
-          <option value="0">Tous les dimanches</option>
-        </select>
-        <div class="request-frequency-note">
-          La demande s’appliquera à tous ces jours pendant la saison.
-        </div>
-      </div>
-
-      <div class="full">
-        <label>Détail</label>
-        <textarea id="requestNote" placeholder="Ex. Plusieurs joueurs travaillent tous les lundis."></textarea>
-      </div>
-    </div>
-
-    <button type="button" class="primary" style="width:100%;margin-top:10px" onclick="addTeamRequest()">AJOUTER LA DEMANDE</button>
-
-    <div class="section-title" style="margin-top:16px">Demandes enregistrées</div>
-    <div id="teamRequestsList"></div>
-  </div>
-</div>
 
 <div class="modal" id="managerAccessModal">
   <div class="sheet">
@@ -2380,6 +2533,10 @@ body.role-viewer .strike-count{
       <div class="manager-setting">
         <label>Nouvelle heure</label>
         <input id="managerGameTime" type="time">
+      </div>
+      <div class="manager-setting full">
+        <label>Terrain</label>
+        <select id="managerGameField"></select>
       </div>
     </div>
 
@@ -4717,20 +4874,30 @@ let leagueSettings={
   autoExtraRunner:false,
   autoRunnerBase:2,
   gamesPerOpponent:2,
+  usePools:false,
+  poolCount:3,
+  poolNames:["Pool A","Pool B","Pool C"],
+  poolAssignmentMode:"balanced",
+  poolAssignments:{},
+  poolPlayMode:"within",
+  fields:["Terrain 1"],
   weeklySlots:{
-    0:{enabled:false,count:0,times:[]},
-    1:{enabled:true,count:3,times:["18:30","19:45","21:00"]},
-    2:{enabled:true,count:3,times:["18:30","19:45","21:00"]},
-    3:{enabled:false,count:0,times:[]},
-    4:{enabled:true,count:3,times:["18:30","19:45","21:00"]},
-    5:{enabled:false,count:0,times:[]},
-    6:{enabled:false,count:0,times:[]}
+    0:{enabled:false,count:0,slots:[]},
+    1:{enabled:true,count:3,slots:[{time:"18:30",field:"Terrain 1"},{time:"19:45",field:"Terrain 1"},{time:"21:00",field:"Terrain 1"}]},
+    2:{enabled:true,count:3,slots:[{time:"18:30",field:"Terrain 1"},{time:"19:45",field:"Terrain 1"},{time:"21:00",field:"Terrain 1"}]},
+    3:{enabled:false,count:0,slots:[]},
+    4:{enabled:true,count:3,slots:[{time:"18:30",field:"Terrain 1"},{time:"19:45",field:"Terrain 1"},{time:"21:00",field:"Terrain 1"}]},
+    5:{enabled:false,count:0,slots:[]},
+    6:{enabled:false,count:0,slots:[]}
   },
   seasonStart:"2026-09-07",
   seasonEnd:"2026-10-31",
   seasonPause:false,
   pauseStart:"",
-  pauseEnd:""
+  pauseEnd:"",
+  usePlayoffs:false,
+  qualifyPerPool:2,
+  wildcardCount:0
 };
 let leagueTeamOrder=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"];
 let leagueTeamMeta={
@@ -4819,13 +4986,13 @@ leagueSchedule.forEach(g=>{
 const WEEKDAY_NAMES=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
 
 function leagueTeamIds(){
-  return leagueTeamOrder.slice(0,Math.max(2,Math.min(12,Number(leagueSettings.teamCount)||6)));
+  return leagueTeamOrder.slice(0,Math.max(2,Math.min(32,Number(leagueSettings.teamCount)||6)));
 }
 function teamStatusId(team){return "teamStatus_"+String(team).replace(/[^a-z0-9]/gi,"_");}
 function teamSafeId(team){return String(team).replace(/[^a-z0-9]/gi,"_");}
 
 function ensureLeagueTeamCount(count){
-  count=Math.max(2,Math.min(12,Number(count)||6));
+  count=Math.max(2,Math.min(32,Number(count)||6));
   const palette=["#1f4f7d","#d94a4a","#9aa3ad","#79bdf2","#d94a4a","#f2cf42","#7e6bd6","#39a97b","#dd7f32","#bb67a5","#4f9fbd","#8f9a52"];
   while(leagueTeamOrder.length<count){
     const n=leagueTeamOrder.length+1;
@@ -4871,7 +5038,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.16.5 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.17.0 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -4908,61 +5075,364 @@ function toggleLeagueSettingDependencies(){
   if($("mgrPauseEnd"))$("mgrPauseEnd").disabled=!pause;
 }
 
+
+let weeklyDraftSlots=null;
+
+function defaultSlotTime(index){
+  const defaults=["18:30","19:45","21:00","17:00","18:00","19:00","20:00","21:30","22:00","22:30"];
+  return defaults[index]||"18:30";
+}
+
+function getConfiguredFields(){
+  const fields=(leagueSettings.fields||[]).map(x=>String(x||"").trim()).filter(Boolean);
+  return fields.length?fields:["Terrain 1"];
+}
+
+function fieldOptionsHtml(selected){
+  return getConfiguredFields().map(f=>`<option value="${f}" ${f===selected?"selected":""}>${f}</option>`).join("");
+}
+
+function migrateWeeklyCfg(cfg){
+  const fields=getConfiguredFields();
+  const source=cfg||{enabled:false,count:0};
+  if(Array.isArray(source.slots)){
+    return {
+      enabled:!!source.enabled,
+      count:Number(source.count)||source.slots.length||0,
+      slots:source.slots.map((s,i)=>({
+        time:s.time||defaultSlotTime(i),
+        field:s.field||fields[i%fields.length]
+      }))
+    };
+  }
+  const legacyTimes=Array.isArray(source.times)?source.times:[];
+  return {
+    enabled:!!source.enabled,
+    count:Number(source.count)||legacyTimes.length||0,
+    slots:legacyTimes.map((time,i)=>({time,field:fields[i%fields.length]}))
+  };
+}
+
+function syncWeeklySlotDraft(dow){
+  if(!weeklyDraftSlots)weeklyDraftSlots={};
+  const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
+  const cfg=weeklyDraftSlots[dow]||{enabled:false,count:0,slots:[]};
+  cfg.enabled=!!$(`weekEnabled${dow}`)?.checked;
+  cfg.count=count;
+  cfg.slots=[];
+  for(let i=0;i<count;i++){
+    const time=$(`weekTime${dow}_${i}`)?.value||defaultSlotTime(i);
+    const field=$(`weekField${dow}_${i}`)?.value||getConfiguredFields()[0];
+    cfg.slots.push({time,field});
+  }
+  weeklyDraftSlots[dow]=cfg;
+}
+
+function renderWeeklyDaySlotList(dow){
+  const root=$(`weekSlotList${dow}`);if(!root)return;
+  const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
+  const cfg=weeklyDraftSlots?.[dow]||{enabled:false,count:0,slots:[]};
+  const fields=getConfiguredFields();
+
+  while(cfg.slots.length<count){
+    const i=cfg.slots.length;
+    cfg.slots.push({time:defaultSlotTime(i),field:fields[i%fields.length]});
+  }
+  cfg.slots=cfg.slots.slice(0,count);
+  cfg.count=count;
+  weeklyDraftSlots[dow]=cfg;
+
+  root.innerHTML=count?cfg.slots.map((slot,i)=>`
+    <div class="weekly-slot-row">
+      <div class="slot-number">${i+1}</div>
+      <div>
+        <label>Heure</label>
+        <input id="weekTime${dow}_${i}" type="time" value="${slot.time||defaultSlotTime(i)}"
+               onchange="syncWeeklySlotDraft(${dow});updateScheduleMathPreview()">
+      </div>
+      <div class="slot-field-col">
+        <label>Terrain</label>
+        <select id="weekField${dow}_${i}" onchange="syncWeeklySlotDraft(${dow});updateScheduleMathPreview()">
+          ${fields.map(f=>`<option value="${f}" ${f===(slot.field||fields[0])?"selected":""}>${f}</option>`).join("")}
+        </select>
+      </div>
+    </div>`).join("")
+    :'<div class="muted" style="font-size:11px;margin-top:7px">Aucun match prévu cette journée.</div>';
+}
+
+function changeWeeklyMatchCount(dow){
+  syncWeeklySlotDraft(dow);
+  renderWeeklyDaySlotList(dow);
+  updateScheduleMathPreview();
+}
+
 function renderWeeklyDayRows(){
   const root=$("weeklyDayRows");if(!root)return;
+
+  weeklyDraftSlots={};
+  for(let dow=0;dow<7;dow++){
+    weeklyDraftSlots[dow]=migrateWeeklyCfg(leagueSettings.weeklySlots?.[dow]);
+  }
+
   root.innerHTML=WEEKDAY_NAMES.map((name,dow)=>{
-    const cfg=leagueSettings.weeklySlots?.[dow]||{enabled:false,count:0,times:[]};
-    const fallback=["18:30","19:45","21:00"];
-    const times=(cfg.times?.length?cfg.times:fallback).join(", ");
+    const cfg=weeklyDraftSlots[dow];
     return `<div class="weekly-day-row">
       <div class="weekly-day-title">${name}</div>
       <div class="weekly-active-col">
         <label>Journée active</label>
         <label class="weekly-active-toggle">
-          <input id="weekEnabled${dow}" type="checkbox" ${cfg.enabled?"checked":""} onchange="updateScheduleMathPreview()">
+          <input id="weekEnabled${dow}" type="checkbox" ${cfg.enabled?"checked":""}
+                 onchange="syncWeeklySlotDraft(${dow});updateScheduleMathPreview()">
           <span>${cfg.enabled?"Oui":"Activer"}</span>
         </label>
       </div>
       <div>
         <label>Matchs</label>
-        <input id="weekCount${dow}" type="number" min="0" max="10" value="${cfg.count||0}" oninput="updateScheduleMathPreview()">
+        <input id="weekCount${dow}" type="number" min="0" max="20" value="${cfg.count||0}"
+               onchange="changeWeeklyMatchCount(${dow})">
       </div>
       <div class="times-col">
-        <label>Heures</label>
-        <input id="weekTimes${dow}" type="text" value="${times}" placeholder="18:30, 19:45, 21:00" oninput="updateScheduleMathPreview()">
+        <div id="weekSlotList${dow}"></div>
       </div>
     </div>`;
   }).join("");
+
+  for(let dow=0;dow<7;dow++)renderWeeklyDaySlotList(dow);
 }
 
 function readWeeklySlotsFromForm(){
   const slots={};
   for(let dow=0;dow<7;dow++){
-    const enabled=!!$(`weekEnabled${dow}`)?.checked;
-    const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
-    const times=String($(`weekTimes${dow}`)?.value||"").split(",").map(x=>x.trim()).filter(Boolean);
-    slots[dow]={enabled:enabled&&count>0,count,times:times.slice(0,count)};
+    syncWeeklySlotDraft(dow);
+    const cfg=weeklyDraftSlots[dow]||{enabled:false,count:0,slots:[]};
+    slots[dow]={
+      enabled:!!cfg.enabled && cfg.count>0,
+      count:cfg.count,
+      slots:cfg.slots.map(s=>({time:s.time,field:s.field}))
+    };
   }
   return slots;
+}
+
+function teamsGroupedByPool(settings=leagueSettings){
+  const ids=leagueTeamIds();
+  if(!settings.usePools)return {"Toutes les équipes":ids};
+
+  const names=(settings.poolNames||[]).slice(0,settings.poolCount||0);
+  const groups={};
+  names.forEach((name,i)=>groups[name||`Pool ${String.fromCharCode(65+i)}`]=[]);
+
+  ids.forEach((team,i)=>{
+    let idx=Number(settings.poolAssignments?.[team]);
+    if(!Number.isInteger(idx)||idx<0||idx>=names.length)idx=i%Math.max(1,names.length);
+    const name=names[idx]||`Pool ${String.fromCharCode(65+idx)}`;
+    if(!groups[name])groups[name]=[];
+    groups[name].push(team);
+  });
+  return groups;
+}
+
+function requiredGameCountForSettings(perOpponent){
+  const n=leagueTeamIds().length;
+  if(leagueSettings.usePools && ($("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode)==="within"){
+    const groups=teamsGroupedByPool(leagueSettings);
+    return Object.values(groups).reduce((sum,arr)=>sum+(arr.length*(arr.length-1)/2)*perOpponent,0);
+  }
+  return (n*(n-1)/2)*perOpponent;
 }
 
 function updateScheduleMathPreview(){
   const el=$("scheduleMathPreview");if(!el)return;
   const n=leagueTeamIds().length;
   const perOpponent=Math.max(1,Number($("mgrGamesPerOpponent")?.value)||leagueSettings.gamesPerOpponent||1);
-  const total=Math.round(n*(n-1)/2*perOpponent);
+  const total=Math.round(requiredGameCountForSettings(perOpponent));
+
   let weekly=0;
   for(let dow=0;dow<7;dow++){
     const enabled=!!$(`weekEnabled${dow}`)?.checked;
     const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
     if(enabled)weekly+=count;
   }
+
   const weeks=weekly?Math.ceil(total/weekly):"—";
-  el.innerHTML=`<b>${n} équipes • ${perOpponent} match${perOpponent>1?"s":""} contre chaque adversaire</b><br>
+  const poolText=leagueSettings.usePools
+    ? `${leagueSettings.poolCount||0} pools • ${($("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode)==="within"?"matchs dans chaque pool":"confrontations tous pools"}`
+    : "Aucun pool";
+
+  let qualification="";
+  if($("mgrUsePlayoffs")?.checked){
+    const q=Math.max(1,Number($("mgrQualifyPerPool")?.value)||1);
+    const wc=Math.max(0,Number($("mgrWildcardCount")?.value)||0);
+    const base=leagueSettings.usePools?(leagueSettings.poolCount||1)*q:q;
+    qualification=`<br>Qualification prévue : <b>${base+wc} équipes</b>`;
+  }
+
+  el.innerHTML=`<b>${n} équipes • ${perOpponent} match${perOpponent>1?"s":""} contre chaque adversaire admissible</b><br>
+    ${poolText}<br>
     Total à programmer : <b>${total} matchs</b><br>
     Capacité hebdomadaire configurée : <b>${weekly} matchs</b><br>
-    Minimum théorique : <b>${weeks}${weeks!=="—"?" semaines":""}</b> (avant pauses, conflits et journées incomplètes).`;
+    Minimum théorique : <b>${weeks}${weeks!=="—"?" semaines":""}</b>${qualification}`;
 }
+
+
+function renderFieldConfig(){
+  const root=$("fieldNamesContainer");if(!root)return;
+  const count=Math.max(1,Math.min(12,Number($("mgrFieldCount")?.value)||1));
+  const current=readCurrentFieldNames();
+  while(current.length<count)current.push(`Terrain ${current.length+1}`);
+  root.innerHTML=current.slice(0,count).map((name,i)=>`
+    <div class="field-row">
+      <div class="slot-number">${i+1}</div>
+      <div>
+        <label>Nom du terrain</label>
+        <input id="fieldName${i}" type="text" value="${String(name).replace(/"/g,"&quot;")}" placeholder="Terrain ${i+1}">
+      </div>
+    </div>`).join("");
+}
+
+function readCurrentFieldNames(){
+  const count=Math.max(1,Math.min(12,Number($("mgrFieldCount")?.value)||((leagueSettings.fields||[]).length||1)));
+  const out=[];
+  for(let i=0;i<count;i++){
+    const el=$(`fieldName${i}`);
+    out.push(String(el?.value || leagueSettings.fields?.[i] || `Terrain ${i+1}`).trim() || `Terrain ${i+1}`);
+  }
+  return out;
+}
+
+function togglePlayoffFields(){
+  const on=!!$("mgrUsePlayoffs")?.checked;
+  if($("playoffFieldsWrap"))$("playoffFieldsWrap").classList.toggle("hidden",!on);
+  updateScheduleMathPreview();
+}
+
+function renderPoolRulesSummary(){
+  const el=$("poolRulesSummary");if(!el)return;
+  if(!leagueSettings.usePools){
+    el.innerHTML="Aucun pool / section configuré. Les confrontations utilisent l’ensemble des équipes.";
+    if($("poolPlayModeWrap"))$("poolPlayModeWrap").classList.add("hidden");
+    return;
+  }
+  if($("poolPlayModeWrap"))$("poolPlayModeWrap").classList.remove("hidden");
+
+  const groups=teamsGroupedByPool(leagueSettings);
+  el.innerHTML=Object.entries(groups).map(([name,teamsInPool])=>
+    `<div style="margin-bottom:5px"><b>${name}</b> • ${teamsInPool.length} équipes</div>`
+  ).join("");
+}
+
+function defaultPoolName(i){return `Pool ${String.fromCharCode(65+i)}`}
+
+function normalizePoolConfig(){
+  const count=Math.max(2,Math.min(8,Number(leagueSettings.poolCount)||3));
+  leagueSettings.poolCount=count;
+  if(!Array.isArray(leagueSettings.poolNames))leagueSettings.poolNames=[];
+  while(leagueSettings.poolNames.length<count)leagueSettings.poolNames.push(defaultPoolName(leagueSettings.poolNames.length));
+  leagueSettings.poolNames=leagueSettings.poolNames.slice(0,count);
+  if(!leagueSettings.poolAssignments)leagueSettings.poolAssignments={};
+}
+
+function autoPoolAssignments(){
+  normalizePoolConfig();
+  const out={};
+  leagueTeamIds().forEach((team,i)=>out[team]=i%leagueSettings.poolCount);
+  return out;
+}
+
+function togglePoolSetup(){
+  const use=!!$("mgrUsePools")?.checked;
+  if($("poolSetupWrap"))$("poolSetupWrap").classList.toggle("hidden",!use);
+  renderPoolSetup();
+}
+
+function renderPoolSetup(){
+  const use=!!$("mgrUsePools")?.checked;
+  if(!use)return;
+
+  const count=Math.max(2,Math.min(8,Number($("mgrPoolCount")?.value)||leagueSettings.poolCount||3));
+  const names=[...(leagueSettings.poolNames||[])];
+  while(names.length<count)names.push(defaultPoolName(names.length));
+
+  const namesRoot=$("poolNamesContainer");
+  if(namesRoot){
+    namesRoot.innerHTML=names.slice(0,count).map((name,i)=>`
+      <div class="pool-name-row">
+        <div class="slot-number">${String.fromCharCode(65+i)}</div>
+        <div>
+          <label>Nom</label>
+          <input id="poolName${i}" type="text" value="${String(name).replace(/"/g,"&quot;")}" placeholder="${defaultPoolName(i)}"
+                 oninput="renderPoolAssignments()">
+        </div>
+      </div>`).join("");
+  }
+  renderPoolAssignments();
+}
+
+function currentPoolNames(){
+  const count=Math.max(2,Math.min(8,Number($("mgrPoolCount")?.value)||leagueSettings.poolCount||3));
+  const names=[];
+  for(let i=0;i<count;i++){
+    names.push(String($(`poolName${i}`)?.value||leagueSettings.poolNames?.[i]||defaultPoolName(i)).trim()||defaultPoolName(i));
+  }
+  return names;
+}
+
+function renderPoolAssignments(){
+  const root=$("poolAssignmentsContainer");if(!root)return;
+  const use=!!$("mgrUsePools")?.checked;
+  if(!use){root.innerHTML="";return}
+
+  const names=currentPoolNames();
+  const mode=$("mgrPoolAssignmentMode")?.value||"balanced";
+  const ids=leagueTeamIds();
+
+  if(mode==="balanced"){
+    const groups=names.map(()=>[]);
+    ids.forEach((team,i)=>groups[i%names.length].push(team));
+    root.innerHTML=groups.map((arr,i)=>`
+      <div class="pool-summary">
+        <b>${names[i]}</b><br>
+        ${arr.length?arr.map(t=>`<span class="pool-chip">${teamDisplayName(t)}</span>`).join(""):"Aucune équipe"}
+      </div>`).join("");
+    return;
+  }
+
+  root.innerHTML=ids.map((team,i)=>{
+    const assigned=Number(leagueSettings.poolAssignments?.[team]);
+    const idx=Number.isInteger(assigned)&&assigned>=0&&assigned<names.length?assigned:i%names.length;
+    return `<div class="pool-assignment-row">
+      <div><b>${teamDisplayName(team)}</b></div>
+      <select id="poolAssign_${teamSafeId(team)}">
+        ${names.map((name,p)=>`<option value="${p}" ${p===idx?"selected":""}>${name}</option>`).join("")}
+      </select>
+    </div>`;
+  }).join("");
+}
+
+function savePoolConfigFromTeamManager(){
+  const use=!!$("mgrUsePools")?.checked;
+  leagueSettings.usePools=use;
+  if(!use){
+    leagueSettings.poolAssignments={};
+    return;
+  }
+
+  leagueSettings.poolCount=Math.max(2,Math.min(8,Number($("mgrPoolCount")?.value)||3));
+  leagueSettings.poolNames=currentPoolNames();
+  leagueSettings.poolAssignmentMode=$("mgrPoolAssignmentMode")?.value||"balanced";
+
+  if(leagueSettings.poolAssignmentMode==="balanced"){
+    leagueSettings.poolAssignments=autoPoolAssignments();
+  }else{
+    const assignments={};
+    leagueTeamIds().forEach((team,i)=>{
+      const val=Number($(`poolAssign_${teamSafeId(team)}`)?.value);
+      assignments[team]=Number.isInteger(val)?val:i%leagueSettings.poolCount;
+    });
+    leagueSettings.poolAssignments=assignments;
+  }
+}
+
 
 function fillLeagueSettingsForm(){
   $("mgrRegInnings").value=String(leagueSettings.regulationInnings||7);
@@ -4971,18 +5441,39 @@ function fillLeagueSettingsForm(){
   $("mgrAutoRunner").checked=!!leagueSettings.autoExtraRunner;
   $("mgrAutoRunnerBase").value=String(leagueSettings.autoRunnerBase||2);
   $("mgrGamesPerOpponent").value=leagueSettings.gamesPerOpponent||2;
+  $("mgrPoolPlayMode").value=leagueSettings.poolPlayMode||"within";
+
+  const fields=getConfiguredFields();
+  $("mgrFieldCount").value=fields.length;
+  renderFieldConfig();
+
   $("mgrSeasonStart").value=leagueSettings.seasonStart||"";
   $("mgrSeasonEnd").value=leagueSettings.seasonEnd||"";
   $("mgrSeasonPause").checked=!!leagueSettings.seasonPause;
   $("mgrPauseStart").value=leagueSettings.pauseStart||"";
   $("mgrPauseEnd").value=leagueSettings.pauseEnd||"";
+
+  $("mgrUsePlayoffs").checked=!!leagueSettings.usePlayoffs;
+  $("mgrQualifyPerPool").value=leagueSettings.qualifyPerPool||2;
+  $("mgrWildcardCount").value=leagueSettings.wildcardCount||0;
+
+  renderPoolRulesSummary();
   renderWeeklyDayRows();
+
+  populateTeamSelect("requestTeam",leagueTeamIds()[0]);
+  if($("requestFrequency"))$("requestFrequency").value="date";
+  toggleRequestFrequencyFields();
+  renderTeamRequests();
+
   toggleLeagueSettingDependencies();
+  togglePlayoffFields();
   updateScheduleMathPreview();
 }
 
 function readLeagueSettingsForm(){
   const weeklySlots=readWeeklySlotsFromForm();
+  const fields=readCurrentFieldNames();
+
   const s={
     ...leagueSettings,
     name:leagueSettings.name||"Ligue Diamond",
@@ -4993,23 +5484,35 @@ function readLeagueSettingsForm(){
     autoExtraRunner:!!$("mgrExtraInnings").checked && !!$("mgrAutoRunner").checked,
     autoRunnerBase:Number($("mgrAutoRunnerBase").value)||2,
     gamesPerOpponent:Math.max(1,Number($("mgrGamesPerOpponent").value)||1),
+    poolPlayMode:$("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode||"within",
+    fields,
     weeklySlots,
     seasonStart:$("mgrSeasonStart").value,
     seasonEnd:$("mgrSeasonEnd").value,
     seasonPause:!!$("mgrSeasonPause").checked,
     pauseStart:$("mgrPauseStart").value,
-    pauseEnd:$("mgrPauseEnd").value
+    pauseEnd:$("mgrPauseEnd").value,
+    usePlayoffs:!!$("mgrUsePlayoffs").checked,
+    qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool").value)||1),
+    wildcardCount:Math.max(0,Number($("mgrWildcardCount").value)||0)
   };
+
   const enabledDays=Object.values(weeklySlots).filter(x=>x.enabled&&x.count>0);
   if(!enabledDays.length){alert("Configurez au moins une journée de match.");return null}
+
   for(const d of enabledDays){
-    if(d.times.length<d.count){
-      alert("Chaque journée doit avoir au moins autant d’heures que de matchs prévus.");
+    if(d.slots.length<d.count || d.slots.some(x=>!x.time||!x.field)){
+      alert("Chaque match prévu doit avoir une heure et un terrain.");
       return null;
     }
   }
-  if(!s.seasonStart||!s.seasonEnd||s.seasonEnd<s.seasonStart){alert("Vérifiez les dates de début et de fin de saison.");return null}
-  if(s.seasonPause && (!s.pauseStart||!s.pauseEnd||s.pauseEnd<s.pauseStart)){alert("Vérifiez les dates de la pause.");return null}
+
+  if(!s.seasonStart||!s.seasonEnd||s.seasonEnd<s.seasonStart){
+    alert("Vérifiez les dates de début et de fin de saison.");return null
+  }
+  if(s.seasonPause && (!s.pauseStart||!s.pauseEnd||s.pauseEnd<s.pauseStart)){
+    alert("Vérifiez les dates de la pause.");return null
+  }
   return s;
 }
 
@@ -5044,9 +5547,13 @@ function isDateInLeaguePause(iso,s=leagueSettings){
 function weeklySlotsForDate(iso,s){
   const [y,m,d]=iso.split("-").map(Number);
   const dow=new Date(y,m-1,d).getDay();
-  const cfg=s.weeklySlots?.[dow];
+  const cfg=migrateWeeklyCfg(s.weeklySlots?.[dow]);
   if(!cfg?.enabled||isDateInLeaguePause(iso,s))return [];
-  return (cfg.times||[]).slice(0,cfg.count||0).map(time=>({date:iso,time}));
+  return (cfg.slots||[]).slice(0,cfg.count||0).map(slot=>({
+    date:iso,
+    time:slot.time,
+    field:slot.field
+  }));
 }
 function availableLeagueSlots(s){
   const out=[];
@@ -5072,19 +5579,37 @@ function roundRobinRounds(names){
   return rounds;
 }
 
+
 function buildRequiredLeagueGames(s){
-  const names=leagueTeamIds();
-  const baseRounds=roundRobinRounds(names);
   const games=[];
-  for(let cycle=0;cycle<s.gamesPerOpponent;cycle++){
-    baseRounds.forEach((pairs,roundIndex)=>{
-      pairs.forEach((pair,i)=>{
-        const [a,b]=pair;
-        const swap=((cycle+roundIndex+i)%2)===1;
-        games.push({away:swap?b:a,home:swap?a:b,round:roundIndex,cycle});
+
+  function appendRounds(names,groupKey){
+    if(names.length<2)return;
+    const baseRounds=roundRobinRounds(names);
+    for(let cycle=0;cycle<s.gamesPerOpponent;cycle++){
+      baseRounds.forEach((pairs,roundIndex)=>{
+        pairs.forEach((pair,i)=>{
+          const [a,b]=pair;
+          const swap=((cycle+roundIndex+i)%2)===1;
+          games.push({
+            away:swap?b:a,
+            home:swap?a:b,
+            round:roundIndex,
+            cycle,
+            pool:groupKey||null
+          });
+        });
       });
-    });
+    }
   }
+
+  if(s.usePools && s.poolPlayMode==="within"){
+    const groups=teamsGroupedByPool(s);
+    Object.entries(groups).forEach(([poolName,names])=>appendRounds(names,poolName));
+  }else{
+    appendRounds(leagueTeamIds(),null);
+  }
+
   return games;
 }
 
@@ -5113,7 +5638,7 @@ function generateLeagueScheduleFromSettings(){
     if(!candidates.length)continue;
     const choice=candidates[0];
     const g=remaining.splice(choice.i,1)[0];
-    proposed.push({...g,date:slot.date,time:slot.time,status:"scheduled",
+    proposed.push({...g,date:slot.date,time:slot.time,field:slot.field,status:"scheduled",
       preferenceExceptions:choice.conflicts.map(r=>r.id)});
     if(choice.conflicts.length){
       preferenceExceptions.push({game:g,date:slot.date,conflicts:choice.conflicts});
@@ -5332,15 +5857,23 @@ function openTeamManager(){
   $("mgrActiveTeamCount").value=leagueTeamIds().length;
   if($("mgrLeagueNameTeam"))$("mgrLeagueNameTeam").value=leagueSettings.name||"Ligue Diamond";
   renderManagerTeamList();
+
+  if($("mgrUsePools"))$("mgrUsePools").checked=!!leagueSettings.usePools;
+  if($("mgrPoolCount"))$("mgrPoolCount").value=leagueSettings.poolCount||3;
+  if($("mgrPoolAssignmentMode"))$("mgrPoolAssignmentMode").value=leagueSettings.poolAssignmentMode||"balanced";
+  normalizePoolConfig();
+  togglePoolSetup();
+
   $("teamManagerModal").classList.add("show");
 }
 function closeTeamManager(){ $("teamManagerModal").classList.remove("show"); }
 
 function applyLeagueTeamCount(){
-  const count=Math.max(2,Math.min(12,Number($("mgrActiveTeamCount").value)||6));
+  const count=Math.max(2,Math.min(32,Number($("mgrActiveTeamCount").value)||6));
   ensureLeagueTeamCount(count);
   $("mgrActiveTeamCount").value=count;
   renderManagerTeamList();
+  renderPoolSetup();
   toast(`${count} équipes actives`);
 }
 
@@ -5399,11 +5932,12 @@ function saveAllTeamConfigs(){
     leagueTeamMeta[team].displayName=name||teamDisplayName(team);
     leagueTeamMeta[team].color=color;
   });
+  savePoolConfigFromTeamManager();
   ensureLeagueInvite();
   renderLeagueTeamVisuals();
   renderCaptainTeamSelectors();
   renderSchedule();renderStandings();renderManagerSchedule();
-  toast("Ligue / tournoi et équipes enregistrés");
+  toast("Compétition, équipes et pools enregistrés");
   closeTeamManager();
 }
 
@@ -5412,13 +5946,20 @@ function populateTeamSelect(selectId,selected){
   el.innerHTML=leagueTeamIds().map(t=>`<option value="${t}" ${t===selected?"selected":""}>${teamDisplayName(t)}</option>`).join("");
 }
 
+
+function populateFieldSelect(selectId,selected){
+  const el=$(selectId);if(!el)return;
+  const fields=getConfiguredFields();
+  el.innerHTML=fields.map(f=>`<option value="${f}" ${f===selected?"selected":""}>${f}</option>`).join("");
+}
+
 function openManualGameModal(){
   const ids=leagueTeamIds();
   populateTeamSelect("manualAwayTeam",ids[0]);
   populateTeamSelect("manualHomeTeam",ids[1]||ids[0]);
   $("manualGameDate").value=leagueSettings.seasonStart||"";
   $("manualGameTime").value="18:30";
-  $("manualGameField").value="";
+  populateFieldSelect("manualGameField",getConfiguredFields()[0]);
   updateManualGameWarning();
   $("managerScheduleModal").classList.remove("show");
   $("manualGameModal").classList.add("show");
@@ -5464,13 +6005,13 @@ function addManualLeagueGame(){
 
 
 function openTeamRequests(){
-  populateTeamSelect("requestTeam",leagueTeamIds()[0]);
-  if($("requestFrequency"))$("requestFrequency").value="date";
-  toggleRequestFrequencyFields();
-  renderTeamRequests();
-  $("teamRequestsModal").classList.add("show");
+  openLeagueSettings();
+  setTimeout(()=>{
+    const section=$("embeddedTeamRequests");
+    if(section)section.scrollIntoView({behavior:"smooth",block:"start"});
+  },120);
 }
-function closeTeamRequests(){ $("teamRequestsModal").classList.remove("show"); }
+function closeTeamRequests(){ closeLeagueSettings(); }
 
 function toggleRequestFrequencyFields(){
   const recurring=$("requestFrequency")?.value==="weekly";
@@ -5654,6 +6195,7 @@ function openManagerGame(key){
     <div style="margin-top:6px"><b>${managerStatusLabel(g.status)}</b> • ${formatScheduleDate(g.date)} • ${g.time}</div>`;
   $("managerGameDate").value=g.date;
   $("managerGameTime").value=g.time;
+  populateFieldSelect("managerGameField",g.field||getConfiguredFields()[0]);
   $("managerScheduleModal").classList.remove("show");
   $("managerGameModal").classList.add("show");
 }
@@ -5677,6 +6219,7 @@ function setManagerGameStatus(status){
 function saveManagerGameReschedule(){
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===managerSelectedGameId);if(!g)return;
   const date=$("managerGameDate").value,time=$("managerGameTime").value;
+  const field=$("managerGameField")?.value||getConfiguredFields()[0];
   if(!date||!time){alert("Choisissez une date et une heure.");return}
   const conflicts=requestConflictsForGame(g.away,g.home,date);
   if(isDateInLeaguePause(date)||conflicts.length){
@@ -5687,7 +6230,7 @@ function saveManagerGameReschedule(){
     const ok=confirm(msg+"\n\nVoulez-vous quand même programmer ce match?");
     if(!ok)return;
   }
-  g.date=date;g.time=time;g.status="scheduled";
+  g.date=date;g.time=time;g.field=field;g.status="scheduled";
   renderSchedule();
   renderOfficialGames();
   openManagerGame(scheduleGameKey(g));
@@ -6183,7 +6726,7 @@ function renderViewer(){
   renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.16.4.
+// L'accueil par rôles demeure la base stable, avec le moteur de compétition v0.17.0.
 
 renderLineupEditor();
 

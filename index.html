@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.17.3</title>
+<title>Diamond v0.17.5</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1523,10 +1523,52 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0175-quick-weekly">
+.weekly-quick-grid{
+  display:grid;
+  grid-template-columns:1.05fr 1fr .85fr;
+  gap:8px;
+  margin-top:9px;
+}
+.weekly-quick-grid input,
+.weekly-quick-grid select{
+  width:100%;
+  min-height:44px;
+  box-sizing:border-box;
+}
+.weekly-generated-summary{
+  margin-top:8px;
+  font-size:11px;
+  line-height:1.4;
+  color:#aebed0;
+}
+.weekly-slots-details{
+  margin-top:9px;
+  border-top:1px solid rgba(255,255,255,.08);
+  padding-top:8px;
+}
+.weekly-slots-details summary{
+  cursor:pointer;
+  font-size:11px;
+  font-weight:900;
+  color:#c8d5e2;
+  user-select:none;
+}
+@media(max-width:520px){
+  .weekly-quick-grid{
+    grid-template-columns:1fr 1fr;
+  }
+  .weekly-quick-grid > div:last-child{
+    grid-column:1/-1;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.17.3 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.17.5 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1587,7 +1629,7 @@ body.role-viewer .strike-count{
         </button>
         <button class="role-card" type="button" onclick="openManagerSchedule()">
           <strong>📅 Gestion de l’horaire</strong>
-          <small>Ajouter un match manuellement, reporter pour pluie, annuler, suspendre ou replanifier.</small>
+          <small>Ajouter un match manuellement, remettre pour pluie, créer une reprise, annuler, suspendre ou replanifier.</small>
         </button>
         <button class="role-card" type="button" onclick="openManagerAccess()">
           <strong>👥 Accès gestionnaires</strong>
@@ -2236,6 +2278,20 @@ body.role-viewer .strike-count{
         <input id="mgrGamesPerOpponent" type="number" min="1" max="20" value="2" oninput="updateScheduleMathPreview()">
       </div>
 
+      <div class="manager-setting full">
+        <label>Maximum de matchs par équipe dans une même journée</label>
+        <select id="mgrMaxGamesPerTeamPerDay" onchange="updateScheduleMathPreview()">
+          <option value="1">1 match</option>
+          <option value="2">2 matchs</option>
+          <option value="3">3 matchs</option>
+          <option value="4">4 matchs</option>
+          <option value="99">Illimité</option>
+        </select>
+        <div class="muted" style="font-size:11px;margin-top:5px">
+          Important pour les tournois : une équipe peut jouer plus d’une fois dans la même journée, mais jamais deux matchs à la même heure.
+        </div>
+      </div>
+
       <div class="manager-section-title">🏟️ Terrains</div>
 
       <div class="manager-setting full">
@@ -2255,7 +2311,8 @@ body.role-viewer .strike-count{
 
       <div class="manager-setting full">
         <div class="muted" style="font-size:12px;margin-bottom:9px">
-          Choisissez le nombre de matchs par journée. Pour chaque match, sélectionnez ensuite l’heure et l’un des terrains configurés plus haut.
+          Mode rapide : choisissez l’heure du premier match, la durée et le nombre total de matchs.
+          Diamond crée automatiquement les créneaux et répartit les matchs sur les terrains disponibles.
         </div>
         <div id="weeklyDayRows"></div>
         <div class="native-time-note">
@@ -2568,7 +2625,7 @@ body.role-viewer .strike-count{
       <button type="button" class="league-info-close-top" onclick="closeManagerSchedule()">FERMER</button>
     </div>
     <div class="readonly-note" style="margin-bottom:10px">
-      Un match <b>reporté – pluie</b> reste dans l’historique et peut être replanifié plus tard, même pendant une pause de saison.
+      Un match <b>remis – pluie</b> reste à sa date originale dans l’horaire. Lorsqu’il est replanifié, Diamond crée un nouveau match marqué <b>REPRISE</b>.
     </div>
     <button type="button" class="primary" style="width:100%;margin-bottom:10px" onclick="openManualGameModal()">＋ AJOUTER UN MATCH MANUELLEMENT</button>
     <div id="managerScheduleList"></div>
@@ -2598,8 +2655,8 @@ body.role-viewer .strike-count{
       </div>
     </div>
 
-    <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="saveManagerGameReschedule()">REPLANIFIER / REMETTRE PRÉVU</button>
-    <button type="button" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('postponed-rain')">🌧️ REPORTÉ — PLUIE</button>
+    <button id="managerRescheduleBtn" type="button" class="primary" style="width:100%;margin-top:12px" onclick="saveManagerGameReschedule()">REPLANIFIER / REMETTRE PRÉVU</button>
+    <button type="button" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('postponed-rain')">🌧️ REMIS — PLUIE</button>
     <button type="button" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('suspended')">⏸️ SUSPENDU</button>
     <button type="button" class="danger" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('cancelled')">ANNULER LE MATCH</button>
   </div>
@@ -3948,8 +4005,9 @@ function renderOfficialGames(){
 
     if(status!=="scheduled"){
       const labels={
-        rain:"REPORTÉ • PLUIE",
-        postponed:"REPORTÉ",
+        rain:"REMIS • PLUIE",
+        postponed:"REMIS",
+        "postponed-rain":"REMIS • PLUIE",
         cancelled:"ANNULÉ",
         suspended:"SUSPENDU"
       };
@@ -3975,11 +4033,15 @@ function renderOfficialGames(){
       <button type="button" class="readonly-note" style="width:100%;text-align:left;margin-bottom:10px"
         onclick="openOfficialGame('${key}')">
         <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
-          <strong>${g.time}${fieldLine}</strong>
+          <strong>${g.time}${fieldLine}${g.resumption?` • 🔁 REPRISE`:""}</strong>
           <span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
           <span>›</span>
         </div>
         <div style="margin-top:6px;font-size:12px">
+          ${g.resumption&&g.resumedFrom?(()=>{
+            const origin=leagueSchedule.find(x=>x.id===g.resumedFrom);
+            return origin?`Match remis le ${formatScheduleDate(origin.date)}<br>`:"";
+          })():""}
           ${g.away}: ${awayState}<br>
           ${g.home}: ${homeState}
         </div>
@@ -4333,7 +4395,7 @@ function renderSchedule(){
       const status=g.status||"scheduled";
       const statusLabels={
         "scheduled":"À venir",
-        "postponed-rain":"🌧️ Reporté — pluie",
+        "postponed-rain":"🌧️ Remis — pluie",
         "cancelled":"Annulé",
         "suspended":"⏸️ Suspendu"
       };
@@ -4343,7 +4405,13 @@ function renderSchedule(){
             ${matchup}
             <span class="muted">${g.time}</span>
           </div>
-          <div class="muted" style="font-size:12px;margin-top:3px">${statusLabels[status]||"À venir"}</div>
+          <div class="muted" style="font-size:12px;margin-top:3px">
+            ${g.resumption?"🔁 REPRISE":(statusLabels[status]||"À venir")}
+            ${g.resumption&&g.resumedFrom?(()=>{
+              const origin=leagueSchedule.find(x=>x.id===g.resumedFrom);
+              return origin?` • match remis le ${formatScheduleDate(origin.date)}`:"";
+            })():""}
+          </div>
         </div>`;
     }).join("");
 
@@ -5114,6 +5182,7 @@ let leagueSettings={
   autoExtraRunner:false,
   autoRunnerBase:2,
   gamesPerOpponent:2,
+  maxGamesPerTeamPerDay:1,
   usePools:false,
   poolCount:3,
   poolNames:["Pool A","Pool B","Pool C"],
@@ -5279,7 +5348,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.17.3 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.17.5 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -5317,6 +5386,7 @@ function toggleLeagueSettingDependencies(){
 }
 
 
+
 let weeklyDraftSlots=null;
 
 function defaultSlotTime(index){
@@ -5324,10 +5394,29 @@ function defaultSlotTime(index){
   return defaults[index]||"18:30";
 }
 
+function minutesToClock(total){
+  total=((Number(total)||0)%(24*60)+(24*60))%(24*60);
+  const h=Math.floor(total/60);
+  const m=total%60;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+}
+
+function clockToMinutes(clock){
+  const [h,m]=String(clock||"00:00").split(":").map(Number);
+  return (Number(h)||0)*60+(Number(m)||0);
+}
+
+function durationLabel(minutes){
+  const m=Number(minutes)||60;
+  const h=Math.floor(m/60);
+  const rem=m%60;
+  if(h && rem)return `${h} h ${String(rem).padStart(2,"0")}`;
+  if(h)return `${h} h`;
+  return `${rem} min`;
+}
+
 function getConfiguredFields(){
-  // If the terrain editor is currently present in the DOM, use its live values.
-  // This lets the weekly schedule immediately offer newly added terrains
-  // without forcing the manager to save/close/reopen first.
+  // Use live values while the manager edits the field list.
   const countEl=$("mgrFieldCount");
   const firstFieldInput=$("fieldName0");
 
@@ -5349,55 +5438,142 @@ function fieldOptionsHtml(selected){
   return getConfiguredFields().map(f=>`<option value="${f}" ${f===selected?"selected":""}>${f}</option>`).join("");
 }
 
+function inferQuickWeeklySettings(source,fields){
+  const slots=Array.isArray(source?.slots)?source.slots:[];
+  const startTime=source?.startTime || slots[0]?.time || "18:30";
+
+  let durationMinutes=Number(source?.durationMinutes)||0;
+  if(!durationMinutes && slots.length>fields.length){
+    const first=clockToMinutes(slots[0]?.time);
+    const next=clockToMinutes(slots[fields.length]?.time);
+    const diff=next-first;
+    if(diff>0)durationMinutes=diff;
+  }
+  if(!durationMinutes)durationMinutes=75;
+
+  return {startTime,durationMinutes};
+}
+
+function generateQuickDaySlots(startTime,durationMinutes,count,fields){
+  const safeFields=(fields&&fields.length)?fields:["Terrain 1"];
+  const start=clockToMinutes(startTime||"18:30");
+  const duration=Math.max(15,Number(durationMinutes)||60);
+  const total=Math.max(0,Number(count)||0);
+
+  return Array.from({length:total},(_,i)=>{
+    const wave=Math.floor(i/safeFields.length);
+    return {
+      time:minutesToClock(start + wave*duration),
+      field:safeFields[i%safeFields.length]
+    };
+  });
+}
+
 function migrateWeeklyCfg(cfg){
   const fields=getConfiguredFields();
   const source=cfg||{enabled:false,count:0};
+  let slots=[];
+
   if(Array.isArray(source.slots)){
-    return {
-      enabled:!!source.enabled,
-      count:Number(source.count)||source.slots.length||0,
-      slots:source.slots.map((s,i)=>({
-        time:s.time||defaultSlotTime(i),
-        field:s.field||fields[i%fields.length]
-      }))
-    };
+    slots=source.slots.map((s,i)=>({
+      time:s.time||defaultSlotTime(i),
+      field:s.field||fields[i%fields.length]
+    }));
+  }else{
+    const legacyTimes=Array.isArray(source.times)?source.times:[];
+    slots=legacyTimes.map((time,i)=>({time,field:fields[i%fields.length]}));
   }
-  const legacyTimes=Array.isArray(source.times)?source.times:[];
+
+  const quick=inferQuickWeeklySettings({...source,slots},fields);
+  const count=Number(source.count)||slots.length||0;
+
   return {
     enabled:!!source.enabled,
-    count:Number(source.count)||legacyTimes.length||0,
-    slots:legacyTimes.map((time,i)=>({time,field:fields[i%fields.length]}))
+    count,
+    startTime:quick.startTime,
+    durationMinutes:quick.durationMinutes,
+    slots
   };
 }
 
 function syncWeeklySlotDraft(dow){
   if(!weeklyDraftSlots)weeklyDraftSlots={};
+
   const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
+  const startTime=$(`weekStart${dow}`)?.value || weeklyDraftSlots[dow]?.startTime || "18:30";
+  const durationMinutes=Math.max(15,Number($(`weekDuration${dow}`)?.value)||weeklyDraftSlots[dow]?.durationMinutes||60);
+
   const cfg=weeklyDraftSlots[dow]||{enabled:false,count:0,slots:[]};
   cfg.enabled=!!$(`weekEnabled${dow}`)?.checked;
   cfg.count=count;
-  cfg.slots=[];
+  cfg.startTime=startTime;
+  cfg.durationMinutes=durationMinutes;
+
+  // Preserve any manual edits currently visible.
+  const edited=[];
   for(let i=0;i<count;i++){
-    const time=$(`weekTime${dow}_${i}`)?.value||defaultSlotTime(i);
-    const field=$(`weekField${dow}_${i}`)?.value||getConfiguredFields()[0];
-    cfg.slots.push({time,field});
+    const timeEl=$(`weekTime${dow}_${i}`);
+    const fieldEl=$(`weekField${dow}_${i}`);
+    if(timeEl || fieldEl){
+      edited.push({
+        time:timeEl?.value || cfg.slots?.[i]?.time || defaultSlotTime(i),
+        field:fieldEl?.value || cfg.slots?.[i]?.field || getConfiguredFields()[0]
+      });
+    }
   }
+  if(edited.length)cfg.slots=edited;
+
   weeklyDraftSlots[dow]=cfg;
+}
+
+function regenerateQuickDaySlots(dow){
+  if(!weeklyDraftSlots)weeklyDraftSlots={};
+  const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
+  const startTime=$(`weekStart${dow}`)?.value || "18:30";
+  const durationMinutes=Math.max(15,Number($(`weekDuration${dow}`)?.value)||60);
+  const fields=getConfiguredFields();
+
+  const cfg=weeklyDraftSlots[dow]||{};
+  cfg.enabled=!!$(`weekEnabled${dow}`)?.checked;
+  cfg.count=count;
+  cfg.startTime=startTime;
+  cfg.durationMinutes=durationMinutes;
+  cfg.slots=generateQuickDaySlots(startTime,durationMinutes,count,fields);
+  weeklyDraftSlots[dow]=cfg;
+
+  renderWeeklyDaySlotList(dow);
+  updateScheduleMathPreview();
 }
 
 function renderWeeklyDaySlotList(dow){
   const root=$(`weekSlotList${dow}`);if(!root)return;
   const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
-  const cfg=weeklyDraftSlots?.[dow]||{enabled:false,count:0,slots:[]};
+  const cfg=weeklyDraftSlots?.[dow]||{enabled:false,count:0,startTime:"18:30",durationMinutes:60,slots:[]};
   const fields=getConfiguredFields();
 
-  while(cfg.slots.length<count){
-    const i=cfg.slots.length;
-    cfg.slots.push({time:defaultSlotTime(i),field:fields[i%fields.length]});
+  // If slots do not match the requested count, generate clean slots.
+  if(!Array.isArray(cfg.slots) || cfg.slots.length!==count){
+    cfg.slots=generateQuickDaySlots(
+      $(`weekStart${dow}`)?.value||cfg.startTime||"18:30",
+      Number($(`weekDuration${dow}`)?.value)||cfg.durationMinutes||60,
+      count,
+      fields
+    );
   }
-  cfg.slots=cfg.slots.slice(0,count);
+
   cfg.count=count;
   weeklyDraftSlots[dow]=cfg;
+
+  const summary=$(`weekGeneratedSummary${dow}`);
+  if(summary){
+    if(!count){
+      summary.textContent="Aucun match prévu.";
+    }else{
+      const uniqueTimes=[...new Set(cfg.slots.map(s=>s.time))];
+      const last=uniqueTimes[uniqueTimes.length-1]||cfg.startTime;
+      summary.innerHTML=`${count} matchs • ${fields.length} terrain${fields.length>1?"s":""} • créneaux de ${durationLabel(cfg.durationMinutes)} • ${cfg.startTime} à ${last}`;
+    }
+  }
 
   root.innerHTML=count?cfg.slots.map((slot,i)=>`
     <div class="weekly-slot-row">
@@ -5414,13 +5590,11 @@ function renderWeeklyDaySlotList(dow){
         </select>
       </div>
     </div>`).join("")
-    :'<div class="muted" style="font-size:11px;margin-top:7px">Aucun match prévu cette journée.</div>';
+    :'<div class="muted" style="font-size:11px;margin-top:7px">Aucun créneau généré.</div>';
 }
 
-function changeWeeklyMatchCount(dow){
-  syncWeeklySlotDraft(dow);
-  renderWeeklyDaySlotList(dow);
-  updateScheduleMathPreview();
+function changeWeeklyQuickSetting(dow){
+  regenerateQuickDaySlots(dow);
 }
 
 function renderWeeklyDayRows(){
@@ -5435,6 +5609,7 @@ function renderWeeklyDayRows(){
     const cfg=weeklyDraftSlots[dow];
     return `<div class="weekly-day-row">
       <div class="weekly-day-title">${name}</div>
+
       <div class="weekly-active-col">
         <label>Journée active</label>
         <label class="weekly-active-toggle">
@@ -5443,13 +5618,38 @@ function renderWeeklyDayRows(){
           <span>${cfg.enabled?"Oui":"Activer"}</span>
         </label>
       </div>
-      <div>
-        <label>Matchs</label>
-        <input id="weekCount${dow}" type="number" min="0" max="20" value="${cfg.count||0}"
-               onchange="changeWeeklyMatchCount(${dow})">
+
+      <div class="weekly-quick-grid">
+        <div>
+          <label>Début des matchs</label>
+          <input id="weekStart${dow}" type="time" value="${cfg.startTime||"18:30"}"
+                 onchange="changeWeeklyQuickSetting(${dow})">
+        </div>
+
+        <div>
+          <label>Durée des matchs</label>
+          <select id="weekDuration${dow}" onchange="changeWeeklyQuickSetting(${dow})">
+            ${[
+              [30,"30 min"],[45,"45 min"],[60,"1 h"],[75,"1 h 15"],[90,"1 h 30"],
+              [105,"1 h 45"],[120,"2 h"],[150,"2 h 30"],[180,"3 h"]
+            ].map(([v,l])=>`<option value="${v}" ${Number(cfg.durationMinutes)===v?"selected":""}>${l}</option>`).join("")}
+          </select>
+        </div>
+
+        <div>
+          <label>Nombre de matchs</label>
+          <input id="weekCount${dow}" type="number" min="0" max="100" value="${cfg.count||0}"
+                 onchange="changeWeeklyQuickSetting(${dow})">
+        </div>
       </div>
+
+      <div id="weekGeneratedSummary${dow}" class="weekly-generated-summary"></div>
+
       <div class="times-col">
-        <div id="weekSlotList${dow}"></div>
+        <details class="weekly-slots-details">
+          <summary>PERSONNALISER LES CRÉNEAUX GÉNÉRÉS</summary>
+          <div id="weekSlotList${dow}"></div>
+        </details>
       </div>
     </div>`;
   }).join("");
@@ -5461,10 +5661,12 @@ function readWeeklySlotsFromForm(){
   const slots={};
   for(let dow=0;dow<7;dow++){
     syncWeeklySlotDraft(dow);
-    const cfg=weeklyDraftSlots[dow]||{enabled:false,count:0,slots:[]};
+    const cfg=weeklyDraftSlots[dow]||{enabled:false,count:0,startTime:"18:30",durationMinutes:60,slots:[]};
     slots[dow]={
       enabled:!!cfg.enabled && cfg.count>0,
       count:cfg.count,
+      startTime:cfg.startTime,
+      durationMinutes:cfg.durationMinutes,
       slots:cfg.slots.map(s=>({time:s.time,field:s.field}))
     };
   }
@@ -5524,10 +5726,14 @@ function updateScheduleMathPreview(){
     qualification=`<br>Qualification prévue : <b>${base+wc} équipes</b>`;
   }
 
+  const dailyMax=Number($("mgrMaxGamesPerTeamPerDay")?.value)||leagueSettings.maxGamesPerTeamPerDay||1;
+  const dailyMaxText=dailyMax>=99?"illimité":dailyMax;
+
   el.innerHTML=`<b>${n} équipes • ${perOpponent} match${perOpponent>1?"s":""} contre chaque adversaire admissible</b><br>
     ${poolText}<br>
     Total à programmer : <b>${total} matchs</b><br>
     Capacité hebdomadaire configurée : <b>${weekly} matchs</b><br>
+    Maximum par équipe / jour : <b>${dailyMaxText}</b><br>
     Minimum théorique : <b>${weeks}${weeks!=="—"?" semaines":""}</b>${qualification}`;
 }
 
@@ -5535,23 +5741,19 @@ function updateScheduleMathPreview(){
 function refreshWeeklyFieldOptions(){
   const fields=getConfiguredFields();
   for(let dow=0;dow<7;dow++){
-    const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||0);
-    for(let i=0;i<count;i++){
-      const sel=$(`weekField${dow}_${i}`);
-      if(!sel)continue;
+    if(!weeklyDraftSlots?.[dow])continue;
 
-      const previous=sel.value;
-      sel.innerHTML=fields.map(f=>`<option value="${f}">${f}</option>`).join("");
+    const cfg=weeklyDraftSlots[dow];
+    const count=Math.max(0,Number($(`weekCount${dow}`)?.value)||cfg.count||0);
+    cfg.slots=generateQuickDaySlots(
+      $(`weekStart${dow}`)?.value||cfg.startTime||"18:30",
+      Number($(`weekDuration${dow}`)?.value)||cfg.durationMinutes||60,
+      count,
+      fields
+    );
+    weeklyDraftSlots[dow]=cfg;
 
-      if(fields.includes(previous)){
-        sel.value=previous;
-      }else{
-        sel.value=fields[i%fields.length] || fields[0];
-      }
-    }
-    if(weeklyDraftSlots && weeklyDraftSlots[dow]){
-      syncWeeklySlotDraft(dow);
-    }
+    if($(`weekSlotList${dow}`))renderWeeklyDaySlotList(dow);
   }
   updateScheduleMathPreview();
 }
@@ -5744,6 +5946,7 @@ function fillLeagueSettingsForm(){
   $("mgrAutoRunner").checked=!!leagueSettings.autoExtraRunner;
   $("mgrAutoRunnerBase").value=String(leagueSettings.autoRunnerBase||2);
   $("mgrGamesPerOpponent").value=leagueSettings.gamesPerOpponent||2;
+  $("mgrMaxGamesPerTeamPerDay").value=String(leagueSettings.maxGamesPerTeamPerDay||1);
   $("mgrPoolPlayMode").value=leagueSettings.poolPlayMode||"within";
 
   const fields=getConfiguredFields();
@@ -5787,6 +5990,7 @@ function readLeagueSettingsForm(){
     autoExtraRunner:!!$("mgrExtraInnings").checked && !!$("mgrAutoRunner").checked,
     autoRunnerBase:Number($("mgrAutoRunnerBase").value)||2,
     gamesPerOpponent:Math.max(1,Number($("mgrGamesPerOpponent").value)||1),
+    maxGamesPerTeamPerDay:Math.max(1,Number($("mgrMaxGamesPerTeamPerDay")?.value)||1),
     poolPlayMode:$("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode||"within",
     fields,
     weeklySlots,
@@ -5931,29 +6135,77 @@ function generateLeagueScheduleFromSettings(){
   const remaining=[...required];
   const proposed=[];
   const preferenceExceptions=[];
-  let currentDate=null,usedToday=new Set();
+  const maxPerDay=Math.max(1,Number(s.maxGamesPerTeamPerDay)||1);
+
+  let currentDate=null;
+  let dayCounts={};
+  let busyAtTime={};
+
   for(const slot of slots){
-    if(slot.date!==currentDate){currentDate=slot.date;usedToday=new Set();}
+    if(slot.date!==currentDate){
+      currentDate=slot.date;
+      dayCounts={};
+      busyAtTime={};
+    }
+
+    const timeKey=slot.time;
+    if(!busyAtTime[timeKey])busyAtTime[timeKey]=new Set();
+
     const candidates=remaining
-      .map((g,i)=>({g,i,conflicts:requestConflictsForGame(g.away,g.home,slot.date)}))
-      .filter(x=>!usedToday.has(x.g.away)&&!usedToday.has(x.g.home))
-      .sort((a,b)=>a.conflicts.length-b.conflicts.length);
+      .map((g,i)=>{
+        const conflicts=requestConflictsForGame(g.away,g.home,slot.date);
+        const awayCount=dayCounts[g.away]||0;
+        const homeCount=dayCounts[g.home]||0;
+        return {g,i,conflicts,awayCount,homeCount,totalDayLoad:awayCount+homeCount};
+      })
+      .filter(x=>
+        x.awayCount<maxPerDay &&
+        x.homeCount<maxPerDay &&
+        !busyAtTime[timeKey].has(x.g.away) &&
+        !busyAtTime[timeKey].has(x.g.home)
+      )
+      .sort((a,b)=>
+        a.conflicts.length-b.conflicts.length ||
+        a.totalDayLoad-b.totalDayLoad
+      );
+
     if(!candidates.length)continue;
+
     const choice=candidates[0];
     const g=remaining.splice(choice.i,1)[0];
-    proposed.push({...g,date:slot.date,time:slot.time,field:slot.field,status:"scheduled",
-      preferenceExceptions:choice.conflicts.map(r=>r.id)});
+
+    proposed.push({
+      ...g,
+      date:slot.date,
+      time:slot.time,
+      field:slot.field,
+      status:"scheduled",
+      preferenceExceptions:choice.conflicts.map(r=>r.id)
+    });
+
     if(choice.conflicts.length){
       preferenceExceptions.push({game:g,date:slot.date,conflicts:choice.conflicts});
     }
-    usedToday.add(g.away);usedToday.add(g.home);
+
+    dayCounts[g.away]=(dayCounts[g.away]||0)+1;
+    dayCounts[g.home]=(dayCounts[g.home]||0)+1;
+    busyAtTime[timeKey].add(g.away);
+    busyAtTime[timeKey].add(g.home);
+
     if(!remaining.length)break;
   }
+
   if(remaining.length){
-    alert(`${remaining.length} matchs n’ont pas pu être placés sans faire jouer une équipe deux fois la même journée. Ajoutez des journées/heures ou allongez la saison.`);
+    const maxText=maxPerDay>=99?"illimité":maxPerDay;
+    alert(
+      `${remaining.length} matchs n’ont pas pu être placés avec les contraintes actuelles.\n\n`+
+      `Maximum par équipe / jour : ${maxText}.\n`+
+      `Diamond empêche aussi une équipe de jouer deux matchs à la même heure.\n\n`+
+      `Ajoutez des journées, augmentez le maximum quotidien ou allongez la compétition.`
+    );
     return;
   }
-  if(!confirm(`Diamond va générer ${proposed.length} matchs et remplacer l’horaire actuel du prototype. Continuer?`))return;
+  if(!confirm(`Diamond va générer automatiquement ${proposed.length} matchs selon les jours, heures, durées et terrains configurés.\n\nL’horaire actuel du prototype sera remplacé. Continuer?`))return;
 
   leagueSettings=s;
   leagueSchedule.length=0;
@@ -6459,10 +6711,11 @@ function renderManagerAccess(){
     </div>`).join("");
 }
 
-function managerStatusLabel(status){
+function managerStatusLabel(status,g=null){
+  if((status||"scheduled")==="scheduled" && g?.resumption)return "REPRISE";
   return {
     "scheduled":"PRÉVU",
-    "postponed-rain":"REPORTÉ — PLUIE",
+    "postponed-rain":"REMIS — PLUIE",
     "cancelled":"ANNULÉ",
     "suspended":"SUSPENDU"
   }[status||"scheduled"]||"PRÉVU";
@@ -6483,9 +6736,14 @@ function renderManagerSchedule(){
     return `<button type="button" class="manager-schedule-card" onclick="openManagerGame('${scheduleGameKey(g)}')">
       <div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
         <span class="logo-matchup">${teamLogo(g.away,34)}<span class="logo-vs">@</span>${teamLogo(g.home,34)}</span>
-        <span class="manager-status ${st}">${managerStatusLabel(st)}</span>
+        <span class="manager-status ${st}">${managerStatusLabel(st,g)}</span>
       </div>
       <div class="muted" style="font-size:12px;margin-top:6px">${formatScheduleDate(g.date)} • ${g.time}${g.field?` • ${g.field}`:""}${g.manual?" • Manuel":""}</div>
+      ${g.resumption?`<div class="muted" style="font-size:11px;margin-top:3px">🔁 Reprise du match remis</div>`:""}
+      ${g.rescheduledTo?(()=>{
+        const reprise=leagueSchedule.find(x=>x.id===g.rescheduledTo);
+        return reprise?`<div class="muted" style="font-size:11px;margin-top:3px">↳ Reprise : ${formatScheduleDate(reprise.date)} • ${reprise.time}${reprise.field?` • ${reprise.field}`:""}</div>`:"";
+      })():""}
     </button>`;
   }).join("");
 }
@@ -6493,12 +6751,27 @@ function renderManagerSchedule(){
 function openManagerGame(key){
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===key);if(!g)return;
   managerSelectedGameId=key;
-  $("managerGameTitle").textContent="GÉRER LE MATCH";
-  $("managerGameMatchup").innerHTML=`<div class="logo-matchup">${teamLogo(g.away,46)}<span class="logo-vs">@</span>${teamLogo(g.home,46)}</div>
-    <div style="margin-top:6px"><b>${managerStatusLabel(g.status)}</b> • ${formatScheduleDate(g.date)} • ${g.time}</div>`;
+  $("managerGameTitle").textContent=g.resumption?"GÉRER LA REPRISE":"GÉRER LE MATCH";
+
+  const origin=g.resumedFrom?leagueSchedule.find(x=>x.id===g.resumedFrom):null;
+  const reprise=g.rescheduledTo?leagueSchedule.find(x=>x.id===g.rescheduledTo):null;
+
+  $("managerGameMatchup").innerHTML=`
+    <div class="logo-matchup">${teamLogo(g.away,46)}<span class="logo-vs">@</span>${teamLogo(g.home,46)}</div>
+    <div style="margin-top:6px"><b>${managerStatusLabel(g.status,g)}</b> • ${formatScheduleDate(g.date)} • ${g.time}${g.field?` • ${g.field}`:""}</div>
+    ${origin?`<div class="muted" style="font-size:11px;margin-top:5px">🔁 Reprise du match remis le ${formatScheduleDate(origin.date)} à ${origin.time}</div>`:""}
+    ${reprise?`<div class="muted" style="font-size:11px;margin-top:5px">↳ Reprise créée le ${formatScheduleDate(reprise.date)} à ${reprise.time}</div>`:""}
+  `;
+
   $("managerGameDate").value=g.date;
   $("managerGameTime").value=g.time;
   populateFieldSelect("managerGameField",g.field||getConfiguredFields()[0]);
+
+  const rescheduleBtn=$("managerRescheduleBtn");
+  if(rescheduleBtn){
+    rescheduleBtn.textContent=g.status==="postponed-rain"?"CRÉER LA REPRISE":"REPLANIFIER / REMETTRE PRÉVU";
+  }
+
   $("managerScheduleModal").classList.remove("show");
   $("managerGameModal").classList.add("show");
 }
@@ -6516,14 +6789,16 @@ function setManagerGameStatus(status){
   renderSchedule();
   renderOfficialGames();
   openManagerGame(scheduleGameKey(g));
-  toast(managerStatusLabel(status));
+  toast(managerStatusLabel(status,g));
 }
 
 function saveManagerGameReschedule(){
   const g=leagueSchedule.find(x=>scheduleGameKey(x)===managerSelectedGameId);if(!g)return;
   const date=$("managerGameDate").value,time=$("managerGameTime").value;
   const field=$("managerGameField")?.value||getConfiguredFields()[0];
+
   if(!date||!time){alert("Choisissez une date et une heure.");return}
+
   const conflicts=requestConflictsForGame(g.away,g.home,date);
   if(isDateInLeaguePause(date)||conflicts.length){
     const msg=[
@@ -6533,11 +6808,76 @@ function saveManagerGameReschedule(){
     const ok=confirm(msg+"\n\nVoulez-vous quand même programmer ce match?");
     if(!ok)return;
   }
-  g.date=date;g.time=time;g.field=field;g.status="scheduled";
+
+  // Match remis à cause de la pluie:
+  // on conserve le match ORIGINAL à sa date initiale avec la mention REMIS — PLUIE,
+  // puis on crée un NOUVEAU match à la nouvelle date avec la mention REPRISE.
+  if(g.status==="postponed-rain"){
+    if(g.rescheduledTo){
+      const existing=leagueSchedule.find(x=>x.id===g.rescheduledTo);
+      if(existing){
+        const replace=confirm(
+          `Une reprise existe déjà le ${formatScheduleDate(existing.date)} à ${existing.time}.\n\nVoulez-vous déplacer cette reprise?`
+        );
+        if(!replace)return;
+
+        existing.date=date;
+        existing.time=time;
+        existing.field=field;
+        existing.status="scheduled";
+        existing.resumption=true;
+
+        renderSchedule();
+        renderOfficialGames();
+        renderManagerSchedule();
+        openManagerGame(scheduleGameKey(existing));
+        toast("Reprise déplacée");
+        return;
+      }
+    }
+
+    const reprise={
+      id:"R"+Date.now(),
+      date,
+      time,
+      away:g.away,
+      home:g.home,
+      field,
+      status:"scheduled",
+      resumption:true,
+      resumedFrom:g.id,
+      manual:true
+    };
+
+    leagueSchedule.push(reprise);
+    g.rescheduledTo=reprise.id;
+
+    officialGameSubmissions[scheduleGameKey(reprise)]={
+      awaySubmitted:false,
+      homeSubmitted:false,
+      awayLocked:false,
+      homeLocked:false
+    };
+
+    renderSchedule();
+    renderOfficialGames();
+    renderManagerSchedule();
+    openManagerGame(scheduleGameKey(reprise));
+    toast("Reprise créée");
+    return;
+  }
+
+  // Pour un match prévu normal (ou une reprise), on peut encore le déplacer directement.
+  g.date=date;
+  g.time=time;
+  g.field=field;
+  g.status="scheduled";
+
   renderSchedule();
   renderOfficialGames();
+  renderManagerSchedule();
   openManagerGame(scheduleGameKey(g));
-  toast("Match replanifié");
+  toast(g.resumption?"Reprise replanifiée":"Match replanifié");
 }
 
 function automaticExtraRunner(){

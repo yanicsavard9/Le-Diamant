@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.16.0</title>
+<title>Diamond v0.16.3</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -343,7 +343,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 .player-used-note.yankees{color:#ef6a6a}
 
 
-/* v0.16.0 — meilleure adaptation iPhone pour l'écran marqueur */
+/* v0.16.3 — meilleure adaptation iPhone pour l'écran marqueur */
 @media (max-width: 640px){
   body{
     overflow-x:hidden;
@@ -484,7 +484,7 @@ body:not(.role-official) #gameLogCard{display:none!important}
 }
 
 
-/* v0.16.0 — corrige la bande noire à droite sur iPhone */
+/* v0.16.3 — corrige la bande noire à droite sur iPhone */
 html, body{
   width:100%;
   max-width:100%;
@@ -531,7 +531,7 @@ table{
 }
 
 
-/* v0.16.0 — écran marqueur iPhone pleine largeur, sans bande noire */
+/* v0.16.3 — écran marqueur iPhone pleine largeur, sans bande noire */
 html,body{
   width:100%;
   max-width:100%;
@@ -631,7 +631,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.0 — enlève toute ligne sous le lanceur */
+/* v0.16.3 — enlève toute ligne sous le lanceur */
 .pitcher-center,
 .pitcher-center *,
 .pitcher-center .player-link,
@@ -691,7 +691,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.0 — correctifs ciblés après vérification du HTML réel */
+/* v0.16.3 — correctifs ciblés après vérification du HTML réel */
 
 /* Masque la diagonale du losange qui passait sous le nom du lanceur */
 .pitcher-center{
@@ -729,7 +729,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.0 — changements rapides + fermeture Horaire en haut */
+/* v0.16.3 — changements rapides + fermeture Horaire en haut */
 #profileChangeBtn{
   min-height:52px;
   font-weight:900;
@@ -754,7 +754,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.0 — formats de match 3/4/5/7/9 manches */
+/* v0.16.3 — formats de match 3/4/5/7/9 manches */
 .inning-format{
   display:grid;
   grid-template-columns:repeat(5,minmax(0,1fr));
@@ -770,7 +770,7 @@ body{background:var(--bg)}
 }
 
 
-/* v0.16.0 */
+/* v0.16.3 */
 #completedGameModal,
 #completedGameTeamModal,
 #officialCompletedGameModal{
@@ -1288,10 +1288,116 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0161-weekday-labels">
+.weekly-day-row{
+  grid-template-columns:1fr 90px !important;
+  align-items:start !important;
+}
+.weekly-day-row .weekly-day-title{
+  grid-column:1/-1;
+  font-size:17px;
+  font-weight:950;
+  color:#ffffff;
+  letter-spacing:.01em;
+  margin-bottom:2px;
+}
+.weekly-day-row .weekly-active-col{
+  min-width:0;
+}
+.weekly-day-row .weekly-active-toggle{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:44px;
+  font-weight:850;
+  color:#dfe9f4;
+}
+.weekly-day-row .weekly-active-toggle input[type="checkbox"]{
+  width:26px !important;
+  height:26px !important;
+  min-height:26px !important;
+  flex:0 0 26px;
+  margin:0;
+}
+.weekly-day-row .times-col{
+  grid-column:1/-1;
+}
+@media(max-width:520px){
+  .weekly-day-row{grid-template-columns:1fr 86px !important}
+}
+</style>
+
+
+<style id="diamond-v0162-recurring-team-requests">
+.request-frequency-note{
+  font-size:11px;
+  color:#aebed0;
+  margin-top:5px;
+  line-height:1.35;
+}
+.request-recurring-badge{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:950;
+  border:1px solid rgba(121,189,242,.35);
+  color:#9fd7ff;
+  background:rgba(121,189,242,.08);
+  margin-top:5px;
+}
+</style>
+
+
+<style id="diamond-v0163-invitations">
+.qr-card{
+  max-width:330px;margin:12px auto;padding:16px;border-radius:20px;
+  background:#fff;color:#111;text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+}
+.qr-card img{width:240px;height:240px;max-width:100%;object-fit:contain;display:block;margin:0 auto}
+.qr-league-name{font-size:17px;font-weight:950;margin-top:8px}
+.qr-reference{font-size:11px;color:#667;margin-top:4px;letter-spacing:.05em}
+.invite-status-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px;border:1px solid rgba(255,255,255,.10);border-radius:13px;
+  background:rgba(255,255,255,.035);margin-top:10px
+}
+.invite-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.invite-actions .full{grid-column:1/-1}
+.league-search-result{
+  border:1px solid rgba(121,189,242,.35);background:rgba(121,189,242,.07);
+  border-radius:14px;padding:12px;margin-top:10px
+}
+.league-search-result h3{margin:0 0 4px}
+.qr-scanner-box{
+  position:relative;overflow:hidden;border-radius:16px;background:#05080c;
+  aspect-ratio:1/1;margin-top:10px;border:1px solid rgba(255,255,255,.12)
+}
+.qr-scanner-box video{width:100%;height:100%;object-fit:cover;display:block}
+.qr-scan-frame{
+  position:absolute;inset:18%;border:3px solid #77d7ff;border-radius:18px;
+  box-shadow:0 0 0 999px rgba(0,0,0,.30);pointer-events:none
+}
+.qr-scan-status{font-size:12px;line-height:1.4;margin-top:9px;color:#b9cadb}
+.invite-privacy-note{
+  padding:10px;border-radius:12px;border:1px solid rgba(156,240,178,.24);
+  background:rgba(156,240,178,.06);font-size:11px;line-height:1.45;margin-top:10px
+}
+#leagueInviteModal .sheet,#leagueSearchModal .sheet,#qrScannerModal .sheet,#joinInviteModal .sheet{
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch
+}
+@media(max-width:520px){
+  .invite-actions{grid-template-columns:1fr}
+  .invite-actions .full{grid-column:auto}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.16.0 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.16.3 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1362,6 +1468,10 @@ body.role-viewer .strike-count{
           <strong>👥 Accès gestionnaires</strong>
           <small>Nommer un gestionnaire adjoint ou donner un accès temporaire pour vacances ou maladie.</small>
         </button>
+        <button class="role-card" type="button" onclick="openLeagueInvite()">
+          <strong>🔗 Invitations et QR Code</strong>
+          <small>Afficher le QR officiel de la ligue, le partager, le régénérer et contrôler sa visibilité dans la recherche.</small>
+        </button>
         <button class="role-card" type="button" onclick="openLeagueInfo('standings')">
           <strong>🏆 Classement</strong>
           <small>Consulter le classement actuel de la ligue.</small>
@@ -1414,7 +1524,10 @@ body.role-viewer .strike-count{
   <section id="viewerView" class="hidden">
     <div class="role-topbar">
       <div><b>👤 Joueur / Spectateur</b><div class="muted" style="font-size:12px">Consultation seulement</div></div>
-      <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button type="button" onclick="openLeagueSearch()">🔎 RECHERCHER UNE LIGUE</button>
+        <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
+      </div>
     </div>
 
     <div class="card">
@@ -2002,6 +2115,96 @@ body.role-viewer .strike-count{
 </div>
 
 
+
+<div class="modal" id="leagueInviteModal">
+  <div class="sheet">
+    <div class="league-info-header">
+      <h3>🔗 Invitations et QR Code</h3>
+      <button type="button" class="league-info-close-top" onclick="closeLeagueInvite()">FERMER</button>
+    </div>
+
+    <div class="readonly-note">
+      Le QR officiel permet de rejoindre la ligue comme <b>Joueur / Spectateur</b>.
+      Les accès Capitaine, Marqueur et Gestionnaire doivent toujours être attribués séparément.
+    </div>
+
+    <div class="qr-card">
+      <div id="leagueInviteQr"></div>
+      <div id="leagueInviteName" class="qr-league-name">Ligue Diamond</div>
+      <div id="leagueInviteRef" class="qr-reference"></div>
+    </div>
+
+    <div class="invite-status-row">
+      <div>
+        <b>Ligue visible dans la recherche</b>
+        <div class="muted" style="font-size:11px">Les joueurs peuvent trouver son nom, mais ils doivent quand même scanner le QR pour la rejoindre.</div>
+      </div>
+      <input id="leagueSearchVisible" type="checkbox" checked onchange="saveLeagueSearchVisibility()">
+    </div>
+
+    <div class="invite-actions">
+      <button type="button" class="primary" onclick="shareLeagueQR()">PARTAGER LE QR</button>
+      <button type="button" onclick="regenerateLeagueInvite()">RÉGÉNÉRER LE QR</button>
+      <button type="button" class="full" onclick="printLeagueQR()">🖨️ AFFICHER POUR IMPRESSION</button>
+    </div>
+
+    <div class="invite-privacy-note">
+      🔒 Le QR général ne donne aucun droit d’administration. Un joueur qui le scanne rejoint uniquement l’espace Joueur / Spectateur.
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="leagueSearchModal">
+  <div class="sheet">
+    <div class="league-info-header">
+      <h3>🔎 Rechercher une ligue</h3>
+      <button type="button" class="league-info-close-top" onclick="closeLeagueSearch()">FERMER</button>
+    </div>
+
+    <div class="readonly-note">
+      Recherchez une ligue par son nom. Trouver la ligue ne suffit pas pour la rejoindre :
+      <b>le QR officiel doit être scanné.</b>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px">
+      <input id="leagueSearchInput" type="search" placeholder="Nom de la ligue" onkeydown="if(event.key==='Enter')searchLeagueByName()">
+      <button type="button" class="primary" onclick="searchLeagueByName()">RECHERCHER</button>
+    </div>
+
+    <div id="leagueSearchResults"></div>
+  </div>
+</div>
+
+<div class="modal" id="qrScannerModal">
+  <div class="sheet">
+    <div class="league-info-header">
+      <h3>📷 Scanner le QR Diamond</h3>
+      <button type="button" class="league-info-close-top" onclick="closeQRScanner()">FERMER</button>
+    </div>
+
+    <div id="qrScannerBox" class="qr-scanner-box">
+      <video id="qrScannerVideo" autoplay playsinline muted></video>
+      <div class="qr-scan-frame"></div>
+    </div>
+    <div id="qrScannerStatus" class="qr-scan-status">
+      Autorisez l’accès à la caméra et placez le QR dans le carré.
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="joinInviteModal">
+  <div class="sheet">
+    <h3>⚾ Invitation Diamond détectée</h3>
+    <div class="readonly-note">
+      Ce QR vous invite à rejoindre la ligue comme <b>Joueur / Spectateur</b>.
+      Il ne donne aucun accès Capitaine, Marqueur ou Gestionnaire.
+    </div>
+    <div id="joinInviteCode" class="manager-summary" style="margin-top:10px"></div>
+    <button type="button" class="primary" style="width:100%;margin-top:12px" onclick="acceptLeagueInvite()">REJOINDRE LA LIGUE</button>
+    <button type="button" style="width:100%;margin-top:8px" onclick="closeJoinInvite()">PLUS TARD</button>
+  </div>
+</div>
+
 <div class="modal" id="teamManagerModal">
   <div class="sheet">
     <div class="league-info-header">
@@ -2039,18 +2242,27 @@ body.role-viewer .strike-count{
   </div>
 </div>
 
+
 <div class="modal" id="teamRequestsModal">
   <div class="sheet">
     <div class="league-info-header">
       <h3>📩 Demandes des équipes</h3>
       <button type="button" class="league-info-close-top" onclick="closeTeamRequests()">FERMER</button>
     </div>
+
     <div class="readonly-note" style="margin-bottom:10px">
-      Ces demandes servent d’avertissement au gestionnaire lorsqu’il ajoute ou déplace un match. Elles ne bloquent jamais une décision.
+      Une demande peut viser une <b>date précise</b> ou revenir <b>chaque semaine</b>, par exemple : « indisponible tous les lundis ».
+      Diamond avertira le gestionnaire lorsqu’un match entre en conflit, sans bloquer sa décision.
     </div>
+
     <div class="manager-form-grid">
-      <div><label>Équipe</label><select id="requestTeam"></select></div>
-      <div><label>Type</label>
+      <div>
+        <label>Équipe</label>
+        <select id="requestTeam"></select>
+      </div>
+
+      <div>
+        <label>Type de demande</label>
         <select id="requestType">
           <option value="unavailable">Indisponible</option>
           <option value="move">Demande de déplacement</option>
@@ -2058,10 +2270,44 @@ body.role-viewer .strike-count{
           <option value="note">Autre note</option>
         </select>
       </div>
-      <div><label>Date concernée</label><input id="requestDate" type="date"></div>
-      <div class="full"><label>Détail</label><textarea id="requestNote" placeholder="Ex. Plusieurs joueurs sont absents ce soir-là."></textarea></div>
+
+      <div>
+        <label>Fréquence</label>
+        <select id="requestFrequency" onchange="toggleRequestFrequencyFields()">
+          <option value="date">Date précise</option>
+          <option value="weekly">Chaque semaine</option>
+        </select>
+      </div>
+
+      <div id="requestDateWrap">
+        <label>Date concernée</label>
+        <input id="requestDate" type="date">
+      </div>
+
+      <div id="requestWeekdayWrap" class="hidden">
+        <label>Jour récurrent</label>
+        <select id="requestWeekday">
+          <option value="1">Tous les lundis</option>
+          <option value="2">Tous les mardis</option>
+          <option value="3">Tous les mercredis</option>
+          <option value="4">Tous les jeudis</option>
+          <option value="5">Tous les vendredis</option>
+          <option value="6">Tous les samedis</option>
+          <option value="0">Tous les dimanches</option>
+        </select>
+        <div class="request-frequency-note">
+          La demande s’appliquera à tous ces jours pendant la saison.
+        </div>
+      </div>
+
+      <div class="full">
+        <label>Détail</label>
+        <textarea id="requestNote" placeholder="Ex. Plusieurs joueurs travaillent tous les lundis."></textarea>
+      </div>
     </div>
+
     <button type="button" class="primary" style="width:100%;margin-top:10px" onclick="addTeamRequest()">AJOUTER LA DEMANDE</button>
+
     <div class="section-title" style="margin-top:16px">Demandes enregistrées</div>
     <div id="teamRequestsList"></div>
   </div>
@@ -4353,6 +4599,8 @@ function confirmReset(){
 }
 
 
+const LEAGUE_INVITE_QR_POOL=[{"code":"DMD-RK9HE5","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-RK9HE5","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE60lEQVR42u3dUY6jMBBF0WGU/W+5ZwHkwz1FvbLFOd+dBEiujNzIvn5+fv4Ay/66BKAZ0AxoBjQDmgE0A5oBzYBmQDOgGUAzoBnQDGgGNANoBjQDmoHtfIqvv65rt1Mqrgry9YzW3zP28uKVL75n8YyO/oUYZ0AzoBnQDGgGNAPcfTreNLYGdMc8ZsfEbuzlHVf+lPeM/UKMM6AZ0AxoBjQDmgHuPrFP6ngOt/jp6+/Z8RRwxxPQHVOrsZnu2V+IcQY0A5oBzYBmAM1AxccleFZxWnn9L2envzdcGcM4A5oBzYBmAM2AZmCQueb/F5tW/qr4QbHjNM6AezNAM6AZ0AxoBt4gN9f85tnJ9aeAYwtWdKwfEjsk4wy4NwPNAJoBzYBmYDctc81HL7DQ8cDv7F92nPubfyHGGdAMaAY0A5oBzQB310seN449L3z0pxe95LdknAHNgGZAM6AZ0AxwV32uecPd5Dp20ls/9/VDKi6sEVsDuuMXEvvejTPg3gw0A5oBNAOagYxj9gaMTZgWX96xDnLHcRYPqWNiN/b/gOLBG2dAM6AZ0AxoBjQD3F2xRRtmn8Odfc+Oq7R+SLMreGz4szHOgHsz0AxoBjQDaAYed3VMmH4VmwaNbcRXPM3ZWdRTvriijktnnAHNgGZAM6AZ0Axwd224Gd0pzyB3fNAp17P46R1nFJumN86AZkAzoBnQDGgGuGtZrzm2EvHsB63bcA53dp2T2dW3rdcM7s1AM6AZ0AygGXjc8N6AxTnHDaeVY+85u2Vf8SJ3nHvsyhtnQDOgGdAMaAY0A9xdG24Ht252v8Gi2EIQGz5VHVtYwzgD7s1AM6AZQDOgGchoea55w530inO4p2wtuO6UdU5iS4UYZ8C9GWgGNAOaATQDFdW55lMeZZ19iDj2yO3swhrFdU46fiHGGdAMaAY0A2gGNAMZx6zX/FXHk8XFD1p/+foFiU2Urx9SxxRw8duMXRDjDGgGNAOaAc2AZoC76lxzbImD2HIZRUdv2bfh+tez2wAaZ0AzoBnQDGgGNAMsanmu+egFK2KT2hvOShfFHjPvWAPaOAPuzUAzoBnQDKAZqBher7njPY+egI4dUux775iRnz134wxoBjQDmgHNgGaAu2Oea46twhx7+fp7ri/iPPsddVwl6zWDezPQDKAZ0AxoBo6Q2xswtgrz+kRk8TjXzc5KF1++4V92/MCMM+DeDDQDmgHNAJqBitxcc+z51g3/cv2CbHhIs38ZW2zaOAOaAc2AZkAzgGag4tpwLq/lPFPPNcce4y16866MxhlwbwaaAc2AZgDNwONyewPGrK9uvOGj1h0fNPvFbbhZonEG3JuBZkAzoBlAM/C43N6AHTpWcpg9o44LMnvws1sLWq8Z3JuBZkAzgGZAM5Bx9nrNGx5n7D1jF6RjA8bYIRlnwL0ZaAY0A2gGNAMZnzef/OzaFLH3jL284zTtDQjuzUAzgGZAM6AZOMKr55pjW/bNTgGfstthx8uNM+DeDDQDmgE0A5qBjNxc84arBhcXgthwI77ip6/PIB+9XaFxBjQDmgHNgGYAzcDjWuaaN5w07FifIfbEbsfBzx5S7Ovo+A+HcQY0A5oBzYBmQDPA3bXherhgnAHNgGYAzYBmQDOgGdAMoBnQDGgGNAOaAc0AmgHNgGZAM6AZ0AzwG/8ArJ32hCkdZHIAAAAASUVORK5CYII="},{"code":"DMD-YM4DHQ","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-YM4DHQ","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAFDElEQVR42u3dwW7bQAxF0arw//9yuq+8mIDhIxWfs25sSfbFGKwwur6+vv4Ax/66BKAZ0AxoBjQDmgE0A5oBzYBmQDOgGUAzoBnQDGgGNANoBjQDmoF1XsW/v65r2ykVdwV5e0bnr9nx57GrdP7uC88o9g2xzoBmQDOgGdAMaAa4e3W8aGwP6OIc83wu3PFGxetZHGrPfppP+YZYZ0AzoBnQDGgGNAMcesXeqWPeWnz389fsuAt49pA6PriOzyj2DbHOgGZAM6AZ0AygGah4ffLJd9waXBwrz96tHLvR2zoDmgE0A5oBzYBm4Jf56Flzx6bDsbFy8Y0Wjr+tM6AZQDOgGdAMaAaeKzdrfvR0snhvb8e/7Lj/unjusUOyzoDfZqAZQDOgGdAMbNMya370BguxbZQX7rYRu4X50d8Q6wxoBjQDmgHNgGaAu+tDNkOYfY5f7G7l4rsXfch3yToDmgHNgGZAM6AZ4K56X/PCp8m9ffeOQ+qYX3dc5I6ZeMdV6vjcrTPgtxloBjQDaAY0Axkbnw3YsRHE+RsVZ6Mdu20UT7N48LGNNWL/H1A8eOsMaAY0A5oBzYBmgLvhZwPGRquzY+XzM5rdQ+P8lvCOq9Rxj3zH9bTOgGZAM6AZ0AxoBrjbeF/zwo0gisc5+8S/8zdaOO3t2GnEOgN+m4FmQDOgGUAz8ONys+aFE+TYFDW2scb5axYH0B1fhtgHZ50Bv81AM6AZ0AygGfhx1VlzbIq6cHOJ2eciPvp5g7H/Y7BfM/htBpoBzQCaAc1Axi+8r3nhUDs2KJ89+NndS2JX3joDmgHNgGZAM6AZ4O7qGMZ94+1TeynMPqEudvAdF7l48B1/fv6a1hnw2ww0A5oBNAOagYyW+5oX7k0xexdw7ILEjnP2NvPZz906A5oBzYBmQDOgGeAut4dGxxS144bfha8Z2xy549OcvdnZOgOaAc2AZgDNgGYg41q4lfCjN9YontHCLU1mR8ALd9+2zoBmQDOgGdAMaAa4a7mveXYIG7u3N3aViqc5u4NHcSq9cExvnQHNgGZAM6AZ0Axwl9tDY3bDio5/OXtBYjuNxD6Oc7M3O1tnQDOgGdAMaAY0A9xdHdPetx49c1w41F6430Xxg4t9wcyawW8z0AxoBjQDaAZ+3PAeGrFxbfGxdTHnZ9TxvMHYvecdxxm7Id06A5oBzYBmQDOgGeDuWriLRccbnVv4KLzYBZkd/S/cbNo6A36bgWZAM6AZ0AxwKLdfc3EU+JSxcsfuELMD/dl/ufChjtYZ0AxoBjQDmgHNAHfXwlley3mmhrALb/g9P87Y9Sy+5uxU2joDmgHNgGZAM6AZ4K56X/NTnjs3O659yrC4Q2wubL9m8NsMNAOaATQDmoFBw88GLOrYyWH2jDrOffbgZ2fi9msGv81AM6AZQDOgGcjI7de8cNobexDf7MF3vNHb05x9gmLs3a0zoBnQDGgGNAOaAe5eLsF/Fu4K0rFbdMefn7/m+Wl6NiD4bQaaATQDmgHNwCN89Kw59iC+c7OPKyz++eyk27MBwW8z0AxoBtAMaAYG5WbNC3cN7tgIYnZU/VZxV+visxY7pufWGfDbDDQDaAY0A5qBbVpmzU/ZhiL22LrY3crnijPxjrFyx8fR8T8c1hnQDGgGNAOaAc0Ad9fC/XDBOgOaAc0AmgHNgGZAM6AZQDOgGdAMaAY0A5oBNAOaAc2AZkAzoBngO/4Bl3YIV1NyC/gAAAAASUVORK5CYII="},{"code":"DMD-436UPZ","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-436UPZ","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE9UlEQVR42u3dyXLbQAxAwTDF//9l5x76AAfCMmH33VoovRrVeAq8vr6+fgFhv10C0AxoBjQDmgHNAJoBzYBmQDOgGdAMoBnQDGgGNAOaATQDmgHNwDp38u+v69r2luJTQeIvPvmYFX+evPLJx6y4yAu/IdYZ8NsMNAOaAc2AZoCgu+JB22ZAV+y3VjxRxX5r20WueKJTviHWGdAMaAY0A5oBzQBBd9szte0Ltz178hRwxQno2Q9u4WdknQG/zUAzoBlAM6AZ6HG/+c0ndycXTsZIvviFr9M6A5oBzQCaAc2AZuAIt0vwl9mByxVHgyu2ldsOEVtnQDOgGUAzoBnQDByhb6/5lN3J2XkXyYEVFS++bQP6lG+IdQY0A5oBzYBmQDPAU8le89EDFmaPBp9yLPrN3xDrDGgGNAOaAc2AZoCn6yXDECpucFcx3fjojd2XfJesM6AZ0AxoBjQDmgGesueaT7nrXdtLqrggbYed2y5I2+dunQG/zUAzoBlAM6AZ6JHda27b4GvbME3+edsc5Io93Nl7A1a8zYoXb50BzYBmQDOgGdAM8DQ8QyM5XKJtNsXscORTrlLFl2F2+9s6A5oBzYBmQDOgGSDomt2EXXh7vaSFd/yLX/nkO4r/efIlJT8O6wz4bQaaAc2AZgDNwMf1zdD4/zaLK65S27PHn2jhEOfZgeDWGdAMaAY0A5oBzQBPd8WDnjJxYvbFJx19v8HZ6dvmNYPfZqAZ0AxoBtAMfNzwvOYfvNB3zCxOXpC2LeCKzyj5mG2fpnUGNAOaAc2AZkAzwNM9+/SzsxRmRzEkDxFXbNfO7sgv3Fa2zoBmQDOgGdAMaAYI6puh8a1TbgPY9uxtNwysGMFR8URto0KsM+C3GWgGNAOaATQDGdm95tlDxBX33Ks4HluxLxz/ONreUfLWgrPHzK0zoBnQDGgGNANoBjLMa/73P194gLriIp8yaST+59YZ8NsMNAOaAc0AmoGP23iu+ZTTynFt8y4WTvBI7kovvKmjdQY0A5oBzYBmQDPAU9+55oUHfheOd1h4zPzo8dkVF9k6A5oBzYBmQDOgGeApu9dccYi4Yge57RxuUttkjFmz/w+w1wx+m4FmQDOgGUAz8HH30a9+9lxz8iUt3NRu+89Bxetsm51inQHNgGZAM6AZ0Azw1LfXHN8KnJ3CPHvPvbbHbJuMcfSwaesM+G0GmgHNgGZAM0DQ9eZ5F20bptkPqeslHT1to+ILZp0Bv81AM6AZ0AxoBgi6Ft6MruR9HnIbwNnb6yWvZ9tjtu3yW2dAM6AZ0AxoBjQDBGVnaJxyEnbhzegWbhZXWHj62zoDfpuBZkAzoBlAM/BxJfOa206YxjdM2zZ2Z8+Jzx74rbggyQ/ODA3w2ww0A5oBNAOagR7D9waMm70NYNtp5bZ3lHzMb99m23ufvfLWGdAMaAY0A5oBzQBPt0sQkdzcTP552x3/Zmd9LDyUbZ0BzYBmQDOgGdAMEPTqveaFp5UrdmbbNspnd+TdGxD8NgPNgGYAzYBmYFDfXvPCqcEVgyAWDtaoOECd3IBOvk7rDPhtBpoBNAOaAc3ANiV7zQs3DSvmM8S3qit2upMvfuFYj4qPo+I/HNYZ0AxoBjQDmgHNAE/Xwnm4YJ0BzYBmAM2AZkAzoBnQDKAZ0AxoBjQDmgHNAJoBzYBmQDOgGdAM8BN/AO7tBU5vCdObAAAAAElFTkSuQmCC"},{"code":"DMD-UHP44G","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-UHP44G","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE9klEQVR42u3dUY7iMBBF0cmI/W+5ZwHmw62aemXDOd8NSYArR27LeX5+fv4A2/76CEAzoBnQDGgGNANoBjQDmgHNgGZAM4BmQDOgGdAMaAbQDGgGNAPHeRVf/zzPaZdU3BXk7RXtv2fs5cVPvviexSu6+hdinAHNgGZAM6AZ0AywenW8aWwP6I55zI6J3dh53vJtXv0LMc6AZkAzoBnQDGgGWL1iR+pYhzt79OIq4OIK6I7LLL7ngd+RcQbcm4FmQDOAZkAzkPH65ouf3UciNgFdvPaOhd7GGdAMoBnQDGgGNAMf5uUj2NExWTy7s/OB09/GGdAMoBnQDGgGNAP3ys013zI72XGe+6uAYxtW7L88NgF9yy/EOAOaAc2AZkAzoBlg1TLXfPUGC7NLmGeXG8eWMF/9CzHOgGZAM6AZ0AxoBlg9X7IZwoG7MBeP3nHtRV/yWzLOgGZAM6AZ0AxoBlhV1zUf+DS5t0cvnlLxLzuOHtsDuuMXEvvejTPg3gw0A5oBNAOagYxrng0YmzAtvrxjH+SO8yyeUsfEbse/KDpO3jgDmgHNgGZAM6AZYPXENm04cLHz1Zsj37KDR+xnY10zuDcDzYBmAM2AZmBQyx4aHQ5c13zLE//2D3Tg/HXH12GcAfdmoBnQDGgG0Az8d09sKvCt2aMXHfgovAP3a+5Yzz672Nk4A5oBzYBmQDOgGWBVXdccmywuPvGv4y9ntwqJ7eAR2+uj+AvpOLpxBtybgWZAM6AZ0AywafjZgFc/8W92H+TZR/Z1fMgd36Z1zeDeDDQDmgE0A5qBjNxcc2wv4I6Xd8y3Fo/ecUoHzp7v82xAcG8GmgHNAJoBzcCglrnm2QfcxXaxKJ5nx2XGzvPA/wfEforGGdAMaAY0A5oBzQCr6lzzgVtbxP5y/4o65oVjR98/pf1drYvvaZwB92agGUAzoBnQDJzmie088ItzSj3cr2MO95Zn7nVcZocDd8o2zoBmQDOgGdAMaAZYPbOPrYs9si929Nw3N7r/9YEPDLRfM7g3A82AZgDNgGZgUG4PjY45x9nlxrE53FvmxA/8H0PHB2KcAc2AZkAzoBnQDLB6zR7+6oW0+2Yni2Oz/Pt/Wfw2Z/f6MM6AZkAzoBnQDGgGWD237PD7eds7xNbhxraQLh69+J4dH51xBjQDmgHNgGZAM8CmE9c1vxWbMO2YKO+Ykb/6aYe3bDZtnAH3ZqAZ0AxoBjQDbHpmV61+yYTpgSe/f0qzDlxVbZwBzYBmQDOgGdAMsHpiD44bvs7UJOyBC373zzP2eRbfs+PoxhnQDGgGNAOaATQDFdU9NG5ZCdsxEfl5k8UdYvPCsQMZZ0AzoBnQDGgGNAOsWvZrjq0wLe5uHLuijond2efj3fLR2UMD3JuBZkAzgGZAM5CRezbg7Gxv8UAde2jEXh77QGJrpTvWiRtnQDOgGdAMaAbQDFS8vvniZ3dyKE7Xzm423fEhz+7CbJwBzYBmQDOgGUAzUPHVc83Fyc1bZmZjS60/b023cQY0A5oBzYBmQDPAptxc84G7Bu+vLI7Nt3as7e04evEDKZ6ncQbcm4FmAM2AZkAzcJqWueYDJw1j06C3TEDPnlJsSr3jPxzGGdAMaAY0A5oBzQCr58D9cME4A5oBzQCaAc2AZkAzoBlAM6AZ0AxoBjQDmgE0A5oBzYBmQDOgGeA3/gEc5wt7QHjz5QAAAABJRU5ErkJggg=="},{"code":"DMD-G6N3V5","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-G6N3V5","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAFBElEQVR42u3dUW4iMRBF0ekR+99yZgHmw6NKvbLhnO8QGsJVo4plPz8/P3+AbX+9BaAZ0AxoBjQDmgE0A5oBzYBmQDOgGUAzoBnQDGgGNANoBjQDmoHjvIqPf57ntJdU3BXk7Sva/52xhxff+eLvLL6iqz8h7jOgGdAMaAY0A5oBVq+OXxrbA7o4x4wNdmPXectf85ZPiPsMaAY0A5oBzYBmgE2v2DN1rMMtPvv+WLljFXDHBLljtNqx2PnAT4j7DGgGNAOaAc0AmoGK1ze/+OK098CdMa6+TvcZ0AygGdAMaAY0A/f66lnz7LQ3tjPGgeuv3WdAM4BmQDOgGdAMfJjcrPmW6WTHRhD7097YhhXF5dsdA+hbPiHuM6AZ0AxoBjQDmgFWLbPmqzdYiO3sHPvJjtf+zZ8Q9xnQDGgGNAOaAc0Aq+dLNkOY3Ucitlq5+OxFX/JZcp8BzYBmQDOgGdAMsKquaz7wNLm3z168pNmHxxY7d/yNPm/S7T4DmgHNgGZAM6AZYFWdNXcM+Do2gog9PLYP8uedYdjxMjsu3n0GNAOaAc2AZkAzwOqJDXZnR6tXb4589Q4eB74h7jPguxloBjQDmgE0A7/udeA1xfam6LjOA88G3H94x+g/9s+M2ADafQY0A5oBzYBmQDPAqmXWHBsBx8bK+y9z9idjA+jZP9zs/xjcZ0AzoBnQDGgGNAOsno6Fn7PHwR04gL7lkmI7eHQ8PLbU2n0GNAOaAc2AZkAzwCq3rrmouOT28/ZBnj2yr/iGdLz22DvvPgOaAc2AZkAzoBlg9cROVJtdoBo7hHDf7CGEsYvveHjxw+A+A76bgWZAM6AZQDPw61rWNXcMTA/cm6LjOmMD6OJ1xsbKHddpDw3w3Qw0A5oBzQCagV9XnTUXp73FUWDHgt/iWunY1hYdr2hfx9GCt/w7wX0GNAOaAc2AZkAzwOo5cCvhjmPrZveRmD2dr+MPd8vxj/ZrBt/NQDOgGUAzoBnIyO3X/P7pU9sTmwvvmD1Bsch+zeC7GWgGNANoBjQDg1r20IjtsXvLsPhLDs2LLYueXezsPgOaAc2AZkAzoBlg9br66menqMXrjM1GO1YWx07nK26K3fHa3WdAM6AZ0AxoBjQDrHKz5o5R4OzDOxx4uN/spLt4CKH9msF3M9AMaAbQDGgGMk5c1zy7a3DH74ytLD7wAMbYoY6x6bn7DGgGNAOaAc2AZoDVNXtozG77uz+dvGXau39Jsz85e3al+wxoBjQDmgHNgGaATc+Bs7yW1zl6Ol/xiQ48MDC220ZstbL7DGgGNAOaAc0AmoGK6rrmA7c8fjtznF0WXXzrZjcA6fiEdMyF7dcMvpuBZkAzgGZAMzCoZQ+N2ArT2P4Ms6u/O/blOPDii3/i2BviPgOaAc2AZkAzoBlglduveXbPh/1L6jihruMNib1L+29IbK10bJ8T9xnQDGgGNAOaAc0Am17f/OI7RpaxqXTHUHt2Y2hnA4LvZoBmQDOgGdAM3OurZ82zB/HtP3vs4R0XH5t0OxsQfDcDzYBmAM2AZmBQbtZ84K7BxY0gOlbsdqzt7djVuuPiDzxn0n0GNAOaAc2AZkAzwKaWWfOBQ8OOMWhsxW7HAHr2kmIj9Y7/cLjPgGZAM6AZ0AxoBlg9B+6HC+4zoBnQDKAZ0AxoBjQDmgE0A5oBzYBmQDOgGUAzoBnQDGgGNAOaAf7HPxaJ+XWgqxVkAAAAAElFTkSuQmCC"},{"code":"DMD-WJ5KG6","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-WJ5KG6","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAFB0lEQVR42u3dQXLbMBBFwTDF+1/ZOQC1gDOeP4DZvY4litIrshDU8Pr6+voDLPvrFIBmQDOgGdAMaAbQDGgGNAOaAc2AZgDNgGZAM6AZ0AygGdAMaAa2cxf//rqu3T7S+lSQ9YMvvmbHnxfPfPE1O07yhr8Q1xlwbwaaAc2AZkAzwKK740VjM6Bj65jFN+r489hJ7nijo38hrjOgGdAMaAY0A5oBnu7YO3Xswy2++/re3o5dwB0ryB1Lqx2bnTf8hbjOgGZAM6AZ0AygGai43/zhi6u9sckYsZ3FsQkerjOgGUAzoBnQDGgGfplXrzXPLhbPTnbecPnbdQY0A2gGNAOaAc3AuXJrzb9vdXJ9b2/Hvyyez+L27Y4F6FN+Ia4zoBnQDGgGNAOaAZ5a1pqPHrAwu4V5drtxbAvz0b8Q1xnQDGgGNAOaAc0AT9dLhiF07BeOPUUw9tmLXvJbcp0BzYBmQDOgGdAM8FTd17zh0+Q+vnvxkIr/suPdYzOgO34hse/ddQbcm4FmQDOAZkAzkLHjswE7BkGsv1FxbbRjDnLxYxYPPjZYo+Pr6Dh41xnQDGgGNAOaAc0AT8MzNGY3vcaWldc/e8cIjtkJHrETYl8zuDcDzYBmAM2AZmDQ2WvNG86ROOXZgBuuX8d2arvOgHsz0AxoBjQDaAZ+3DW7OffoJeD1N6p+San917NzOWLfpusMuDcDzYBmQDOAZuDHVec1x5ZWY0Oc1z/mKbOViye54z8JYsvf5jWDezPQDGgG0AxoBjJyzwaMPTSvw+xk5/VDij2yr+MsdXwd9jWDezPQDGgG0AxoBjJy85o33Ns7u6gdGwTxkjPv2YDg3gw0A5oBNAOagUEt+5pjUxdmNzt/FFuELS6txqaCzK5Km6EB7s1AM6AZQDOgGciorjXPjtONPdhw/c9j68Idn6h4SOsnpPiarjPg3gw0A2gGNAOagd1cG44S7nhs3YZzJNZfM/dr2G9Hece2aNcZcG8GmgHNgGYAzcCPuzbcGtyxrPz71oWL39H6J+r4ijuY1wzuzUAzoBlAM6AZGHTH3in21LviCI6ORe3YCVn/mLNfcccqf2yzs+sMaAY0A5oBzYBmgKfhfc3rr/lR7El6xeNc9+YnKJ7yY3CdAc2AZkAzoBnQDPB0n3KgxVXU2fXWDSd4xFZmY1uYY//H4DoDmgHNgGZAM6AZ4GnHGRobTmEuvvvsWOri13HKTG37msG9GWgGNANoBjQDg455NmDxz632/vchzdpwxovrDGgGNAOaAc2AZoCnK/bguOHP2bA9tmh2tvIpc7pnR3K7zoBmQDOgGdAMaAZYVJ2hccpO2NjD6GZP3YZbmGcf1WheM7g3A82AZgDNgGYgo2Vec2yHafHZgOvHObv7OzaTZMMfQ3FN3AwNcG8GmgHNAJoBzUDG8LMB180umG64fTt2loqPQIx9zNi7u86AZkAzoBnQDGgGeLqdghWzO4tjw6Y71nCP3pTtOgOaAc2AZkAzoBlg0avXmouLmx3jHT6aXUEuPp1v9jhdZ8C9GWgGNANoBjQDGbm15g2nBq8PgihOdu5YmV3XMdW6+DGLx+k6A+7NQDOAZkAzoBnYTcta84aLhrFl0I5l5Y7hErOHFJs00vE/HK4zoBnQDGgGNAOaAZ6uDefhgusMaAY0A2gGNAOaAc2AZgDNgGZAM6AZ0AxoBtAMaAY0A5oBzYBmgO/4B/Dj/FEavtkTAAAAAElFTkSuQmCC"},{"code":"DMD-5HTCN8","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-5HTCN8","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE8UlEQVR42u3dUZKbMBBF0ZBi/1ueLAB/KNXu19JwzvfYBsItUYpKXD8/P3+AZX9dAtAMaAY0A5oBzQCaAc2AZkAzoBnQDKAZ0AxoBjQDmgE0A5oBzcB27uLnr+va7ZTWdwVZP/jid3Z8vHjli9/ZcZE3vEOMM+DZDDQDmgHNgGaARXfHl8b2gI7NYxZ/qOM4Yxe544eOvkOMM6AZ0AxoBjQDmgGe7tgvdazDLf56x3euH/zsIcVO85Q7xDgDmgHNgGZAM4BmoOJ+88l3zKIWp5U7JqBjx2mcATQDmgHNgGZAM/Bar55rLs7hzk4rx1ZVx6a/jTOgGUAzoBnQDGgGzpWbaz56djI2L7zh6wpjE9Cn3CHGGdAMaAY0A5oBzQBPLXPNR2+w0LHgd/YvO879zXeIcQY0A5oBzYBmQDPA0/WSzRBm1wvHXq9XPPeil9xLxhnQDGgGNAOaAc0AT9V1zRu+Te7jr8cOqeOCbLgHdPGCxP7djTPg2Qw0A5oBNAOagYzcuubY2t7Z/Rk2PPjZjTU63mFY/HjxghhnQDOgGdAMaAY0AzwN76Gx4aLX2Tnx37eDR8cFie0rbZwBzYBmQDOgGdAMsOg+5UA7JouLM92nvPFv/Yc2nL/u2GnEOAOezUAzoBnQDKAZ+Lortji3Yyowtj/D+ncO/3Put19z7MqbawbPZqAZ0AygGdAMDKqua+6Yy1ufNJydxyye0eyVn33fYGz6237N4NkMNAOaATQDmoGM4T00Ttl0uDgJOzsj33Hu64cUu21iN4NxBjQDmgHNgGZAM8DTdcpGEB/NvkmvaMOdRjoOvuPjxZvBOAOezUAzoBnQDKAZ+LqWdc0dk8WzW/Sui03Cxl4Y2PFPHPu4PTTAsxloBjQDaAY0Axm5PTRml7J2/OXHg4/NC68f0uymIrOLnY0zoBnQDGgG0AxoBjKu2P4Msz8U2xg69s69lrvh5J1GOu464wxoBjQDmgHNgGaARTu+G3BdbLY3tuVx8dJtuINH8dLNTisbZ0AzoBnQDGgGNAMsank3YGwGef3jxeM8ZRfmlltkv7n72cXOxhnQDGgGNAOaAc0AT9fs6tqjJ2FjF6Tjh2bN/n+AuWbwbAaaAc2AZgDNwNed/W7A2YW0szreN9gxMxtbwhz7LwrjDGgGNAOaAc2AZoCne8Nj6pgGnV1q3bGyeHZZ9IY7ZVvXDJ7NQDOgGUAzoBkYlJtrPvo1gLN7fWw4Jx77yw1XlBtnQDOgGdAMaAY0Azxdp+yDXD3PQ14DeMquILHdNjbc0ds4A5oBzYBmQDOgGeCpuq75lPfOnTJdW/zL2W091n9odvW3cQY8m4FmQDOgGUAz8HUte2jEVpjG9meYncPt2IU5ZvbVgvZrBs9moBnQDKAZ0AxknL1f8+whrR9nbBFxx1VaP6PZ04z9unEGNAOaAc2AZkAzwNP95pPv2DF5dr+L2GbTxYu8fpreDQiezUAzgGZAM6AZOMKr55pjr+wr/uXsDHLsHYYdHzfOgGcz0AxoBtAMaAYycnPNG+4avL4wecMJ6HUdu1p3HPyG75k0zoBmQDOgGdAMaAZY1DLXvOGkYWx/hthkcfE7i4uIO6aVN7xKxhnQDGgGNAOaAc0Ai64N98MF4wxoBjQDaAY0A5oBzYBmAM2AZkAzoBnQDGgG0AxoBjQDmgHNgGaA//EPmlIOVHDIbMoAAAAASUVORK5CYII="},{"code":"DMD-YDWGKN","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-YDWGKN","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE5ElEQVR42u3dW27jMBBFwWig/W85swD5g0DndpNW1bfjh8YHFHoI+vr9/f0Blv1zCUAzoBnQDGgGNANoBjQDmgHNgGZAM4BmQDOgGdAMaAbQDGgGNAPbuYt/f13Xbh9p/VSQj2++eKhI8YJ8fPW25yw+8vu+IdYZcG8GmgHNgGZAM8CiO/GkbWdAJ+aYiQH0hhc5MVJff86jvyHWGdAMaAY0A5oBzQBPd9srJTbnJrTtLE5cpfU/L86F26b8G35DrDOgGdAMaAY0A5oBnm6XoEHbYR3FuXBiVG2dAfdmgGZAM6AZ0Ay8gVnzksSRx+sv9NHH50wcbbHhgcvWGdAMaAbQDGgGNAO76Zs1z+6ETewsfskMd/b0EusMuDcDzQCaAc2AZuAIkVnz0Tthi7uVPfLrvyHWGdAMaAY0A5oBzQBP15sP3j3lF/+Kb8kpzNYZ0AxoBjQDaAY0A2nVfc2J/a2JgWnb3t71t3TK9Vx/ocQ/h3UG3JuBZgDNgGZAM3CEHc/QOGUfbtspzOuT2eIR0ht+GTb82lhnQDOgGdAMaAY0AzxVz9BoO+E38eofbbjZOXFBIl+mwFg5MdA3awb3ZqAZ0AxoBtAM/LnrlEFkYipd1PajebMHQ5/y/wGJ62mdAfdmoBnQDGgGNAMs6juvuTheTIyqZ7dFb2j2zc9+Q6wzoBnQDGgGNANoBiruDd/T7Bbm2blwYgvz+gx39hcU237Y0DoDmgHNgGZAM4Bm4M8Nn6GRmGNu+Mj1C1LUNqZvGwFveCi2dQY0A5oBzYBmQDPAU+QMjTazP0JY/PPEuHbDY6m/76AS6wxoBjQDmgHNgGaAp+qs+ZQZbvHVNzyGYvZoi1nO0AD3ZqAZQDOgGdAM7Gb4DI11bWdTJC5I21brtgF04t9o9kgT6wy4NwPNgGZAM4BmoGLHWfOGR/QmNlC3fcxTnjPxXUq8JesMaAY0A5oBzYBmgKc78aQbjlaLO2FnDwgufsy252z7J277DxLrDGgGNAOaAc2AZoBFkd8GnP3Vu5f8Ql3bCDhxkRPatlpbZ0AzoBnQDGgGNAM8XbNbRI8+W3l2ft026Z7dK534Lpk1g3sz0AxoBjQDaAb+XGRfc8KGv2WX+ETFR7ZduvWrlNgBPTt8t86AZkAzoBnQDGgGeKrOmk85n+Hjn7dtuU1MURM2PFSkbX5tnQH3ZqAZ0AxoBtAMVFxtJyS85GyK2aMt2qb8bWbPeLHOgGZAM6AZ0AxoBlh0bTjLi3zO0eMdPpo9MmL2TJK2S2edAfdmoBnQDKAZ0Az0uNrmg21mD6yYPQSj73szuks98WWwzoB7M9AMaAY0A2gGKu7Ek7aNVtenk4lHFj/77Gi1bRPx7J8nRv/WGdAMaAY0A5oBzQBPd9srzZ7P8JIttxv+jl/iE61fOvuawb0ZaAY0A2gGNAM97pd8zg3PfGgbvrf9VOPslW/bTW+dAc2AZkAzoBnQDPD0llnzhsd6tJ0OMfvI2QPBnaEB7s1AM6AZQDOgGejRN2ve8PfxEluYi39+yqi6+Jxt3xBnaIB7M9AMaAbQDGgGekRmzYlze9veUnEIe8pBEAltW5hnr6d1BjQDmgHNgGZAM8DTdfRwE6wzoBnQDGgG0AxoBjQDmgHNAJoBzYBmQDOgGdAMoBnQDGgGNAOaAX5+/gM7e/9RuxqQiwAAAABJRU5ErkJggg=="},{"code":"DMD-Q5URZ6","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-Q5URZ6","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAFAklEQVR42u3dQY7bMBBFwSjQ/a882UdeMOj0b9KqWo9tSfYDBQ5BXT8/P7+AZb9dAtAMaAY0A5oBzQCaAc2AZkAzoBnQDKAZ0AxoBjQDmgE0A5oBzcB27uLrr+va7ZTWdwVZP/jie3a8vHjli+/ZcZE3/IUYZ8C9GWgGNAOaAc0Ai+6ON43tAd0x39rxQbH51o4rf8p7xq68cQY0A5oBzYBmQDPA0x37pNi88Pqnr6/t7VgFXFwB3bHYufjFdXxHsV+IcQY0A5oBzYBmAM1Axf3mk++YmY3NX7/kOI0zoBnQDKAZ0AxoBo7w6rnmjj00OhZQF338oA2P0zgDmgE0A5oBzYBm4Fy5ueajZyeLs9LFqeqO69mxWUfskIwz4N4MNANoBjQDmoHdtMw1H73BQmxn59hfdpz7m38hxhnQDGgGNAOaAc0AT9dLNkPoeI5f7OWxcy96yW/JOAOaAc2AZkAzoBngqbqu+ZSn3sUOqeOCxBY7xy5I7Hs3zoB7M9AMaAbQDGgGMqpzzbEJvtiEafHlsX2QO+ZwZ58N2HGaHQdvnAHNgGZAM6AZ0AzwdMU2bdhwsXNsWrl4lTq+jo4zmv3ZWNcM7s1AM6AZQDOgGRh0bTi9+FFxXfMpS4NPmYCOfXEdX4dxBtybgWZAM6AZQDPw392xT4pNbhZ1TAF3/OX6RS5uYL3hJs6zvxDjDGgGNAOaAc2AZoCnlrnm4jLeDR9wd8reyrHvqGOZece3ab9mcG8GmgHNAJoBzUBGy1xzxzLe2Sf+xS5I8Yxij+ybvcizO1AbZ0AzoBnQDGgGNAM8De/X/PmYRmcSj96sI3ZGHZs4zz6q0TgDmgHNgGZAM4BmoCK3h8ZHxRXQsdnJ2B4asQno4nHOPlqweJz20AD3ZqAZ0AxoBtAM/HfVuebvW8q64XvGNkcuHlLx0YKzT/wzzoBmQDOgGdAMoBmouGKPmGs5+oYH3HUsyp7dFSR2PTvEviPjDLg3A82AZkAzgGag4p79+Nhk8YYTprMXef04i/9OiD3U0X7N4N4MNAOaATQDmoFB1bnm79uNN7bQe3a/iw6xWf7Zxc7GGdAMaAY0A5oBzQBPuf2aiy+fnQLuOKSYjuXbsf8HrO8BHVu6bpwBzYBmQDOgGdAM8NSyh0Zsa4vZ585t+Ni62HcUu0rFhxDarxncm4FmQDOAZkAzkPGF+zUXxWalY9tSb3hIsWXmHT8b4wxoBjQDmgHNgGaAp9xc8+zOzrPv+dEpE9Czf7nhRiXGGdAMaAY0A5oBzQBP1ymbDlfPMzUJu+GC3/XjjF3P4nvOzkobZ0AzoBnQDGgGNAM8DT8bsMPHOcdTpmuLf9kxe97xC+mYF7ZfM7g3A82AZgDNgGZgUO7ZgB023J9hdifiDbehmH20oP2awb0ZaAY0A2gGNAMZuf2aZxcRf99xzn7Q+kz37CEZZ8C9GWgGNANoBjQDGbdL8JfYNsodTxFcf3nx3IvXs+M0jTPg3gw0A5oBNAOagUGvnmuOTW4W569jL+84+NhMt2cDgnsz0AxoBtAMaAYG5eaaN9w1uLjlccdfdujY1brjNDd8zqRxBjQDmgHNgGZAM8CilrnmDScNN3w2YPHSFQ++uIi44zQ7niLY8RUbZ0AzoBnQDGgGNAM8XRvuhwvGGdAMaAbQDGgGNAOaAc0AmgHNgGZAM6AZ0AygGdAMaAY0A5oBzQD/4g9rpupm0O+uugAAAABJRU5ErkJggg=="},{"code":"DMD-D6TJRW","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-D6TJRW","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE7klEQVR42u3dQW7jMAxA0dHA979yewB7oYIhKcbvrdvEcfNhgxXk9fPz8w/Y9t8pAM2AZkAzoBnQDKAZ0AxoBjQDmgHNAJoBzYBmQDOgGUAzoBnQDBznCv7+Wuu0jxTcFeTxE+2/ZtmvB8988DWDn2j0N8R1BjQDmgHNgGZAM8DdlfGiZXtAZ8wxMwa7Zcc55a85+hviOgOaAc2AZkAzoBng7ip7p4x1uMF33x8rZ6wCzlgB3fuHy/gblX1DXGdAM6AZ0AxoBtAMRFxv/vDBae+BO2OMPk7XGdAMoBnQDGgGNANzvXrW3DvtDU669/Wuv3adAfdmgGZAM6AZ0Ay8Qd2secp0MmMjiP1pb9mGFcHl2xkD6CnfENcZ0AxoBjQDmgHNAHcps+bRGyyU7exc9pMZn/3N3xDXGdAMaAY0A5oBzQB36yWbIUx5jt/owe5LvkuuM6AZ0AxoBjQDmgHuouuaD3ya3OO7ZxxSxvw64yRnzMQzzlLG3911BtybgWZAM4BmQDNQIzprLhvwlS0iDs5Gy/ZB/r5nGJb9PyB48K4zoBnQDGgGNAOaAe5Wxg6/j6bsTVG238WBq5V7N8Ho3avadQY0A5oBzYBmAM1AxCrbIHj04/XKRupTBtC9U/59GV9v1xnQDGgGNAOaAc0Ad+vAxbkHzhy/b2lw8GMGz3zGRiVli51dZ0AzoBnQDGgGNAPcjdmvef/dH2eOvfPrKdPzsgXUZafOfs3g3gw0A5oBNAOagRqrd1j8hwM9byVs767BBx78gRtrWNcM7s1AM6AZQDOgGaixemejQWV7K/f+etkIeMqZ339N1xlwbwaaAc0AmgHNQI0r40WnPEkv42NOGUAHj3PKQN8eGuDeDDQDmgE0A5qBGlfZO/UuZc34ybIHBh64rUfGTtll/yRwnQHNgGZAM6AZQDPwcevALXoz3qh3ZXHZWYp+G1rXiZf9NV1nwL0ZaAY0A5oBNAMft6YMNzNes+x5g/u/3vsxe+fsQfZrBvdmoBnQDKAZ0Aw0GvNswLIxaMYJmbKuOXiWXjLld50BzYBmQDOgGdAMcLemLCJ+NGWs3DsoP3DL47LtRzwbENybgWZAM4BmQDNQ45pyoKO3d9i3/4kynjdYtqVJxnGW/TvBdQY0A5oBzYBmQDPAXd2suXcBde+oOmMNcu+y6N6f3P+CWdcM7s1AM6AZQDOgGahRN2sODg0PHIPuH/z+CRk9Pc/4yQM3sHadAc2AZkAzoBnQDHC3DpzlpXzOhOWxQb17K5ctM894zd6ptOsMaAY0A5oBzYBmgLvouuYpz50rexjd/mse+LDEDAc+ldF1BtybgWZAM6AZQDPwcSl7aJStMM3Yn6F3ce7++ex9Pl7ZlyE4E7dfM7g3A82AZgDNgGagxon7NT/qHZgGR9W9S5gz3qhspXbwkFxnwL0ZaAY0A2gGNAM1LqfgszImnmVP/MuY4WY8LNF1BtybgWYAzYBmQDNwmlfPmsuGmxkPuCtbah08+LJJt2cDgnsz0AxoBtAMaAYa1c2aD9w1OLgRRHDe+n27Wpetv3adAfdmoBlAM6AZ0AycJmXWfODQMGPaG3w6X+8G1sFDKluU3fsndp0BzYBmQDOgGdAMsGkduB8uuM6AZkAzgGZAM6AZ0AxoBtAMaAY0A5oBzYBmAM2AZkAzoBnQDGgG+ItfcyQXSNO9+eEAAAAASUVORK5CYII="},{"code":"DMD-86BX4D","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-86BX4D","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE90lEQVR42u3dUW7bMBBF0arw/rfsLkD6YDGZN2R0zncTy44vKLDE6Pp+v3+AZX99BKAZ0AxoBjQDmgE0A5oBzYBmQDOgGUAzoBnQDGgGNANoBjQDmoHtfIo/f13Xbm+pOBXk8R2t/86OH499SuuvvuE7in1DrDOgGdAMaAY0A5oB7j4dvzQ2A7q4j7n+47EXWv88i5vas3/NU74h1hnQDGgGNAOaAc0Aiz6xV+rYby2+enEPt3gKuGOzuGNrteOw84bfEOsMaAY0A5oBzQCagYrPm998x85sbP/6JddpnQHNgGYAzYBmQDNwhFfvNXfsonYcoJ599diwDusMaAbQDGgGNAOagXPl9ppP2Z3suM6OwdCP19mxWRzbgD7lG2KdAc2AZkAzoBnQDHDXstd89ICF2Z3ZU45Fv/kbYp0BzYBmQDOgGdAMcHe9ZBhCxwPuYk8RjL33opd8l6wzoBnQDGgGNAOaAe6q55pPeepd8ZKK/7Lj1TsOO3f8jX7fTrd1BjQDmgHNgGZAM8Ddjs8G7BgEEfvx2WkbHZ98bLDG7KMarTPg3gw0A5oBzQCagYrhGRrF4RKxH1//ncX3PntaecMvw+z2t3UGNAOaAc2AZkAzwKIrdoh4w4fmbXg0+JQN6Nj8644/h3UG3JuBZkAzoBlAM/DjcueaO86ixmYBP9rwUXgbzmuOnSiPHXa2zoBmQDOgGdAMaAa4a5nXHDtZvOFk59nnIsYuvrh/Hdv+Nq8Z3JuBZkAzgGZAM5BxbXg49/lCR0/Czg4IXv9AYlvAxb9RbK/ZuWZwbwaaAc0AmgHNQMZnw2s6+oGBsQHWHdu1s08R3HBb2ToDmgHNgGZAM6AZYFFuhsaj9f3B2YPJsYcQxk5VF6/zlP8PMEMD3JuBZkAzgGZAM5BxzY5N2HA2Rey9xy6p4wT07BP/Zr9g1hnQDGgGNAOaAc0Ady3nmjvOCxdfPTbduOPI7eymduxph8UPJPb/FtYZ0AxoBjQDmgHNAHfD85pjT6jb8Kx0bEd+9mjw7Pxr6wy4NwPNgGYAzYBmIOOaHe/waHbC7+xh5w33xDuGYm84bcM6A+7NQDOgGdAMoBmoyM1rfnTKtnLHe++4pNh1xt6mec3g3gw0A2gGNAOagSPk5jUfvStd/J2xkcexi18X+5DNawb3ZqAZ0AygGdAMDLpmhyN3zGdYf6FHv29fOHY0eHbahnPN4N4MNAOaATQDmoFBuWcDzp5rLv7O2Pb3hpc0+y83HGBtnQHNgGZAM6AZ0Axwd224l9fyPlObsOtmD1DPnmcv/s7ZXWnrDGgGNAOaAc2AZoC76rnmU54717FlWdwsnp0OEfvDxfaFzWsG92agGdAMoBnQDAzKPRuwQ2w+Q8e/7Njt3XAMxeyjBc1rBvdmoBnQDKAZ0AxknD2vueOSZoc2dDwfL3ZJswNAYq9unQHNgGZAM6AZ0Axw93nzm9/wtHLHtnLHsI6OD9mzAcG9GaAZ0AxoBjQD53r1XnPxXPO62MDl4qzqjouP7XR7NiC4NwPNgGYAzYBmYFBur3nDqcHrgyBiQ4dPefWjH1donQHNgGZAM6AZQDPw41r2mjfcNJzdwy2e2O24+NlLiv05Ov6HwzoDmgHNgGZAM6AZ4O7acB4uWGdAM6AZQDOgGdAMaAY0A2gGNAOaAc2AZkAzgGZAM6AZ0AxoBjQD/I9/oKcIZp8Qxx4AAAAASUVORK5CYII="},{"code":"DMD-JXNSQP","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-JXNSQP","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE80lEQVR42u3dS47bMBBAwTDQ/a/sHEBaMGj3h1bVOuOx5XmgwBCt9fl8/gDb/roEoBnQDGgGNAOaATQDmgHNgGZAM6AZQDOgGdAMaAY0A2gGNAOagXGu4M+vtaZ9pP2pIPtvPviaGW8p4yqVXZBT/kKsM+DeDDQDmgHNgGaATVfGi5bNgA7uY+7vtwZ/Ue8O8ktes+zKW2dAM6AZ0AxoBjQD3F1lvyljX7j3twdPAWecgM7YWs047DzwL8Q6A5oBzYBmQDOAZiDievOHD+4gB18z+C/L9q8zrpJ1BjQDaAY0A5oBzcCPuVyC78rYVt438Py1dQbcmwGaAc2AZkAz8AZ1e82n7E5mHOPd//GygRX7P967UW6dAfdmoBlAM6AZ0AwcIWWv+egBCxkHk3v/ZcZnf/NfiHUGNAOaAc2AZkAzwN16yTCEjPPCGdONj97YfcnfknUGNAOaAc2AZkAzwF30XPPAp8kFn6S3/zHLLkjZYeeM7+j3drqtM6AZ0AxoBjQDmgHu6s41l53t7Z3PMPDN9w7WyHgyYfDHgxfEOgOaAc2AZkAzoBngbtmI/O6/7L10Ayd4ZFyQsrnS1hnQDGgGNAOaAc0Am1bZgODfe2jeo1M+Zu8uf/At7cv487bOgGZAM6AZ0AxoBrhrnqFRNtk5Y2N3/xfVfZ3z5jVnfMW9h52tM6AZ0AxoBjQDmgHurowXPWXocPC3ZzxasEzvAeqy7W/zmsG9GWgGNANoBjQDNVL2moN7eb0nYQdekEdlx3h7j0UHf5FzzeDeDDQDmgE0A5qBGs0zNIIGDpsOvvneYdMZbz7jx8v+GKwzoBnQDGgGNAOaATbVzdDImLowcHeybBO29/B476MFg+/TDA1wbwaaAc2AZgDNwNddvb/+lM3iga+5fz17t9R7DztbZ0AzoBnQDKAZ0AzUaN5r7t2y/L1BEANPau8Lfkdl++zWGdAMaAY0A5oBzQB3zc8GPGXkce9VGrh7XvYV9z4G0DoDmgHNgGZAM6AZYNMqe7zeo4xd1IHbyvtXaeCbz/g6yv6PYf/HrTPg3gw0A5oBzQCagYjoXnPZON2Mg7Rljyvs3SgfOPK47Nv0bEBwbwaaAc0AmgHNQI2zZ2hkTPjd/0QD93CD31HGzmzZEWbzmsG9GWgGNANoBjQDjSY+G/BR2U7iKSeLM8Yol53UPmXYtHUG3JuBZkAzoBnQDLCpbq85uGmYsZNY9prBC1I2lyP4lso+pnUG3JuBZgDNgGZAMzDNOuVJetHPOW9cxsDH6wWvZ9lr9u5KW2dAM6AZ0AxoBjQD3EXPNZ/y3LmBjxbMOBpcNik7+BdSNqjEvGZwbwaaAc0AmgHNQI3mZwMGZcxnKJsBXbaD3Ht0vffRguY1g3sz0AxoBtAMaAZqTJzX/GjgI/sGjnfo3SgvOytdNufEOgOaAc2AZkAzoBlg0/XmD182BCOo7Il/vYOhPRsQ3JsBmgHNgGZAM3CuV+81n7K5GTxAnTHBI+MZhmWTRqwz4N4MNAOaAc0AmoGvq9trHjg1eP+0ctnQ4d5RIRn71wMfV2idAc2AZkAzoBlAM/B1KXvNAzcNB+4gB+dyBN988BBxxrZyxteRsXdvnQHNgGZAM6AZ0AxwtwaOjADrDGgGNANoBjQDmgHNgGYAzYBmQDOgGdAMaAbQDGgGNAOaAc2AZoD/8Q8n6PBOxaMw/gAAAABJRU5ErkJggg=="},{"code":"DMD-PV4WFG","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-PV4WFG","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAFG0lEQVR42u3dW27cMBBFwSjQ/rfsLID+oNHu22Sm6tsZPWYOKDAC+Xx9ff0Btv11C0AzoBnQDGgGNANoBjQDmgHNgGZAM4BmQDOgGdAMaAbQDGgGNAPHeYv//nme0y5pf1WQ/ZMvfmbHPy/e+eJndtzkA38hxhnwbAaaAc2AZkAzwKa340Nja0DH5luLB4rNt3bc+Vs+M3bnjTOgGdAMaAY0A5oBVm/sSB3zwrNHL74FXHwDuuMyi5954HdknAHPZqAZ0AygGdAMZLyffPGz60gUJ6Bnp78PXBnDOAOaAc2AZgDNgGZg0OsW7OiYLO54r7m4KkjsPI0zoBlAM6AZ0AxoBv4zubnmW2YnOxZx7vjLjlnp4g2JnZJxBjybgWYAzYBmQDNwmpa55qsXWJh9hXn2dePYK8xX/0KMM6AZ0AxoBjQDmgFWz4cshnDgKszFo3dce9GH/JaMM6AZ0AxoBjQDmgFW1feaD9xNrmMnvdkbEnvZOXZDYt+7cQY8m4FmQDOAZkAzkHHi3oAdC0HsH6g4NxpbB7ljDnd2b8COy+w4eeMMaAY0A5oBzYBmgNXw3oAdm+Z1HH3/M/cd+Lby/ivhHXfpljVJjDOgGdAMaAY0A5oBVu/VZ98xETm7tEXHX+7/8wNnezu+DuMMeDYDzYBmQDOAZuDXPbOb0c2uDlE8+eKBOu7n7LXHvuLZtT6MM6AZ0AxoBjQDmgFWLe81x3ZpK76xWzz52AIgxWvfP6XYCh6x6W/rNYNnM9AMaAbQDGgGMnJraMyu+bB/SsWT/1bsZefYln3F+9lx7bE7b5wBzYBmQDOgGdAMsLpmb8COz+w4pY6jF7fs63j/+uqlQowz4NkMNAOaAc0AmoFf1zLXHJtv7djLrniZsenv4tRqxxIcHQeKLRVinAHPZqAZ0AxoBtAMVFTnmmdfIu5YxaLjfeGOeeH9U4otrNGxUnZsXQ7jDGgGNAOaAc0AmoGKJ7bywA/OaXRhjeKBilc0+3XMvife8W1arxk8m4FmQDOAZkAzkJFbQyO2OkRsw8DiP49d5uwKHrfcT+MMaAY0A5oBzQCagYrce82xd2Zjk9rFa98/+eGfyHnLZ8++7GycAc2AZkAzoBnQDLC6Zr3mA1+kvUVsX8T9vyx+m7NrfRhnQDOgGdAMaAY0A6xa1tAobsQ3O4/ZcZ7FnfRmN/frWOuj4zxjt844A5oBzYBmQDOgGWD1xo60PxU4uwhGx2d2vIfbMc/esTJGbLWN2M/GOAOaAc2AZkAzoBlg9Ry4Ed+BE6b7bpnt3T+lWbO/T+MMeDYDzYBmQDOgGWDTc+BmdC3XmVouY98tc+L79zP2mbM7PRpnQDOgGdAMaAY0A6xyewPGFNflKB6o49YduIxy8UCzC5UYZ8CzGWgGNAOaATQDv254b8Ci4nTt/l/OLkMRW5PkwB9D8X5aQwM8m4FmQDOAZkAzkDG8N+C+2DaA355n7C3g4mV+8l2KHd04A5oBzYBmQDOgGWD1ugU7Yjv+dczIz65VffVL2cYZ0AxoBjQDmgHNAJs+eq756hUnYjPIsT0MO/65cQY8m4FmQDOAZkAzkJGbaz5wDrf4ZnFxE8LiX+7rWKu64+QP3GfSOAOaAc2AZkAzoBlgU8tc84GThrNzuMU3djtOfvaUYl9Hx/9wGGdAM6AZ0AxoBjQDrJ4D18MF4wxoBjQDaAY0A5oBzYBmAM2AZkAzoBnQDGgG0AxoBjQDmgHNgGaAn/gHl8z8ddJxPQ4AAAAASUVORK5CYII="},{"code":"DMD-2ACCDU","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-2ACCDU","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE+klEQVR42u3dwW7bQAxF0arw//9yuo+8mILmI5Wcs24iS/HFCKwwur6+vv4Ax/66BKAZ0AxoBjQDmgE0A5oBzYBmQDOgGUAzoBnQDGgGNANoBjQDmoF1XsWfv65r2ymd7wry9sO//fHzf1k8UPEiL9wR5dHfEOsMuDcDzYBmQDOgGeDQq+OXxiae53PM4li5ePSOM4odqOOvufAbYp0B92agGdAMaAbQDFS8YkcqTv06ppOzjxt3HH12/F38Gy38hlhnQDOgGdAMaAY0Axx6uQTfFEfAsYlncX4dm7NbZ8C9GaAZ0AxoBjQDv8FvmTXHpqjFGW7xQB1iZ2SdAc0AmgHNgGZAM/BcuVnzU15bV9zEOXag2PS847Hop3xDrDOgGdAMaAY0A5oBDrXMmhdusNCxuURsVN0x7Y1NkJ/yDbHOgGZAM6AZ0AygGaiozpp/3l4Ks0PYhRtDP+WVfdYZ0AxoBjQDaAY0A4Ou4ihwdjPfp+xNMfsA9cI3/s1uAGKdAfdmoBnQDGgG0Ax83MZ3A54PTGPPIHeMlc8Vf2fHBHnhxhqx/+GwzoBmQDOgGdAMaAa4a9lDY+GWx+c6noCOnVHsme6Y2S+DdQY0A5oBzYBmQDPAoWvheLFjI4if91zz7JWfvSCzl846A5oBzYBmQDOgGeDuWjiEXTjcXPg7Fw7fFz5V3XHu1hnQDGgGNAOaAc0Ad7k9NDr2F559P97sO/diM9yf9/pH6wy4NwPNgGZAM4Bm4OOG99CITRJjU+mFQ9jYh184preHBrg3A82AZgDNgGYg4xU7UsdwM/Z8a+xth8X3DRYvXccfruPcZw9knQHNgGZAM6AZ0Axw1zJrLk57Ox52nh0Wzz6DHLueHV+b2e0yrDOgGdAMaAY0A5oBDlVnzR3bJsSe7Y1tglEcQM+OlYtnFNs+2zoD7s1AM6AZQDOgGRg0/G7AjueFzz9nx7kXzT7Tff7jj97q2joDmgHNgGZAM4Bm4ONa9tCIbSX86P2aO879/MPH/sSzO2N4NyC4NwPNgGYAzYBmICO3h8ZbC3dMfsquwcWL3GHhDh4dF8Q6A5oBzYBmQDOgGeDuBz7XfC62k8PC9w12nFHM7LlbZ0AzoBnQDGgGNAPcXQvHtbF568KHss8PtPB6zn5DOi6ddQY0A5oBzYBmQDPAodfs4Z/ywsDz9+N1nGbxd55b+Kh18a/Z8ZGsM6AZ0AxoBjQDmgHurtgoMCa2CcZTzmh2BBy7ILGNNawzoBnQDGgGNAOaAe6qzzXHNsktig0iY28RLP7O2GPRHR/Jfs3g3gw0A2gGNAOagW2qs+anPNfcMQJe+CK+2K4gxQ8/+wJG6wy4NwPNgGZAM4Bm4ONa9mteOISNndHsI7exqXTsy7DwPzOsM6AZ0AxoBjQDmgHucu8GfMpDxB2bNsTOveMjnV+Q2dH/+UfybkBwbwaaAc2AZgDNwMe9XIJvirsGvxXb2uIpg/KOS2edAfdmoBnQDKAZ0AwMMms+MjuuLX7O2Y80e5rWGXBvBpoBzQCaAc1ARm7WvPAB1Y4XBnYcfeG/fCv2asHZL5h1BjQDmgHNgGZAM8Bdy6x54TOz51PUju2Ji0Pt2fcNxj5Sx1sEO66SdQY0A5oBzYBmQDPA3bXwcWOwzoBmQDOAZkAzoBnQDGgG0AxoBjQDmgHNgGYAzYBmQDOgGdAMaAb4H/8A373nY2jBt8AAAAAASUVORK5CYII="},{"code":"DMD-PGAUUP","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-PGAUUP","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE7ElEQVR42u3dy27bMBBA0bLQ//9yui+9YDCZB6Nz1rUtK76gwAqj9fX19Qc49tcpAM2AZkAzoBnQDKAZ0AxoBjQDmgHNAJoBzYBmQDOgGUAzoBnQDIzzBF+/1pr2lc6ngpwffPA9M14ePPPB98w4yQN/IdYZcG0GmgHNgGZAM8ChJ+NNy2ZAZ+y3ZnxQ2X5rxpm/5T3Lzrx1BjQDmgHNgGZAM8DuKfuksn3hsk8P3gUcvAM642sG33Pg38g6A67NQDOgGUAzoBmo8TgF/wluWQa3lc//Ze/298DJGNYZ0AxoBjQDaAY0A41evdeccSdsxrZyxgeVHad1BlybAZoBzYBmQDPwBnV7zVfvTpbNay4bWHH+8rIN6Ft+IdYZ0AxoBjQDmgHNALuUvearByxk3PDb+y8zvvubfyHWGdAMaAY0A5oBzQC79ZJhCGX3C1/96UEv+S1ZZ0AzoBnQDGgGNAPsovc1D3yaXMaT9M6/+/khBQdrlM2AzviFlP3drTPg2gw0A5oBNAOagRrXPBuwbMM0+PKyOcgZe7i9zwYs+/+A4MFbZ0AzoBnQDGgGNAPsVsaE34+CO4kZL8/4RsFT13u3cu8QjN5Z1dYZ0AxoBjQDmgE0AxFr4PbiuYFzJAY+8S/4NQfu8gf/HNYZcG0GmgHNgGYAzcCPq7uvOah3BvT5ITX/OefNa874w/Vu01tnQDOgGdAMaAY0A+yi85rLtoDLBhkHd2YH7olnHHzGWTp/ecbXtM6AazPQDGgGNANoBiJSng1YNpq5bBBExgkJ6n1k3/khZeidQG2dAc2AZkAzoBnQDLBbtwyC+Ojq+3DLBkEMnIzRe0O6dQZcm4FmQDOgGUAz8ONS7mvO2DDtfeZe75P0es/nLSek7KdonQHNgGZAM6AZ0Aywi+41947TDf7L3g3oc2U3ZQcP6eo5J9YZ0AxoBjQDmgE0AxETZ2h84+gT7mu+ZRBE2bSNgaOuzWsG12agGUAzoBnQDEzTvNc8cMO0d1hH2Un+qPfu7yDzmsG1GWgGNANoBjQDjVJmaJTdCTtwZMT5cZ5/UMbBZyj7MfTe7GydAc2AZkAzoBnQDLBbGTcRf9S759h7H27vHdADRx73PpXRXjO4NgPNgGZAM4Bm4Mc9GW/6+7aVb3lsXe/5DJ7k4HGW7d1bZ0AzoBnQDGgGNAPsnrJP6p2DnDFgIbgNGpRxQgZOtXZfM7g2A80AmgHNgGbgCnV7zQPva75l+/uWQyr7mtYZcG0GmgE0A5oBzcA0a+BeXsr3nDdto+yG3/PjLDufwffs3ZW2zoBmQDOgGdAMaAbYRe9rvuW5c7ds197y6cEPKnsEonnN4NoMNAOaATQDmoEadc8GzPD75jNknJDer9m7J25eM7g2A82AZgDNgGagxt3zmgceUtkQjLKz1PsIxOAhWWfAtRloBjQDaAY0AzWeN3/5jHnNZS/vHTZddpI9GxBcm4FmAM2AZkAzcIVX7zWfb24GN2HLXt578APPknUGXJuBZkAzgGZAM1Cjbq954NTg4CCIstuigzKmWgc3oAeeJesMaAY0A5oBzQCagYiUveaBm4YZ26Bld+xmDJfoPaSMb1Q2gsM6A5oBzYBmQDOgGWC3Bs7DBesMaAY0A2gGNAOaAc2AZgDNgGZAM6AZ0AxoBtAMaAY0A5oBzYBmgO/4B36O81qeQi1SAAAAAElFTkSuQmCC"},{"code":"DMD-MGNNC3","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-MGNNC3","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAFB0lEQVR42u3dW47iMBBA0fEo+99yzwLMh0fV9TA557uBELgKcluV9fPz8wc49tcpAM2AZkAzoBnQDKAZ0AxoBjQDmgHNAJoBzYBmQDOgGUAzoBnQDIzzBB+/1pr2ls6ngpwffPA5Mw4p4yyVnZBbviGuM+C3GWgGNAOaAc0Ah56MJy2bAZ2xjhlchM04zt6Z2hmvfvU3xHUGNAOaAc2AZkAzwO4pe6Xe9dbz7cbBvzw/+OAO6IyTHHzO3oMvW792nQHNgGZAM6AZ0Aywe9785nu3RZctQGcMABk4GcN1BjQDmgHNAJoBzUCjV681Z6zhli0rX73/2nUGNANoBjQDmgHNwJepW2v+vtXJ8zXcjL8s2+w8cP+16wz4bQaaATQDmgHNwDQpa81XD1gIrqKWbXYuG/ecsQR89TfEdQY0A5oBzYBmQDPAbr1kGELZfuGrXz3oJd8l1xnQDGgGNAOaAc0Au+i+5oF3k/v46sFDCh58xquXzYDO+IaUfe6uM+C3GWgGNANoBjQDNaJrzWULfGULphnLyud/2bt233tvwIy3mXHwrjOgGdAMaAY0A5oBdqt3wm/Z0mrZc2acurLdyr1DMHpnVbvOgGZAM6AZ0AygGYhIWWv+6Oob3JW9zYF35wsu0/dO8Mg4da4zoBnQDGgGNAOaAXZ1a81BA+dInD+87uOcN6+5d5e6tWbw2ww0A5oBNAOagRop85oH3g5u4LiMXr0TPHqnb5vXDH6bgWZAM6AZQDPw656MJ83YGjxwXvP5OmbZEIyyW/adH1KG3m3mrjOgGdAMaAY0A5oBdqts5sMt8y4GPnzgrupb/p3gOgN+m4FmQDOAZkAzUCNlX3PZ1IXgX54re/WyBejgcd6yoG+GBvhtBpoBzQCaAc1Ajehac8YYinPni4YZf3n+jno3j5cN1vj46r2bnV1nQDOgGdAMoBnQDNR4el8+Yxbw1aMtMnYrZ3xGGUvAwX3iZevsrjOgGdAMaAY0A5oBdqv3tnUD//JcxqJ22UkOvqOBNww0rxn8NgPNgGYAzYBmoFHKDI2yGbu9y8rBhwfXcMumgvR+GYLnM+OEuM6AZkAzoBnQDGgG2K3eQRAD1xzLFkzPDyl45geOPO6dnWKtGfw2A82AZkAzgGbg163eSQ5Xj8vIOCHBVy/7jDJePficGafOdQY0A5oBzYBmQDPAoWfgMV09LuOjgWu43/dPAvuawW8z0AxoBtAMaAYarVtWPM8ffu7qHdBX38cv43xmfMFcZ8BvM9AMaAY0A5oBDq2yG8c1v8+E7bHBh/fOVr5lMkbZbmXXGdAMaAY0A5oBNAMR0Rkat+yEzViIPH/OgbM+yj64snXhshdynQHNgGZAM6AZ0AywS5nXXLbD9HzBNLgxuXf3d++tBXu/DME1cTM0wG8z0AxoBtAMaAZq1N0bcOAt+4IHf/UabvCFPp6Q3gEgZa/uOgOaAc2AZkAzoBlg97z5zffOVs64ZV/ZsOmytzlwnrjrDGgGNAOaAc2AZoDdq9eaM25Gl7FUfcvDBx6n6wz4bQaaAc0AmgHNQI26teZbRh4Hd9cGV2YzBKdanw+wDr7NgfeZdJ0BzYBmQDOgGdAMcChlrXngomHGau8tsykyDiljWTnj48hY0HedAc2AZkAzoBnQDLBbA+fhgusMaAY0A2gGNAOaAc2AZgDNgGZAM6AZ0AxoBtAMaAY0A5oBzYBmgP/xD5fxIC2GZbmDAAAAAElFTkSuQmCC"},{"code":"DMD-BNVKTM","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-BNVKTM","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAE+0lEQVR42u3dUY6cShBFwccT+9/yeAHMB1aSNxMT8e2eBpqjQuVScfz8/PwH3Pa/SwCaAc2AZkAzoBlAM6AZ0AxoBjQDmgE0A5oBzYBmQDOAZkAzoBlY5yx+/jiObadU3BXk1zO6/zdjHy9e+eLfLJ7Rq+8Q4wxoBjQDmgHNgGaAq7Pjj8b2gI7NYxa/KPbxjiv/lr8Zu0OMM6AZ0AxoBjQDmgGuztg3dazDnf324hRwxwrojqnV2Ez37B1inAHNgGZAM6AZQDNQcX755Gf3kShOQMfmrzt28DDOgGYAzYBmQDOgGfjHnC7BHR2TxQvnhTuO0zgDns0AzYBmQDOgGfiC3FzzW2YnO5bx3v94bMOK+x+PTUC/5Q4xzoBmQDOgGdAMaAa4aplrfvUGC7NLmGPLoovn/uU7xDgDmgHNgGZAM6AZ4Or4yGYIC3dhLn57x7kXfeReMs6AZkAzoBnQDGgGuKqua174Nrnim/QWXpDZPaA7LkjsdzfOgGcz0AxoBtAMaAYyqnPNsQm+jgnTjgnojn2Qi6dZPPjYxhqxnbKLB2+cAc2AZkAzoBnQDHB1zO7wG5sXXriR8cLVyrObYMzuVW2cAc2AZkAzoBlAM1BxxDYIfvXr9TrmxGffDbhwlj+2Uts4A57NQDOgGdAMoBl43LHwZXSz2z0Xj3P459y3X3Nso5LYYmfjDGgGNAOaAc2AZoCrM/ZNxRnP2fXXHV8Uu57Fc++Yv45Nf9uvGTybgWZAM4BmQDOQ0TLXXJyyfMu65uIZxb6949e8f0ixK188eOMMeDYDzYBmQDOAZqDiiG0EsXB/htlJ7dhGEB+58t4NCJ7NQDOgGUAzoBkY1LKu+S1v0usw+2rB2HHOvlqweJz20ADPZqAZ0AxoBtAMPG54v+bYUtaOfxnbyWHhVtf3f823LDM3zoBmQDOgGdAMoBmoOBZuJdwxAT37dr6F65qLP9yr14kbZ8CzGWgGNAOaATQDjztiewHPbk8c26wj98s1zAt3nPvsrLRxBjybgWZAM4BmQDOQMfxuwIUbVixcRDx8i+zbPnt2sbNxBjQDmgHNgGZAM8BVbl1zh7eslS6e0ewhxX644g0WuxmMM6AZ0AxoBjQDmgGuWt4NuHATjPtfFLsg99+k9+vHO943GJumn710xhnwbAaaAc2AZgDNwOPO2DfFFqjOTm4Wz714PWPLomf/ZcdtY5wBz2agGdAMaAbQDFScbznQhZOb94+zaOFC79i/XLiBtXEGNAOaAc2AZkAzwNWxcC6v5TwblscWze6tvPANirEpdeMMeDYDzYBmQDOAZuBx1XXNb3nvXMdE5MLXKi7cqzo2L2y/ZvBsBpoBzQCaAc3AoI3vBrwvtj/D7Orvjl2YFx588SeOXRDjDGgGNAOaAc2AZoCrje8G/NXC+ev7x1ncwWP2KnW8LDF2SMYZ8GwGmgHNAJoBzUDG6RI8q7jpcMes9Oxe1a9elG2cAc2AZkAzoBnQDHDTp+eaYy+4u69jZrZjqXVxSr34RcVLZ5wBz2agGdAMaAbQDDwuN9e8cNfgjo0gihOms9PfHfPXC19XaJwBzYBmQDOgGUAz8LiWueaFk4axOdyOBb8dBz97SLGfo+N/OIwzoBnQDGgGNAOaAa6OhfvhgnEGNAOaATQDmgHNgGZAM4BmQDOgGdAMaAY0A2gGNAOaAc2AZkAzwN/4A3qQAlSLmEhGAAAAAElFTkSuQmCC"},{"code":"DMD-WBNCZS","url":"https://yanicsavard9.github.io/Le-Diamant/?join=DMD-WBNCZS","image":"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAREAAAERCAIAAADT9gTZAAAFC0lEQVR42u3dwY4aMRBF0emo//+XJ9tIzcJRUa9sOGc9QEO4MqpY7uv39/cHWPbHRwCaAc2AZkAzoBlAM6AZ0AxoBjQDmgE0A5oBzYBmQDOAZkAzoBnYzl18/HVdu72l9VNBXl588VCR4gdSvPj151x/78VP6ehviHUG/DYDzYBmQDOgGWDR3fGksTOgOwa7HQPomPXr7Bipx1499g2xzoBmQDOgGdAMaAZYdMdeKbbht3hJ6wPojovv2K1cvKSOD+SUb4h1BjQDmgHNgGZAM8Ci+5vffHE6uT6EjR3WUZwLd4yqrTPgtxmgGdAMaAY0A9/gq2fNHZtzY9uNO4basS3M1hnQDKAZ0AxoBjQDHyY3a57dCTu7s/joGW7sH+6UvdLWGdAMaAY0A5oBzQBPLbPmo3fCbnjexdF/+XnfEOsMaAY0A5oBzYBmgKfrmw/e7bgR3+wW5tgJHtYZQDOgGdAMaAY0A/yruq+5Y39rx8A0NheOfSCxz3P9hTr+Oawz4LcZaAbQDGgGNANHOPsMjdnpZGwLc/Fg6NmPLvZliG3fts6AZkAzoBnQDGgGeLpmZ44d49pTtkXHTjc+eqwc+4ZYZ8BvM9AMaAY0A2gGKu7Zlz9lilo0e4ZG7EPuGNNveBNC6wxoBjQDmgHNgGaAp9x5zcW5cHGKGjvvYvbegEdffPHVY9dpnQHNgGZAM6AZ0AzwlNvX3HE7uOL22Nh1Ft9Rx3MWNxF3HCoSO2XFOgOaAc2AZkAzgGbg7a5TDvPd8GTn9efs+ECKr168pFP2iXd8va0zoBnQDGgGNAOaAZ5aztBYd8rt9TpevWNcOzvtnb2tojM0wG8z0AxoBtAMaAYGVWfNsY20xYfPDjdnx7WnnIMc+9pYZ0AzoBnQDGgG0Ay83dUxLJ4992D2gIXZTdmxAXTHO4rN2a0z4LcZaAY0A5oBNANvt+N5zR0jy+IlrV/n7F7p2U+++Jwd36WOS7LOgGZAM6AZ0AxoBnjK7Wtef/hLsQF0x3uf3f0dG6lveB8/6wxoBjQDmgE0A5qBjNx5zbGjhGdvGLjh6cax4zJiU/7iJ29fM/htBpoBzYBmAM3A290dTxqbt2642Xn91T/vPn4bDqCtM6AZ0AxoBtAMaAYyqrPm4nCz4+Ev55izJ06s/2XHZLZjX3Pxn6NjQ3rsbVpnQDOgGdAMaAY0Azy1nKGx4fkMHbfsK46Vi3/ZYfZuh+v/cLMbqK0zoBnQDGgGNAOaAZ6G7w1YfM4Nt8fO3kkvNuWP2fC0DesMaAY0A5oBzYBmgKfr6JNz/+N9js6vXzplJr6u4/8YOl7IOgOaAc2AZkAzgGbg7a7YfDBmdhAZG5hueLfD2J7u2S+DdQY0A5oBzYBmQDPA093xpLMTz+JfxvYLz47pYzPx2Yd3TOStM6AZ0AxoBjQDmgGe7tgrzZ7PMHtkRMdxGcUPOXYfv46vzey9Fq0zoBnQDGgGNAOaAZ7uL3mfG544EXt4x9EWscOmOy7JOgN+m4FmQDOgGUAz8HbfMmvu2BpcfHhs3jr7l7MHgjtDA/w2A82AZgDNgGYgIzdrnr1l30sdg8jY2RSxg4yLh2LPnnfhDA3w2ww0A5oBNAOagYyWWfPsXe+Kl9Rx8RseBNEhtoV59vO0zoBmQDOgGdAMaAZ4uo4eboJ1BjQDmgHNAJoBzYBmQDOgGUAzoBnQDGgGNAOaATQDmgHNgGZAM8DPz189IO1dsSZesgAAAABJRU5ErkJggg=="}];
+
 let currentRole=null;
 let managerSelectedGameId=null;
 let pendingTieInning=null;
@@ -4392,6 +4640,17 @@ let teamRequests=[];
 let managerAccess=[
   {id:"primary",name:"Gestionnaire principal",role:"principal",start:"",end:""}
 ];
+let leagueInvite={
+  poolIndex:0,
+  code:"",
+  searchVisible:true,
+  active:true
+};
+let pendingJoinCode="";
+let qrScannerStream=null;
+let qrScannerDetector=null;
+let qrScannerTimer=null;
+
 let viewerSelectedTeam=null;
 let pendingGameOver=null;
 let completedGames=[];
@@ -4507,7 +4766,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.16.0 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.16.3 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -4551,9 +4810,13 @@ function renderWeeklyDayRows(){
     const fallback=["18:30","19:45","21:00"];
     const times=(cfg.times?.length?cfg.times:fallback).join(", ");
     return `<div class="weekly-day-row">
-      <div class="weekly-day-name">
-        <input id="weekEnabled${dow}" type="checkbox" ${cfg.enabled?"checked":""} onchange="updateScheduleMathPreview()">
-        <span>${name}</span>
+      <div class="weekly-day-title">${name}</div>
+      <div class="weekly-active-col">
+        <label>Journée active</label>
+        <label class="weekly-active-toggle">
+          <input id="weekEnabled${dow}" type="checkbox" ${cfg.enabled?"checked":""} onchange="updateScheduleMathPreview()">
+          <span>${cfg.enabled?"Oui":"Activer"}</span>
+        </label>
       </div>
       <div>
         <label>Matchs</label>
@@ -4659,7 +4922,8 @@ function saveLeagueSettings(){
     officialPrepInnings=s.regulationInnings;
   }
   toggleLeagueSettingDependencies();
-  toast("Paramètres de la ligue enregistrés");
+  ensureLeagueInvite();
+  toast("Paramètres de la ligue enregistrés • QR de ligue prêt");
   return true;
 }
 
@@ -4765,6 +5029,182 @@ function generateLeagueScheduleFromSettings(){
 }
 
 
+
+function ensureLeagueInvite(){
+  if(!LEAGUE_INVITE_QR_POOL.length)return;
+  if(!leagueInvite.code){
+    leagueInvite.poolIndex=Math.max(0,Math.min(LEAGUE_INVITE_QR_POOL.length-1,leagueInvite.poolIndex||0));
+    leagueInvite.code=LEAGUE_INVITE_QR_POOL[leagueInvite.poolIndex].code;
+  }
+}
+function currentLeagueInviteItem(){
+  ensureLeagueInvite();
+  return LEAGUE_INVITE_QR_POOL.find(x=>x.code===leagueInvite.code) ||
+         LEAGUE_INVITE_QR_POOL[leagueInvite.poolIndex] ||
+         LEAGUE_INVITE_QR_POOL[0];
+}
+function renderLeagueInvite(){
+  ensureLeagueInvite();
+  const item=currentLeagueInviteItem();
+  if($("leagueInviteQr"))$("leagueInviteQr").innerHTML=`<img src="${item.image}" alt="QR officiel de la ligue">`;
+  if($("leagueInviteName"))$("leagueInviteName").textContent=leagueSettings.name||"Ligue Diamond";
+  if($("leagueInviteRef"))$("leagueInviteRef").textContent=`Référence d’invitation : ${item.code}`;
+  if($("leagueSearchVisible"))$("leagueSearchVisible").checked=leagueInvite.searchVisible!==false;
+}
+function openLeagueInvite(){
+  renderLeagueInvite();
+  $("leagueInviteModal").classList.add("show");
+}
+function closeLeagueInvite(){ $("leagueInviteModal").classList.remove("show"); }
+function saveLeagueSearchVisibility(){
+  leagueInvite.searchVisible=!!$("leagueSearchVisible")?.checked;
+  toast(leagueInvite.searchVisible?"Ligue visible dans la recherche":"Ligue masquée de la recherche");
+}
+function regenerateLeagueInvite(){
+  if(!confirm("Générer un nouveau QR? Dans la version finale, l’ancien QR sera invalidé."))return;
+  leagueInvite.poolIndex=(leagueInvite.poolIndex+1)%LEAGUE_INVITE_QR_POOL.length;
+  leagueInvite.code=LEAGUE_INVITE_QR_POOL[leagueInvite.poolIndex].code;
+  renderLeagueInvite();
+  toast("Nouveau QR généré");
+}
+function dataUriToFile(dataUri,filename){
+  const parts=dataUri.split(",");
+  const mime=(parts[0].match(/data:(.*?);/)||[])[1]||"image/png";
+  const bin=atob(parts[1]);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return new File([bytes],filename,{type:mime});
+}
+async function shareLeagueQR(){
+  const item=currentLeagueInviteItem();
+  try{
+    const file=dataUriToFile(item.image,`Diamond-${String(leagueSettings.name||"Ligue").replace(/[^a-z0-9]+/gi,"-")}-QR.png`);
+    if(navigator.share && navigator.canShare?.({files:[file]})){
+      await navigator.share({
+        title:`QR Diamond — ${leagueSettings.name||"Ligue"}`,
+        text:"Scannez ce QR dans Diamond pour rejoindre la ligue.",
+        files:[file]
+      });
+      return;
+    }
+    if(navigator.share){
+      await navigator.share({title:`QR Diamond — ${leagueSettings.name||"Ligue"}`,text:"Montrez ce QR aux joueurs pour qu’ils puissent rejoindre la ligue."});
+      return;
+    }
+    alert("Le partage direct n’est pas disponible ici. Vous pouvez afficher le QR et en faire une capture d’écran.");
+  }catch(e){
+    if(e?.name!=="AbortError")alert("Impossible de partager le QR sur cet appareil.");
+  }
+}
+function printLeagueQR(){
+  const item=currentLeagueInviteItem();
+  const w=window.open("","_blank");
+  if(!w){alert("Autorisez l’ouverture d’une nouvelle fenêtre pour afficher le QR.");return}
+  const safeName=String(leagueSettings.name||"Ligue Diamond").replace(/[<>]/g,"");
+  w.document.write(`<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>QR Diamond</title>
+    <style>body{font-family:Arial,sans-serif;text-align:center;padding:30px}img{width:320px;max-width:90vw}h1{margin-bottom:5px}p{color:#555}</style></head>
+    <body><h1>${safeName}</h1><p>Scannez ce QR pour rejoindre la ligue dans Diamond.</p><img src="${item.image}"><p>${item.code}</p></body></html>`);
+  w.document.close();
+}
+function openLeagueSearch(){
+  if($("leagueSearchInput"))$("leagueSearchInput").value="";
+  if($("leagueSearchResults"))$("leagueSearchResults").innerHTML='<div class="readonly-note" style="margin-top:10px">Entrez le nom d’une ligue.</div>';
+  $("leagueSearchModal").classList.add("show");
+}
+function closeLeagueSearch(){ $("leagueSearchModal").classList.remove("show"); }
+function normalizeLeagueSearch(s){
+  return String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+}
+function searchLeagueByName(){
+  const q=normalizeLeagueSearch($("leagueSearchInput")?.value);
+  const root=$("leagueSearchResults");if(!root)return;
+  if(!q){root.innerHTML='<div class="readonly-note" style="margin-top:10px">Entrez le nom d’une ligue.</div>';return}
+  const leagueName=leagueSettings.name||"Ligue Diamond";
+  const matches=leagueInvite.searchVisible!==false && normalizeLeagueSearch(leagueName).includes(q);
+  if(!matches){
+    root.innerHTML='<div class="readonly-note" style="margin-top:10px">Aucune ligue visible ne correspond à cette recherche.</div>';
+    return;
+  }
+  root.innerHTML=`<div class="league-search-result">
+    <h3>⚾ ${leagueName}</h3>
+    <div class="muted">${leagueTeamIds().length} équipes</div>
+    <div class="invite-privacy-note">Cette ligue est visible, mais vous devez scanner son QR officiel pour la rejoindre.</div>
+    <button type="button" class="primary" style="width:100%;margin-top:10px" onclick="openQRScanner()">📷 SCANNER LE QR OFFICIEL</button>
+  </div>`;
+}
+async function openQRScanner(){
+  $("leagueSearchModal").classList.remove("show");
+  $("qrScannerModal").classList.add("show");
+  const status=$("qrScannerStatus");
+  const video=$("qrScannerVideo");
+  if(!("BarcodeDetector" in window)){
+    status.innerHTML="Le scanner QR intégré n’est pas disponible dans ce navigateur. <b>Sur iPhone, utilisez l’appareil photo</b> pour scanner le QR officiel; le lien ouvrira Diamond automatiquement.";
+    return;
+  }
+  try{
+    const formats=await BarcodeDetector.getSupportedFormats();
+    if(!formats.includes("qr_code")){
+      status.innerHTML="La lecture QR n’est pas prise en charge ici. Utilisez l’appareil photo de l’iPhone pour scanner le QR.";
+      return;
+    }
+    qrScannerDetector=new BarcodeDetector({formats:["qr_code"]});
+    qrScannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});
+    video.srcObject=qrScannerStream;
+    await video.play();
+    status.textContent="Placez le QR Diamond dans le carré.";
+    qrScannerTimer=setInterval(scanDiamondQRFrame,350);
+  }catch(e){
+    status.innerHTML="Impossible d’ouvrir la caméra. Vérifiez l’autorisation de caméra ou utilisez l’appareil photo de l’iPhone.";
+  }
+}
+async function scanDiamondQRFrame(){
+  if(!qrScannerDetector||!$("qrScannerVideo"))return;
+  try{
+    const found=await qrScannerDetector.detect($("qrScannerVideo"));
+    if(!found?.length)return;
+    const raw=found[0].rawValue||"";
+    let u;
+    try{u=new URL(raw)}catch(e){return}
+    const code=u.searchParams.get("join");
+    if(!code||!String(code).startsWith("DMD-")){
+      $("qrScannerStatus").textContent="Ce QR n’est pas une invitation Diamond.";
+      return;
+    }
+    closeQRScanner();
+    pendingJoinCode=code;
+    showJoinInvite(code);
+  }catch(e){}
+}
+function closeQRScanner(){
+  if(qrScannerTimer){clearInterval(qrScannerTimer);qrScannerTimer=null}
+  if(qrScannerStream){qrScannerStream.getTracks().forEach(t=>t.stop());qrScannerStream=null}
+  qrScannerDetector=null;
+  const v=$("qrScannerVideo");if(v)v.srcObject=null;
+  $("qrScannerModal").classList.remove("show");
+}
+function showJoinInvite(code){
+  pendingJoinCode=code||"";
+  if($("joinInviteCode"))$("joinInviteCode").innerHTML=`Invitation reconnue : <b>${pendingJoinCode}</b><br><span class="muted">Accès : Joueur / Spectateur seulement</span>`;
+  $("joinInviteModal").classList.add("show");
+}
+function closeJoinInvite(){ $("joinInviteModal").classList.remove("show"); }
+function acceptLeagueInvite(){
+  closeJoinInvite();
+  // Keep the join token in-memory only for the prototype.
+  document.body.dataset.joinedLeague=pendingJoinCode||"yes";
+  selectRole("viewer");
+  toast("Ligue rejointe comme Joueur / Spectateur");
+}
+function handleJoinFromUrl(){
+  const params=new URLSearchParams(location.search);
+  const code=params.get("join");
+  if(code&&String(code).startsWith("DMD-")){
+    pendingJoinCode=code;
+    setTimeout(()=>showJoinInvite(code),180);
+  }
+}
+
+
 function openTeamManager(){
   $("mgrActiveTeamCount").value=leagueTeamIds().length;
   renderManagerTeamList();
@@ -4862,9 +5302,6 @@ function closeManualGameModal(){
   $("managerScheduleModal").classList.add("show");
 }
 
-function requestConflictsForGame(away,home,date){
-  return teamRequests.filter(r=>r.date===date&&(r.team===away||r.team===home));
-}
 function updateManualGameWarning(){
   const el=$("manualGameWarning");if(!el)return;
   const away=$("manualAwayTeam")?.value,home=$("manualHomeTeam")?.value,date=$("manualGameDate")?.value;
@@ -4898,40 +5335,120 @@ function addManualLeagueGame(){
   document.addEventListener("change",e=>{if(e.target?.id===id)updateManualGameWarning();});
 });
 
+
 function openTeamRequests(){
   populateTeamSelect("requestTeam",leagueTeamIds()[0]);
+  if($("requestFrequency"))$("requestFrequency").value="date";
+  toggleRequestFrequencyFields();
   renderTeamRequests();
   $("teamRequestsModal").classList.add("show");
 }
 function closeTeamRequests(){ $("teamRequestsModal").classList.remove("show"); }
 
+function toggleRequestFrequencyFields(){
+  const recurring=$("requestFrequency")?.value==="weekly";
+  if($("requestDateWrap"))$("requestDateWrap").classList.toggle("hidden",recurring);
+  if($("requestWeekdayWrap"))$("requestWeekdayWrap").classList.toggle("hidden",!recurring);
+}
+
 function requestTypeLabel(type){
   return {unavailable:"Indisponible",move:"Déplacement demandé",preference:"Préférence",note:"Note"}[type]||type;
 }
+
+function recurringWeekdayLabel(dow){
+  return {
+    0:"Tous les dimanches",
+    1:"Tous les lundis",
+    2:"Tous les mardis",
+    3:"Tous les mercredis",
+    4:"Tous les jeudis",
+    5:"Tous les vendredis",
+    6:"Tous les samedis"
+  }[Number(dow)]||"Chaque semaine";
+}
+
+function weekdayFromISODate(iso){
+  if(!iso)return null;
+  const [y,m,d]=iso.split("-").map(Number);
+  return new Date(y,m-1,d).getDay();
+}
+
 function addTeamRequest(){
-  const team=$("requestTeam").value,type=$("requestType").value,date=$("requestDate").value;
+  const team=$("requestTeam").value;
+  const type=$("requestType").value;
+  const frequency=$("requestFrequency")?.value||"date";
   const note=String($("requestNote").value||"").trim();
-  if(!date){alert("Choisissez une date concernée.");return}
-  teamRequests.push({id:"R"+Date.now(),team,type,date,note});
+
+  if(frequency==="weekly"){
+    const weekday=Number($("requestWeekday").value);
+    teamRequests.push({
+      id:"R"+Date.now(),
+      team,type,
+      frequency:"weekly",
+      weekday,
+      date:"",
+      note
+    });
+  }else{
+    const date=$("requestDate").value;
+    if(!date){alert("Choisissez une date concernée.");return}
+    teamRequests.push({
+      id:"R"+Date.now(),
+      team,type,
+      frequency:"date",
+      weekday:null,
+      date,
+      note
+    });
+  }
+
   $("requestNote").value="";
+  if($("requestDate"))$("requestDate").value="";
   renderTeamRequests();
   toast("Demande enregistrée");
 }
+
 function removeTeamRequest(id){
   teamRequests=teamRequests.filter(r=>r.id!==id);
   renderTeamRequests();
 }
+
+function requestAppliesOnDate(r,date){
+  if(!r||!date)return false;
+  if((r.frequency||"date")==="weekly"){
+    return Number(r.weekday)===weekdayFromISODate(date);
+  }
+  return r.date===date;
+}
+
+function requestConflictsForGame(away,home,date){
+  return teamRequests.filter(r=>
+    (r.team===away||r.team===home) &&
+    requestAppliesOnDate(r,date)
+  );
+}
+
 function renderTeamRequests(){
   const root=$("teamRequestsList");if(!root)return;
-  root.innerHTML=teamRequests.length?teamRequests.map(r=>`
-    <div class="manager-list-item">
-      <div class="manager-list-item-head">
-        <div><b>${teamDisplayName(r.team)}</b><div class="muted">${r.date}</div></div>
-        <span class="manager-role-pill temporaire">${requestTypeLabel(r.type)}</span>
-      </div>
-      <div style="margin-top:6px">${r.note||"Aucun détail supplémentaire."}</div>
-      <div class="manager-mini-actions"><button type="button" class="danger" onclick="removeTeamRequest('${r.id}')">SUPPRIMER</button></div>
-    </div>`).join(""):'<div class="readonly-note">Aucune demande enregistrée.</div>';
+  root.innerHTML=teamRequests.length?teamRequests.map(r=>{
+    const recurring=(r.frequency||"date")==="weekly";
+    const when=recurring?recurringWeekdayLabel(r.weekday):r.date;
+    return `
+      <div class="manager-list-item">
+        <div class="manager-list-item-head">
+          <div>
+            <b>${teamDisplayName(r.team)}</b>
+            <div class="muted">${when}</div>
+            ${recurring?'<span class="request-recurring-badge">RÉCURRENT</span>':""}
+          </div>
+          <span class="manager-role-pill temporaire">${requestTypeLabel(r.type)}</span>
+        </div>
+        <div style="margin-top:6px">${r.note||"Aucun détail supplémentaire."}</div>
+        <div class="manager-mini-actions">
+          <button type="button" class="danger" onclick="removeTeamRequest('${r.id}')">SUPPRIMER</button>
+        </div>
+      </div>`;
+  }).join(""):'<div class="readonly-note">Aucune demande enregistrée.</div>';
 }
 
 function openManagerAccess(){
@@ -5538,7 +6055,7 @@ function renderViewer(){
   renderViewerDiamond();
 }
 
-// L'accueil par rôles est l'écran initial de v0.16.0.
+// L'accueil par rôles est l'écran initial de v0.16.3.
 
 renderLineupEditor();
 
@@ -5626,8 +6143,10 @@ function hydrateTeamLogos(){
 document.addEventListener("DOMContentLoaded",()=>{
   hydrateTeamLogos();
   ensureLeagueTeamCount(leagueSettings.teamCount||6);
+  ensureLeagueInvite();
   renderLeagueTeamVisuals();
   renderCaptainTeamSelectors();
+  handleJoinFromUrl();
 });
 </script>
 </body>

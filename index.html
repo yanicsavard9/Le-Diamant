@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.17.5</title>
+<title>Diamond v0.17.8</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1565,10 +1565,122 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0177-mobile-weekly-layout">
+/* The league settings sheet must stay inside the iPhone viewport. */
+#leagueSettingsModal .sheet{
+  max-height:92dvh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  box-sizing:border-box;
+}
+
+/* Quick scheduling controls need the full width of each weekday card. */
+#leagueSettingsModal .weekly-quick-grid{
+  grid-column:1/-1 !important;
+  width:100%;
+  min-width:0;
+}
+#leagueSettingsModal .weekly-quick-grid > div,
+#leagueSettingsModal .weekly-day-row > *{
+  min-width:0;
+}
+#leagueSettingsModal .weekly-quick-grid input,
+#leagueSettingsModal .weekly-quick-grid select{
+  max-width:100%;
+  min-width:0;
+}
+
+/* iPhone layout */
+@media(max-width:520px){
+  #leagueSettingsModal .weekly-day-row{
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:10px !important;
+    padding:11px !important;
+  }
+
+  #leagueSettingsModal .weekly-day-title,
+  #leagueSettingsModal .weekly-active-col,
+  #leagueSettingsModal .weekly-quick-grid,
+  #leagueSettingsModal .times-col{
+    grid-column:1/-1 !important;
+  }
+
+  #leagueSettingsModal .weekly-quick-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:9px;
+    margin-top:2px;
+  }
+
+  #leagueSettingsModal .weekly-quick-grid > div:last-child{
+    grid-column:1/-1 !important;
+  }
+
+  #leagueSettingsModal .weekly-quick-grid label{
+    line-height:1.2;
+    min-height:27px;
+  }
+
+  #leagueSettingsModal .weekly-quick-grid input,
+  #leagueSettingsModal .weekly-quick-grid select{
+    width:100% !important;
+    min-height:48px;
+    font-size:16px;
+  }
+
+  #leagueSettingsModal .weekly-active-toggle{
+    min-height:38px;
+  }
+
+  #leagueSettingsModal .weekly-generated-summary{
+    grid-column:1/-1 !important;
+    margin-top:0;
+  }
+
+  #leagueSettingsModal .weekly-slots-details{
+    width:100%;
+    box-sizing:border-box;
+  }
+
+  #leagueSettingsModal .manager-actions-sticky{
+    margin-left:-11px;
+    margin-right:-11px;
+  }
+}
+
+/* Extra-small iPhones: stack the three quick controls vertically. */
+@media(max-width:370px){
+  #leagueSettingsModal .weekly-quick-grid{
+    grid-template-columns:1fr !important;
+  }
+  #leagueSettingsModal .weekly-quick-grid > div{
+    grid-column:1/-1 !important;
+  }
+}
+</style>
+
+
+<style id="diamond-v0178-official-games-scroll">
+#officialGamesModal .sheet{
+  max-height:92dvh;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  box-sizing:border-box;
+  touch-action:pan-y;
+}
+#officialGamesModal #officialGamesList{
+  min-height:0;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.17.5 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.17.8 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2181,7 +2293,7 @@ body.role-viewer .strike-count{
       PRÉPARER CE MATCH
     </button>
 
-    <button type="button" style="width:100%;margin-top:8px" onclick="backToOfficialGames()">RETOUR AUX MATCHS DE LA JOURNÉE</button>
+    <button type="button" style="width:100%;margin-top:8px" onclick="backToOfficialGames()">RETOUR AUX MATCHS PAR DATE</button>
   </div>
 </div>
 
@@ -4042,8 +4154,8 @@ function renderOfficialGames(){
             const origin=leagueSchedule.find(x=>x.id===g.resumedFrom);
             return origin?`Match remis le ${formatScheduleDate(origin.date)}<br>`:"";
           })():""}
-          ${g.away}: ${awayState}<br>
-          ${g.home}: ${homeState}
+          ${teamDisplayName(g.away)}: ${awayState}<br>
+          ${teamDisplayName(g.home)}: ${homeState}
         </div>
       </button>`;
   }).join("");
@@ -4080,21 +4192,21 @@ function renderOfficialGameStatus(){
 
   $("officialGameSubmissionStatus").innerHTML=`
     <div class="readonly-note" style="margin-bottom:8px">
-      <strong>${g.away}</strong><br>${awayState}
+      <strong>${teamDisplayName(g.away)}</strong><br>${awayState}
     </div>
     <div class="readonly-note">
-      <strong>${g.home}</strong><br>${homeState}
+      <strong>${teamDisplayName(g.home)}</strong><br>${homeState}
     </div>`;
 
   const awayBtn=$("officialAwayAlignmentBtn");
   const homeBtn=$("officialHomeAlignmentBtn");
 
   if(awayBtn){
-    awayBtn.textContent=`ALIGNEMENT ${g.away.toUpperCase()}${s.awayLocked?" 🔒":""}`;
+    awayBtn.textContent=`ALIGNEMENT ${teamDisplayName(g.away).toUpperCase()}${s.awayLocked?" 🔒":""}`;
     awayBtn.disabled=!s.awaySubmitted;
   }
   if(homeBtn){
-    homeBtn.textContent=`ALIGNEMENT ${g.home.toUpperCase()}${s.homeLocked?" 🔒":""}`;
+    homeBtn.textContent=`ALIGNEMENT ${teamDisplayName(g.home).toUpperCase()}${s.homeLocked?" 🔒":""}`;
     homeBtn.disabled=!s.homeSubmitted;
   }
 
@@ -4124,14 +4236,14 @@ function openOfficialTeamAlignment(side){
 
   const teamName=side==="away"?g.away:g.home;
   if(!teams[teamName]){
-    toast(`L’équipe ${teamName} n’a pas encore de joueurs configurés dans le prototype.`);
+    toast(`L’équipe ${teamDisplayName(teamName)} n’a pas encore de joueurs configurés dans le prototype.`);
     return;
   }
 
   officialAlignmentReviewSide=side;
 
   $("officialGameDetailModal").classList.remove("show");
-  $("officialAlignmentReviewTitle").textContent=`ALIGNEMENT ${teamName.toUpperCase()}`;
+  $("officialAlignmentReviewTitle").textContent=`ALIGNEMENT ${teamDisplayName(teamName).toUpperCase()}`;
   $("officialAlignmentReviewMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}${g.field?` • ${g.field}`:""}`;
 
   renderOfficialSingleLineupReview();
@@ -4186,14 +4298,14 @@ function renderOfficialSingleLineupReview(){
 
     list.innerHTML=`
       <div class="readonly-note" style="margin-bottom:10px">
-        <strong>${teamName}</strong><br>
+        <strong>${teamDisplayName(teamName)}</strong><br>
         ${locked?"🔒 Alignement déjà verrouillé":"✅ Alignement soumis — prêt à être validé"}
       </div>
 
       <div class="section-title">ORDRE DES FRAPPEURS</div>
       ${lineupHtml}
 
-      <div class="section-title" style="margin-top:14px">BANC — ${teamName.toUpperCase()}</div>
+      <div class="section-title" style="margin-top:14px">BANC — ${teamDisplayName(teamName).toUpperCase()}</div>
       ${benchHtml}
     `;
   }
@@ -4201,13 +4313,13 @@ function renderOfficialSingleLineupReview(){
   const btn=$("officialApproveSingleLineupBtn");
   if(btn){
     btn.classList.toggle("hidden",locked);
-    btn.textContent=`APPROUVER ET VERROUILLER ${teamName.toUpperCase()}`;
+    btn.textContent=`APPROUVER ET VERROUILLER ${teamDisplayName(teamName).toUpperCase()}`;
   }
 
   const status=$("officialSingleLineupLockStatus");
   if(status){
     status.classList.toggle("hidden",!locked);
-    if(locked)status.textContent=`🔒 Alignement ${teamName} approuvé et verrouillé`;
+    if(locked)status.textContent=`🔒 Alignement ${teamDisplayName(teamName)} approuvé et verrouillé`;
   }
 }
 
@@ -4241,7 +4353,7 @@ function approveSelectedTeamLineup(){
   officialLockedTeams[teamName]=true;
   renderOfficialSingleLineupReview();
   renderOfficialGameStatus();
-  toast(`Alignement ${teamName} verrouillé`);
+  toast(`Alignement ${teamDisplayName(teamName)} verrouillé`);
 }
 
 function closeOfficialAlignmentReview(){
@@ -4269,7 +4381,7 @@ function prepareSelectedOfficialGame(){
 
   officialPrepInnings=leagueSettings.regulationInnings||regulationInnings||7;
 
-  $("officialPreGameTitle").textContent=`PRÉPARER • ${g.away} vs ${g.home}`;
+  $("officialPreGameTitle").textContent=`PRÉPARER • ${teamDisplayName(g.away)} vs ${teamDisplayName(g.home)}`;
   $("officialPreGameMeta").textContent=`${formatScheduleDate(g.date)} • ${g.time}${g.field?` • ${g.field}`:""}`;
 
   renderOfficialPreGame();
@@ -4286,11 +4398,11 @@ function renderOfficialPreGame(){
   if(wrap){
     wrap.innerHTML=`
       <div class="readonly-note" style="margin-bottom:8px">
-        <strong>${g.away}</strong><br>
+        <strong>${teamDisplayName(g.away)}</strong><br>
         ${s?.awayLocked?"🔒 Alignement verrouillé":"⏳ Non verrouillé"}
       </div>
       <div class="readonly-note">
-        <strong>${g.home}</strong><br>
+        <strong>${teamDisplayName(g.home)}</strong><br>
         ${s?.homeLocked?"🔒 Alignement verrouillé":"⏳ Non verrouillé"}
       </div>`;
   }
@@ -4491,7 +4603,7 @@ function renderCompletedGameLineScore(game){
   const el=$("matchDetailLineScore");if(!el)return;
   const maxInning=Math.max(game.regulationInnings||0,...Object.keys(game.inningRuns?.[game.awayTeam]||{}).map(Number),...Object.keys(game.inningRuns?.[game.homeTeam]||{}).map(Number));
   const headers=Array.from({length:maxInning},(_,i)=>`<th>${i+1}</th>`).join("");
-  const row=(team,total)=>`<tr><td>${team}</td>${Array.from({length:maxInning},(_,i)=>{const v=game.inningRuns?.[team]?.[i+1];return `<td>${v==null?"":v}</td>`}).join("")}<td><strong>${total}</strong></td></tr>`;
+  const row=(team,total)=>`<tr><td>${teamDisplayName(team)}</td>${Array.from({length:maxInning},(_,i)=>{const v=game.inningRuns?.[team]?.[i+1];return `<td>${v==null?"":v}</td>`}).join("")}<td><strong>${total}</strong></td></tr>`;
   el.innerHTML=`<div class="table-scroll"><table><thead><tr><th>Équipe</th>${headers}<th>R</th></tr></thead><tbody>${row(game.awayTeam,game.awayRuns)}${row(game.homeTeam,game.homeRuns)}</tbody></table></div>`;
 }
 
@@ -4561,7 +4673,7 @@ function renderCompletedBattingStats(teamData,teamName,frozenStats=null){
       <td>${value(p,"K")}</td>
     </tr>`).join("");
 
-  el.innerHTML=`<div class="section-title">STATISTIQUES AU BÂTON — ${teamName.toUpperCase()}</div>
+  el.innerHTML=`<div class="section-title">STATISTIQUES AU BÂTON — ${teamDisplayName(teamName).toUpperCase()}</div>
   <div class="table-scroll"><table>
     <thead><tr><th>Joueur</th><th>AB</th><th>H</th><th>MOY</th><th>HR</th><th>RBI</th><th>R</th><th>BB</th><th>K</th></tr></thead>
     <tbody>${rows||'<tr><td colspan="9">Aucune statistique.</td></tr>'}</tbody>
@@ -4579,7 +4691,7 @@ function renderCompletedPitchingStats(teamData,teamName){
   const ip=`${Math.floor((ps.outs||0)/3)}.${(ps.outs||0)%3}`;
   const eraValue=(ps.outs||0)?(((ps.er||0)*27)/(ps.outs||1)).toFixed(2):"0.00";
 
-  el.innerHTML=`<div class="section-title">LANCEURS — ${teamName.toUpperCase()}</div>
+  el.innerHTML=`<div class="section-title">LANCEURS — ${teamDisplayName(teamName).toUpperCase()}</div>
   <div class="table-scroll"><table>
     <thead><tr><th>Lanceur</th><th>IP</th><th>K</th><th>BB</th><th>ERA</th></tr></thead>
     <tbody><tr>
@@ -4604,7 +4716,7 @@ function proposeGameOver(winner,reason,options={}){
 
   const msg=$("gameOverMessage");
   const detail=$("gameOverDetail");
-  if(msg)msg.textContent=`Fin potentielle : ${winner} mène ${state.awayRuns} - ${state.homeRuns}.`;
+  if(msg)msg.textContent=`Fin potentielle : ${teamDisplayName(winner)} mène ${state.awayRuns} - ${state.homeRuns}.`;
   if(detail)detail.textContent=reason||"Le match semble terminé selon le format choisi.";
 
   const adjust=$("gameOverInningAdjust");
@@ -4671,7 +4783,7 @@ function confirmGameOver(){
   teams[activeAwayTeam].submitted=true;
   teams[activeHomeTeam].submitted=true;
 
-  addLog(`FIN DU MATCH • ${state.winner} gagnent ${state.awayRuns}-${state.homeRuns}`);
+  addLog(`FIN DU MATCH • ${teamDisplayName(state.winner)} gagnent ${state.awayRuns}-${state.homeRuns}`);
 
   saveFinalGameToLocalSeason();
 
@@ -4751,7 +4863,7 @@ function checkWalkOff(){
   if(!state.top&&isFinalOrExtraInning()&&state.homeRuns>state.awayRuns){
     if(!pendingGameOver)proposeGameOver(
       activeHomeTeam,
-      `${activeHomeTeam} ont pris l’avance en fin de la dernière manche. Confirmez la fin du match ou terminez la manche si les PP / PC doivent être comptabilisés.`,
+      `${teamDisplayName(activeHomeTeam)} ont pris l’avance en fin de la dernière manche. Confirmez la fin du match ou terminez la manche si les PP / PC doivent être comptabilisés.`,
       {canFinishInning:true,finishMode:"currentBottom"}
     );
     return false;
@@ -4844,7 +4956,7 @@ function endHalfIfNeeded(){
     state.outs=0;state.halfBatters=0;state.bases={1:null,2:null,3:null};state.pending=[];
     proposeGameOver(
       activeHomeTeam,
-      `${activeHomeTeam} mènent après le haut de la dernière manche.`,
+      `${teamDisplayName(activeHomeTeam)} mènent après le haut de la dernière manche.`,
       {canFinishInning:true,finishMode:"playBottom"}
     );
     return true;
@@ -4852,7 +4964,7 @@ function endHalfIfNeeded(){
 
   if(!endingTop&&inningJustPlayed>=regulationInnings&&state.awayRuns>state.homeRuns){
     state.outs=0;state.halfBatters=0;state.bases={1:null,2:null,3:null};state.pending=[];
-    proposeGameOver(activeAwayTeam,`${activeAwayTeam} mènent après la fin de la manche prévue.`);
+    proposeGameOver(activeAwayTeam,`${teamDisplayName(activeAwayTeam)} mènent après la fin de la manche prévue.`);
     return true;
   }
 
@@ -5348,7 +5460,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.17.5 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.17.8 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -7056,7 +7168,7 @@ function renderLineScoreInto(id){
   const table=$(id);if(!table)return;
   const last=Math.max(displayedInnings,regulationInnings,state.inning),innings=Array.from({length:last},(_,i)=>i+1);
   const head=innings.map(i=>`<th class="${i===state.inning?"current-inning":""}">${i}</th>`).join("");
-  const row=(team,total)=>`<tr><td>${team}</td>${innings.map(i=>`<td class="${i===state.inning?"current-inning":""}">${inningRuns(team,i)}</td>`).join("")}<td>${total}</td></tr>`;
+  const row=(team,total)=>`<tr><td>${teamDisplayName(team)}</td>${innings.map(i=>`<td class="${i===state.inning?"current-inning":""}">${inningRuns(team,i)}</td>`).join("")}<td>${total}</td></tr>`;
   table.innerHTML=`<thead><tr><th>Équipe</th>${head}<th>R</th></tr></thead><tbody>${row(activeAwayTeam,state.awayRuns)}${row(activeHomeTeam,state.homeRuns)}</tbody>`;
 }
 
@@ -7322,9 +7434,9 @@ function renderViewer(){
 
   if(mode==="live"){
     renderLineScores();
-    $("viewerStatus").textContent=`Match en cours • ${currentBattingTeam()} au bâton`;
+    $("viewerStatus").textContent=`Match en cours • ${teamDisplayName(currentBattingTeam())} au bâton`;
   }else if(mode==="final"&&target){
-    $("viewerStatus").textContent=`Match terminé • ${target.awayTeam} ${target.awayRuns} – ${target.homeTeam} ${target.homeRuns}`;
+    $("viewerStatus").textContent=`Match terminé • ${teamDisplayName(target.awayTeam)} ${target.awayRuns} – ${teamDisplayName(target.homeTeam)} ${target.homeRuns}`;
     const ls=$("viewerLineScore");
     if(ls){
       const maxInning=Math.max(
@@ -7333,7 +7445,7 @@ function renderViewer(){
         ...Object.keys(target.inningRuns?.[target.homeTeam]||{}).map(Number)
       );
       const headers=Array.from({length:maxInning},(_,i)=>`<th>${i+1}</th>`).join("");
-      const row=(team,total)=>`<tr><td>${team}</td>${Array.from({length:maxInning},(_,i)=>{
+      const row=(team,total)=>`<tr><td>${teamDisplayName(team)}</td>${Array.from({length:maxInning},(_,i)=>{
         const v=target.inningRuns?.[team]?.[i+1];
         return `<td>${v==null?"":v}</td>`;
       }).join("")}<td><strong>${total}</strong></td></tr>`;
@@ -7341,7 +7453,7 @@ function renderViewer(){
         <tbody>${row(target.awayTeam,target.awayRuns)}${row(target.homeTeam,target.homeRuns)}</tbody>`;
     }
   }else{
-    $("viewerStatus").textContent=`Prochain match • ${activeAwayTeam} vs ${activeHomeTeam}`;
+    $("viewerStatus").textContent=`Prochain match • ${teamDisplayName(activeAwayTeam)} vs ${teamDisplayName(activeHomeTeam)}`;
     const ls=$("viewerLineScore");if(ls)ls.innerHTML="";
   }
 
@@ -7350,7 +7462,7 @@ function renderViewer(){
   const teamData=teams[team];
 
   const title=$("viewerStatsTeamTitle");
-  if(title)title.textContent=team.toUpperCase();
+  if(title)title.textContent=teamDisplayName(team).toUpperCase();
 
   const logoHost=$("viewerStatsTeamLogo");
   if(logoHost)logoHost.innerHTML=`<div style="font-size:30px">⚾</div>`;

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.18.0</title>
+<title>Diamond v0.18.2</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1724,10 +1724,52 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0182-return-buttons">
+#returnMatchBtn,
+#officialReturnToGameBottom{
+  background:#245b3d!important;
+  border-color:#3b8b60!important;
+  color:#f4f7fb!important;
+}
+</style>
+
+
+<style id="diamond-v0182-playoff-editor">
+.playoff-matchup-row{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  gap:7px;
+  align-items:end;
+  padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.playoff-matchup-row:last-child{border-bottom:0}
+.playoff-matchup-vs{
+  align-self:center;
+  padding-bottom:10px;
+  font-weight:950;
+  color:#9fb0c3;
+}
+.playoff-matchup-row select{
+  width:100%;
+  min-width:0;
+}
+@media(max-width:520px){
+  .playoff-matchup-row{
+    grid-template-columns:1fr;
+  }
+  .playoff-matchup-vs{
+    padding:0;
+    text-align:center;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.0 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.2 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -1765,22 +1807,46 @@ body.role-viewer .strike-count{
   </section>
 
 
+
+<div class="modal" id="competitionTypeModal">
+  <div class="sheet">
+    <h3>⚙️ Que voulez-vous gérer?</h3>
+    <div class="readonly-note">
+      Diamond adaptera ensuite les mots, les paramètres et les options au type de compétition choisi.
+    </div>
+
+    <div class="role-grid" style="margin-top:12px">
+      <button type="button" class="role-card" onclick="chooseCompetitionType('league')">
+        <strong>⚾ LIGUE</strong>
+        <small>Saison, calendrier, classement et séries au besoin.</small>
+      </button>
+
+      <button type="button" class="role-card" onclick="chooseCompetitionType('tournament')">
+        <strong>🏆 TOURNOI</strong>
+        <small>Pools, terrains, matchs condensés et éliminatoires.</small>
+      </button>
+    </div>
+
+    <button type="button" style="width:100%;margin-top:10px" onclick="cancelCompetitionTypeChoice()">RETOUR</button>
+  </div>
+</div>
+
   <section id="managerHub" class="hidden">
     <div class="role-topbar">
       <div>
-        <b>⚙️ Gestionnaire de ligue / tournoi</b>
-        <div class="muted" style="font-size:12px">Crée et administre la ligue ou le tournoi, ses équipes, ses règles et son calendrier.</div>
+        <b id="managerRoleTitle">⚙️ Gestionnaire de ligue / tournoi</b>
+        <div id="managerRoleSub" class="muted" style="font-size:12px">Crée et administre la ligue ou le tournoi, ses équipes, ses règles et son calendrier.</div>
       </div>
       <button type="button" onclick="backToRoleHome()">CHANGER DE RÔLE</button>
     </div>
 
     <div class="card">
-      <div class="section-title">Administration de la ligue / du tournoi</div>
+      <div id="managerAdminTitle" class="section-title">Administration de la ligue / du tournoi</div>
       <h2>Que voulez-vous gérer?</h2>
       <div class="role-grid">
         <button class="role-card" type="button" onclick="openTeamManager()">
-          <strong>🏟️ Ligue / tournoi et équipes</strong>
-          <small>Commencez ici : nom de la ligue ou du tournoi, nombre d’équipes, noms, logos et couleurs.</small>
+          <strong id="managerTeamsCardTitle">🏟️ Ligue / tournoi et équipes</strong>
+          <small id="managerTeamsCardSub">Commencez ici : nom de la ligue ou du tournoi, nombre d’équipes, noms, logos et couleurs.</small>
         </button>
         <button class="role-card" type="button" onclick="openLeagueSettings()">
           <strong>⚙️ Règles et calendrier automatique</strong>
@@ -1796,11 +1862,11 @@ body.role-viewer .strike-count{
         </button>
         <button class="role-card" type="button" onclick="openLeagueInvite()">
           <strong>🔗 Invitations et QR Code</strong>
-          <small>Afficher le QR officiel de la ligue, le partager, le régénérer et contrôler sa visibilité dans la recherche.</small>
+          <small id="managerInviteCardSub">Afficher le QR officiel de la ligue, le partager, le régénérer et contrôler sa visibilité dans la recherche.</small>
         </button>
         <button class="role-card" type="button" onclick="openLeagueInfo('standings')">
           <strong>🏆 Classement</strong>
-          <small>Consulter le classement actuel de la ligue.</small>
+          <small id="managerStandingsCardSub">Consulter le classement actuel de la ligue.</small>
         </button>
         <button class="role-card" type="button" onclick="openLeagueInfo('stats')">
           <strong>📊 Statistiques</strong>
@@ -2097,7 +2163,7 @@ body.role-viewer .strike-count{
       <div id="inningFormatBlock" style="margin-top:14px">
         <div class="section-title">Règles du match</div>
         <div id="officialRulesSummary" class="readonly-note">
-          Les règles sont définies par le gestionnaire de la ligue / du tournoi.
+          Les règles sont définies par le gestionnaire de la compétition.
         </div>
       </div>
       <button id="officialReturnToGameBottom" type="button" class="primary hidden"
@@ -2432,8 +2498,13 @@ body.role-viewer .strike-count{
           <label>Confrontations</label>
           <select id="mgrPoolPlayMode" onchange="updateScheduleMathPreview()">
             <option value="within">Chaque équipe joue seulement dans son pool</option>
+            <option value="cross">Chaque équipe joue seulement contre les autres pools</option>
             <option value="all">Toutes les équipes peuvent s’affronter</option>
           </select>
+          <div class="muted" style="font-size:11px;margin-top:6px">
+            « Autres pools » signifie qu’une équipe ne joue jamais contre une équipe de son propre pool.
+            Avec 2 pools, le Pool A joue donc seulement contre le Pool B.
+          </div>
         </div>
       </div>
 
@@ -2470,6 +2541,30 @@ body.role-viewer .strike-count{
         </div>
         <div id="fieldNamesContainer"></div>
       </div>
+
+      <div id="seasonPauseSectionTitle" class="manager-section-title">🗓️ Saison et pause</div>
+
+      <div class="manager-setting">
+        <label id="seasonStartLabel">Date de début de la saison</label>
+        <input id="mgrSeasonStart" type="date" value="2026-09-07">
+      </div>
+
+      <div class="manager-setting">
+        <label id="seasonEndLabel">Date de fin de la saison</label>
+        <input id="mgrSeasonEnd" type="date" value="2026-10-31">
+      </div>
+
+      <div class="manager-setting full">
+        <label id="seasonPauseToggleLabel"><input id="mgrSeasonPause" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Il y aura une pause dans la saison</label>
+        <div class="manager-inline-grid" style="margin-top:8px">
+          <div><label>Début de la pause</label><input id="mgrPauseStart" type="date"></div>
+          <div><label>Fin de la pause</label><input id="mgrPauseEnd" type="date"></div>
+        </div>
+        <div class="muted" style="font-size:11px;margin-top:6px">
+          Aucun match ne sera généré automatiquement pendant la pause. Un match remis peut quand même y être replanifié manuellement.
+        </div>
+      </div>
+
 
       <div class="manager-section-title">📅 Structure hebdomadaire</div>
 
@@ -2541,29 +2636,6 @@ body.role-viewer .strike-count{
         <div id="teamRequestsList"></div>
       </div>
 
-      <div class="manager-section-title">🗓️ Saison et pause</div>
-
-      <div class="manager-setting">
-        <label>Date de début de la saison</label>
-        <input id="mgrSeasonStart" type="date" value="2026-09-07">
-      </div>
-
-      <div class="manager-setting">
-        <label>Date de fin de la saison</label>
-        <input id="mgrSeasonEnd" type="date" value="2026-10-31">
-      </div>
-
-      <div class="manager-setting full">
-        <label><input id="mgrSeasonPause" type="checkbox" onchange="toggleLeagueSettingDependencies()"> Il y aura une pause dans la saison</label>
-        <div class="manager-inline-grid" style="margin-top:8px">
-          <div><label>Début de la pause</label><input id="mgrPauseStart" type="date"></div>
-          <div><label>Fin de la pause</label><input id="mgrPauseEnd" type="date"></div>
-        </div>
-        <div class="muted" style="font-size:11px;margin-top:6px">
-          Aucun match ne sera généré automatiquement pendant la pause. Un match remis peut quand même y être replanifié manuellement.
-        </div>
-      </div>
-
       <div class="manager-section-title">🏆 Qualification / séries</div>
 
       <div class="manager-setting full">
@@ -2571,15 +2643,29 @@ body.role-viewer .strike-count{
         <div id="playoffFieldsWrap" class="manager-inline-grid hidden" style="margin-top:8px">
           <div>
             <label>Qualifiés par pool</label>
-            <input id="mgrQualifyPerPool" type="number" min="1" max="8" value="2" oninput="updateScheduleMathPreview()">
+            <input id="mgrQualifyPerPool" type="number" min="1" max="8" value="2"
+                   oninput="renderPlayoffMatchupEditor();updateScheduleMathPreview()">
           </div>
           <div>
             <label>Meilleurs suivants / wildcards</label>
-            <input id="mgrWildcardCount" type="number" min="0" max="16" value="0" oninput="updateScheduleMathPreview()">
+            <input id="mgrWildcardCount" type="number" min="0" max="16" value="0"
+                   oninput="renderPlayoffMatchupEditor();updateScheduleMathPreview()">
           </div>
+
+          <div style="grid-column:1/-1">
+            <label>Confrontations de la première ronde</label>
+            <select id="mgrPlayoffMatchupMode" onchange="renderPlayoffMatchupEditor();updateScheduleMathPreview()">
+              <option value="seed">Classement général • 1er vs dernier, 2e vs avant-dernier…</option>
+              <option value="cross">Croisé entre pools • ex. A1 vs B2, B1 vs A2</option>
+              <option value="custom">Personnalisé • choisir chaque confrontation</option>
+            </select>
+          </div>
+
+          <div id="playoffMatchupsEditor" style="grid-column:1/-1"></div>
         </div>
         <div class="muted" style="font-size:11px;margin-top:6px">
-          Ces paramètres servent à préparer la qualification. Le tableau éliminatoire automatique sera la prochaine étape du moteur de tournoi.
+          Diamond génère les matchs éliminatoires dans l’horaire. En mode personnalisé, vous pouvez choisir par exemple
+          <b>1er Pool A vs 2e Pool B</b> ou <b>1er général vs 4e général</b>.
         </div>
       </div>
 
@@ -2684,11 +2770,11 @@ body.role-viewer .strike-count{
 <div class="modal" id="teamManagerModal">
   <div class="sheet">
     <div class="league-info-header">
-      <h3>🏟️ Équipes de la ligue</h3>
+      <h3 id="teamManagerTitle">🏟️ Équipes de la ligue</h3>
       <button type="button" class="league-info-close-top" onclick="closeTeamManager()">FERMER</button>
     </div>
     <div class="manager-setting">
-      <label>Nom de la ligue / du tournoi</label>
+      <label id="competitionNameLabel">Nom de la ligue / du tournoi</label>
       <input id="mgrLeagueNameTeam" type="text" value="Ligue Diamond" placeholder="Ex. Ligue de baseball Saguenay">
     </div>
 
@@ -4284,11 +4370,23 @@ function nextScheduleOrder(){
   return leagueSchedule.reduce((m,g)=>Math.max(m,Number(g.scheduleOrder)||0),0)+1;
 }
 
+function scheduleTimeSortValue(time){
+  const [h,m]=String(time||"00:00").split(":").map(Number);
+  let mins=(Number(h)||0)*60+(Number(m)||0);
+  // A tournament day can continue after midnight. A 00:45 game belongs
+  // after 23:30 when both are stored under the same competition date.
+  if(mins<360)mins+=24*60;
+  return mins;
+}
+
 function compareScheduleGames(a,b){
   const ad=String(a.date||""), bd=String(b.date||"");
   if(ad!==bd)return ad.localeCompare(bd);
-  const at=String(a.time||""), bt=String(b.time||"");
-  if(at!==bt)return at.localeCompare(bt);
+
+  const av=scheduleTimeSortValue(a.time);
+  const bv=scheduleTimeSortValue(b.time);
+  if(av!==bv)return av-bv;
+
   return (Number(a.scheduleOrder)||0)-(Number(b.scheduleOrder)||0);
 }
 
@@ -5683,6 +5781,7 @@ let currentRole=null;
 let managerSelectedGameId=null;
 let pendingTieInning=null;
 let leagueSettings={
+  competitionType:null,
   name:"Ligue Diamond",
   teamCount:6,
   regulationInnings:7,
@@ -5715,7 +5814,9 @@ let leagueSettings={
   pauseEnd:"",
   usePlayoffs:false,
   qualifyPerPool:2,
-  wildcardCount:0
+  wildcardCount:0,
+  playoffMatchupMode:"seed",
+  playoffCustomFirstRound:[]
 };
 let leagueTeamOrder=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"];
 let leagueTeamMeta={
@@ -5859,7 +5960,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.18.0 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.18.2 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -6204,10 +6305,26 @@ function teamsGroupedByPool(settings=leagueSettings){
 
 function requiredGameCountForSettings(perOpponent){
   const n=leagueTeamIds().length;
-  if(leagueSettings.usePools && ($("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode)==="within"){
+  const mode=$("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode;
+
+  if(leagueSettings.usePools && mode==="within"){
     const groups=teamsGroupedByPool(leagueSettings);
-    return Object.values(groups).reduce((sum,arr)=>sum+(arr.length*(arr.length-1)/2)*perOpponent,0);
+    return Object.values(groups).reduce(
+      (sum,arr)=>sum+(arr.length*(arr.length-1)/2)*perOpponent,
+      0
+    );
   }
+
+  if(leagueSettings.usePools && mode==="cross"){
+    const groups=Object.values(teamsGroupedByPool(leagueSettings));
+    const allPairs=n*(n-1)/2;
+    const withinPairs=groups.reduce(
+      (sum,arr)=>sum+(arr.length*(arr.length-1)/2),
+      0
+    );
+    return (allPairs-withinPairs)*perOpponent;
+  }
+
   return (n*(n-1)/2)*perOpponent;
 }
 
@@ -6226,8 +6343,14 @@ function updateScheduleMathPreview(){
 
   const playoffPreviewCount=$("mgrUsePlayoffs")?.checked?Math.max(0,playoffQualifierCount({...leagueSettings,usePlayoffs:true,qualifyPerPool:Number($("mgrQualifyPerPool")?.value)||2,wildcardCount:Number($("mgrWildcardCount")?.value)||0})-1):0;
   const weeks=weekly?Math.ceil((total+playoffPreviewCount)/weekly):"—";
+  const poolMode=$("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode;
+  const poolModeLabel=poolMode==="within"
+    ?"matchs seulement dans chaque pool"
+    :poolMode==="cross"
+      ?"matchs seulement contre les autres pools"
+      :"toutes les équipes peuvent s’affronter";
   const poolText=leagueSettings.usePools
-    ? `${leagueSettings.poolCount||0} pools • ${($("mgrPoolPlayMode")?.value||leagueSettings.poolPlayMode)==="within"?"matchs dans chaque pool":"confrontations tous pools"}`
+    ? `${leagueSettings.poolCount||0} pools • ${poolModeLabel}`
     : "Aucun pool";
 
   let qualification="";
@@ -6321,7 +6444,179 @@ function readCurrentFieldNames(){
 function togglePlayoffFields(){
   const on=!!$("mgrUsePlayoffs")?.checked;
   if($("playoffFieldsWrap"))$("playoffFieldsWrap").classList.toggle("hidden",!on);
+  if(on)renderPlayoffMatchupEditor();
   updateScheduleMathPreview();
+}
+
+
+function playoffFirstRoundPairCount(settings=leagueSettings){
+  const q=playoffQualifierCount(settings);
+  if(q<2)return 0;
+  const lower=2**Math.floor(Math.log2(q));
+  const prelim=q-lower;
+  return prelim>0?prelim:q/2;
+}
+
+function playoffSourceToken(source){
+  if(!source)return "";
+  if(source.type==="poolRank")return `pool:${source.poolIndex}:${source.rank}`;
+  if(source.type==="overallRank")return `overall:${source.rank}`;
+  if(source.type==="seed")return `overall:${source.seed}`;
+  return "";
+}
+
+function parsePlayoffSourceToken(token){
+  const parts=String(token||"").split(":");
+  if(parts[0]==="pool"){
+    return {type:"poolRank",poolIndex:Number(parts[1])||0,rank:Number(parts[2])||1};
+  }
+  if(parts[0]==="overall"){
+    return {type:"overallRank",rank:Number(parts[1])||1};
+  }
+  return null;
+}
+
+function playoffSourceOptionsHtml(selectedToken=""){
+  const options=[];
+  const qCount=Math.max(2,playoffQualifierCount({
+    ...leagueSettings,
+    usePlayoffs:true,
+    qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool")?.value)||leagueSettings.qualifyPerPool||2),
+    wildcardCount:Math.max(0,Number($("mgrWildcardCount")?.value)||leagueSettings.wildcardCount||0)
+  }));
+
+  for(let rank=1;rank<=qCount;rank++){
+    options.push({value:`overall:${rank}`,label:`Classement général • ${rank}e`});
+  }
+
+  if(leagueSettings.usePools){
+    const groups=Object.entries(teamsGroupedByPool(leagueSettings));
+    const qPer=Math.max(1,Number($("mgrQualifyPerPool")?.value)||leagueSettings.qualifyPerPool||2);
+    groups.forEach(([name,teamIds],poolIndex)=>{
+      const maxRank=Math.min(teamIds.length,qPer);
+      for(let rank=1;rank<=maxRank;rank++){
+        options.push({value:`pool:${poolIndex}:${rank}`,label:`${name} • ${rank}e`});
+      }
+    });
+  }
+
+  return options.map(o=>`<option value="${o.value}" ${o.value===selectedToken?"selected":""}>${o.label}</option>`).join("");
+}
+
+function defaultCrossPoolPairings(settings=leagueSettings){
+  const pairCount=playoffFirstRoundPairCount(settings);
+  const qPer=Math.max(1,Number($("mgrQualifyPerPool")?.value)||settings.qualifyPerPool||2);
+
+  if(!settings.usePools || Number(settings.poolCount)!==2 || pairCount<1){
+    return [];
+  }
+
+  const pairs=[];
+  for(let i=0;i<pairCount;i++){
+    const rank=Math.floor(i/2)+1;
+    const oppositeRank=Math.max(1,qPer-rank+1);
+    if(i%2===0){
+      pairs.push({
+        awaySource:{type:"poolRank",poolIndex:0,rank},
+        homeSource:{type:"poolRank",poolIndex:1,rank:oppositeRank}
+      });
+    }else{
+      pairs.push({
+        awaySource:{type:"poolRank",poolIndex:1,rank},
+        homeSource:{type:"poolRank",poolIndex:0,rank:oppositeRank}
+      });
+    }
+  }
+  return pairs;
+}
+
+function readPlayoffCustomPairingsFromForm(){
+  const pairCount=playoffFirstRoundPairCount({
+    ...leagueSettings,
+    usePlayoffs:!!$("mgrUsePlayoffs")?.checked,
+    qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool")?.value)||leagueSettings.qualifyPerPool||2),
+    wildcardCount:Math.max(0,Number($("mgrWildcardCount")?.value)||leagueSettings.wildcardCount||0)
+  });
+  const pairs=[];
+  for(let i=0;i<pairCount;i++){
+    const away=parsePlayoffSourceToken($(`playoffAway${i}`)?.value);
+    const home=parsePlayoffSourceToken($(`playoffHome${i}`)?.value);
+    if(away&&home)pairs.push({awaySource:away,homeSource:home});
+  }
+  return pairs;
+}
+
+function renderPlayoffMatchupEditor(){
+  const root=$("playoffMatchupsEditor");
+  if(!root)return;
+
+  const mode=$("mgrPlayoffMatchupMode")?.value||leagueSettings.playoffMatchupMode||"seed";
+  const settings={
+    ...leagueSettings,
+    usePlayoffs:true,
+    qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool")?.value)||leagueSettings.qualifyPerPool||2),
+    wildcardCount:Math.max(0,Number($("mgrWildcardCount")?.value)||leagueSettings.wildcardCount||0)
+  };
+  const q=playoffQualifierCount(settings);
+  const pairCount=playoffFirstRoundPairCount(settings);
+
+  if(q<2){
+    root.innerHTML='<div class="readonly-note">Il faut au moins 2 équipes qualifiées.</div>';
+    return;
+  }
+
+  if(mode==="seed"){
+    root.innerHTML=`<div class="readonly-note">
+      Diamond utilisera le classement général des équipes qualifiées :
+      <b>1er vs ${q}e</b>, <b>2e vs ${Math.max(2,q-1)}e</b>, etc.
+    </div>`;
+    return;
+  }
+
+  if(mode==="cross"){
+    const pairs=defaultCrossPoolPairings(settings);
+    if(!pairs.length){
+      root.innerHTML=`<div class="competition-warning">
+        Le croisement automatique A1 vs B2 / B1 vs A2 est disponible lorsque le tournoi utilise exactement <b>2 pools</b>.
+        Pour 3 pools ou plus, choisissez <b>Personnalisé</b>.
+      </div>`;
+      return;
+    }
+    root.innerHTML=pairs.map((p,i)=>`
+      <div class="readonly-note" style="margin-top:${i?"7":"0"}">
+        <b>Match ${i+1}</b> • ${playoffSourceLabel(p.awaySource)} vs ${playoffSourceLabel(p.homeSource)}
+      </div>`).join("");
+    return;
+  }
+
+  const saved=Array.isArray(leagueSettings.playoffCustomFirstRound)?leagueSettings.playoffCustomFirstRound:[];
+  root.innerHTML=Array.from({length:pairCount},(_,i)=>{
+    const fallbackAway=`overall:${i+1}`;
+    const fallbackHome=`overall:${Math.max(1,q-i)}`;
+    const awayToken=playoffSourceToken(saved[i]?.awaySource)||fallbackAway;
+    const homeToken=playoffSourceToken(saved[i]?.homeSource)||fallbackHome;
+
+    return `<div class="playoff-matchup-row">
+      <div>
+        <label>Match ${i+1} • Équipe 1</label>
+        <select id="playoffAway${i}">${playoffSourceOptionsHtml(awayToken)}</select>
+      </div>
+      <div class="playoff-matchup-vs">VS</div>
+      <div>
+        <label>Équipe 2</label>
+        <select id="playoffHome${i}">${playoffSourceOptionsHtml(homeToken)}</select>
+      </div>
+    </div>`;
+  }).join("");
+
+  const lower=2**Math.floor(Math.log2(q));
+  const prelim=q-lower;
+  if(prelim>0){
+    root.insertAdjacentHTML("beforeend",`<div class="muted" style="font-size:11px;margin-top:8px">
+      ${q} équipes qualifiées nécessitent ${prelim} match${prelim>1?"s":""} de qualification.
+      Les meilleures têtes de série restantes obtiennent un bye automatiquement.
+    </div>`);
+  }
 }
 
 function renderPoolRulesSummary(){
@@ -6475,6 +6770,7 @@ function fillLeagueSettingsForm(){
   $("mgrUsePlayoffs").checked=!!leagueSettings.usePlayoffs;
   $("mgrQualifyPerPool").value=leagueSettings.qualifyPerPool||2;
   $("mgrWildcardCount").value=leagueSettings.wildcardCount||0;
+  $("mgrPlayoffMatchupMode").value=leagueSettings.playoffMatchupMode||"seed";
 
   renderPoolRulesSummary();
   renderWeeklyDayRows();
@@ -6486,6 +6782,7 @@ function fillLeagueSettingsForm(){
 
   toggleLeagueSettingDependencies();
   togglePlayoffFields();
+  renderPlayoffMatchupEditor();
   updateScheduleMathPreview();
 }
 
@@ -6495,7 +6792,8 @@ function readLeagueSettingsForm(){
 
   const s={
     ...leagueSettings,
-    name:leagueSettings.name||"Ligue Diamond",
+    competitionType:leagueSettings.competitionType||"league",
+    name:leagueSettings.name||(competitionNounCapital()+" Diamond"),
     teamCount:leagueTeamIds().length,
     regulationInnings:Number($("mgrRegInnings").value)||7,
     outsPerHalf:$("mgrOutsPerHalf").value==="unlimited"?"unlimited":"3",
@@ -6514,7 +6812,11 @@ function readLeagueSettingsForm(){
     pauseEnd:$("mgrPauseEnd").value,
     usePlayoffs:!!$("mgrUsePlayoffs").checked,
     qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool").value)||1),
-    wildcardCount:Math.max(0,Number($("mgrWildcardCount").value)||0)
+    wildcardCount:Math.max(0,Number($("mgrWildcardCount").value)||0),
+    playoffMatchupMode:$("mgrPlayoffMatchupMode")?.value||"seed",
+    playoffCustomFirstRound:$("mgrPlayoffMatchupMode")?.value==="custom"
+      ?readPlayoffCustomPairingsFromForm()
+      :(leagueSettings.playoffCustomFirstRound||[])
   };
 
   const enabledDays=Object.values(weeklySlots).filter(x=>x.enabled&&x.count>0);
@@ -6537,6 +6839,7 @@ function readLeagueSettingsForm(){
 }
 
 function openLeagueSettings(){
+  updateCompetitionLanguage();
   fillLeagueSettingsForm();
   $("leagueSettingsModal").classList.add("show");
 }
@@ -6552,7 +6855,7 @@ function saveLeagueSettings(){
   }
   toggleLeagueSettingDependencies();
   ensureLeagueInvite();
-  toast("Paramètres de la ligue enregistrés • QR de ligue prêt");
+  toast(`Paramètres ${competitionArticle()} enregistrés • QR prêt`);
   return true;
 }
 
@@ -6621,10 +6924,16 @@ function playoffRoundName(participantCount,isPreliminary=false){
 
 function playoffSourceLabel(source){
   if(!source)return "À déterminer";
-  if(source.type==="seed")return `Tête de série #${source.seed}`;
+  if(source.type==="seed")return `Classement général • ${source.seed}e`;
+  if(source.type==="overallRank")return `Classement général • ${source.rank}e`;
+  if(source.type==="poolRank"){
+    const poolName=leagueSettings.poolNames?.[source.poolIndex]||`Pool ${String.fromCharCode(65+(source.poolIndex||0))}`;
+    return `${poolName} • ${source.rank}e`;
+  }
   if(source.type==="winner")return `Gagnant • ${source.label||source.gameId}`;
   return "À déterminer";
 }
+
 
 function buildPlayoffTemplate(s){
   const qualifierCount=playoffQualifierCount(s);
@@ -6632,6 +6941,7 @@ function buildPlayoffTemplate(s){
 
   const games=[];
   let seq=1;
+
   const makeGame=(roundName,awaySource,homeSource,roundIndex)=>{
     const id="PO"+String(seq).padStart(3,"0");
     const label=`${roundName} ${seq}`;
@@ -6657,30 +6967,74 @@ function buildPlayoffTemplate(s){
   const lowerPower=2**Math.floor(Math.log2(qualifierCount));
   const prelimGames=qualifierCount-lowerPower;
   const byes=lowerPower-prelimGames;
+  const mode=s.playoffMatchupMode||"seed";
+
+  const defaultPair=(i,total)=>({
+    awaySource:{type:"overallRank",rank:i+1},
+    homeSource:{type:"overallRank",rank:Math.max(1,total-i)}
+  });
+
+  let configuredPairs=[];
+
+  if(mode==="custom" && Array.isArray(s.playoffCustomFirstRound)){
+    configuredPairs=s.playoffCustomFirstRound;
+  }else if(mode==="cross"){
+    configuredPairs=defaultCrossPoolPairings(s);
+  }
 
   let tokens=[];
 
   if(prelimGames>0){
     const winners=[];
     for(let i=0;i<prelimGames;i++){
-      const a={type:"seed",seed:byes+1+i};
-      const b={type:"seed",seed:qualifierCount-i};
-      winners.push(makeGame("Ronde de qualification",a,b,0));
+      const fallback={
+        awaySource:{type:"overallRank",rank:byes+1+i},
+        homeSource:{type:"overallRank",rank:qualifierCount-i}
+      };
+      const pair=configuredPairs[i]||fallback;
+      winners.push(makeGame(
+        "Ronde de qualification",
+        pair.awaySource||fallback.awaySource,
+        pair.homeSource||fallback.homeSource,
+        0
+      ));
     }
+
     tokens=[
-      ...Array.from({length:byes},(_,i)=>({type:"seed",seed:i+1})),
+      ...Array.from({length:byes},(_,i)=>({type:"overallRank",rank:i+1})),
       ...winners
     ];
+
   }else{
-    tokens=Array.from({length:qualifierCount},(_,i)=>({type:"seed",seed:i+1}));
+    const pairCount=qualifierCount/2;
+    const winners=[];
+    const roundName=playoffRoundName(qualifierCount,false);
+
+    for(let i=0;i<pairCount;i++){
+      const fallback=defaultPair(i,qualifierCount);
+      const pair=configuredPairs[i]||fallback;
+      winners.push(makeGame(
+        roundName,
+        pair.awaySource||fallback.awaySource,
+        pair.homeSource||fallback.homeSource,
+        0
+      ));
+    }
+    tokens=winners;
   }
 
-  let roundIndex=prelimGames>0?1:0;
+  let roundIndex=prelimGames>0?1:1;
+
   while(tokens.length>1){
     const roundName=playoffRoundName(tokens.length,false);
     const next=[];
     for(let i=0;i<tokens.length/2;i++){
-      next.push(makeGame(roundName,tokens[i],tokens[tokens.length-1-i],roundIndex));
+      next.push(makeGame(
+        roundName,
+        tokens[i],
+        tokens[tokens.length-1-i],
+        roundIndex
+      ));
     }
     tokens=next;
     roundIndex++;
@@ -6688,6 +7042,7 @@ function buildPlayoffTemplate(s){
 
   return games;
 }
+
 
 function regularScheduleComplete(){
   const regular=leagueSchedule.filter(g=>!g.playoff&&!g.resumption&&g.status!=="cancelled");
@@ -6743,6 +7098,15 @@ function completedScheduleWinner(gameId){
 function resolvePlayoffSource(source,seeds){
   if(!source)return null;
   if(source.type==="seed")return seeds[source.seed-1]||null;
+  if(source.type==="overallRank")return seeds[source.rank-1]||null;
+
+  if(source.type==="poolRank"){
+    const groups=Object.values(teamsGroupedByPool(leagueSettings));
+    const poolTeams=groups[source.poolIndex]||[];
+    const ranked=sortStandingsRecords(poolTeams.map(standingsRecord));
+    return ranked[source.rank-1]?.team||null;
+  }
+
   if(source.type==="winner")return completedScheduleWinner(source.gameId);
   return null;
 }
@@ -6806,6 +7170,32 @@ function buildRequiredLeagueGames(s){
   if(s.usePools && s.poolPlayMode==="within"){
     const groups=teamsGroupedByPool(s);
     Object.entries(groups).forEach(([poolName,names])=>appendRounds(names,poolName));
+
+  }else if(s.usePools && s.poolPlayMode==="cross"){
+    const groups=Object.entries(teamsGroupedByPool(s));
+
+    for(let cycle=0;cycle<s.gamesPerOpponent;cycle++){
+      for(let a=0;a<groups.length;a++){
+        for(let b=a+1;b<groups.length;b++){
+          const [poolA,teamsA]=groups[a];
+          const [poolB,teamsB]=groups[b];
+
+          teamsA.forEach((teamA,i)=>{
+            teamsB.forEach((teamB,j)=>{
+              const swap=((cycle+i+j+a+b)%2)===1;
+              games.push({
+                away:swap?teamB:teamA,
+                home:swap?teamA:teamB,
+                cycle,
+                pool:`${poolA} vs ${poolB}`,
+                crossPool:true
+              });
+            });
+          });
+        }
+      }
+    }
+
   }else{
     appendRounds(leagueTeamIds(),null);
   }
@@ -7146,6 +7536,7 @@ function handleJoinFromUrl(){
 
 
 function openTeamManager(){
+  updateCompetitionLanguage();
   $("mgrActiveTeamCount").value=leagueTeamIds().length;
   if($("mgrLeagueNameTeam"))$("mgrLeagueNameTeam").value=leagueSettings.name||"Ligue Diamond";
   renderManagerTeamList();
@@ -7829,6 +8220,79 @@ function setRoleBadge(label){
   badge.classList.remove("hidden");
 }
 
+
+function competitionNoun(){
+  return leagueSettings.competitionType==="tournament"?"tournoi":"ligue";
+}
+function competitionNounCapital(){
+  return leagueSettings.competitionType==="tournament"?"Tournoi":"Ligue";
+}
+function competitionArticle(){
+  return leagueSettings.competitionType==="tournament"?"du tournoi":"de la ligue";
+}
+
+function updateCompetitionLanguage(){
+  const type=leagueSettings.competitionType||"league";
+  const isTournament=type==="tournament";
+  const noun=isTournament?"tournoi":"ligue";
+  const cap=isTournament?"Tournoi":"Ligue";
+
+  const setText=(id,text)=>{const el=$(id);if(el)el.textContent=text};
+
+  setText("managerRoleTitle",`⚙️ Gestionnaire de ${noun}`);
+  setText("managerRoleSub",`Crée et administre ${isTournament?"le tournoi":"la ligue"}, ses équipes, ses règles et son calendrier.`);
+  setText("managerAdminTitle",`Administration ${isTournament?"du tournoi":"de la ligue"}`);
+  setText("managerTeamsCardTitle",`🏟️ ${cap} et équipes`);
+  setText("managerTeamsCardSub",`Commencez ici : nom ${isTournament?"du tournoi":"de la ligue"}, nombre d’équipes, noms, logos et couleurs.`);
+  setText("managerInviteCardSub",`Afficher le QR officiel ${isTournament?"du tournoi":"de la ligue"}, le partager, le régénérer et contrôler sa visibilité dans la recherche.`);
+  setText("managerStandingsCardSub",`Consulter le classement actuel ${isTournament?"du tournoi":"de la ligue"}.`);
+  setText("teamManagerTitle",`🏟️ Équipes ${isTournament?"du tournoi":"de la ligue"}`);
+  setText("competitionNameLabel",`Nom ${isTournament?"du tournoi":"de la ligue"}`);
+
+  setText("seasonPauseSectionTitle",isTournament?"🗓️ Dates du tournoi et pause":"🗓️ Saison et pause");
+  setText("seasonStartLabel",isTournament?"Date de début du tournoi":"Date de début de la saison");
+  setText("seasonEndLabel",isTournament?"Date de fin du tournoi":"Date de fin de la saison");
+
+  const pauseLabel=$("seasonPauseToggleLabel");
+  if(pauseLabel){
+    pauseLabel.childNodes.forEach(node=>{
+      if(node.nodeType===Node.TEXT_NODE){
+        node.textContent=isTournament?" Il y aura une pause pendant le tournoi":" Il y aura une pause dans la saison";
+      }
+    });
+  }
+
+  const nameInput=$("mgrLeagueNameTeam");
+  if(nameInput){
+    nameInput.placeholder=isTournament?"Ex. Tournoi provincial Saguenay":"Ex. Ligue de baseball Saguenay";
+  }
+}
+
+function openCompetitionTypeChoice(){
+  updateCompetitionLanguage();
+  const modal=$("competitionTypeModal");
+  if(modal)modal.classList.add("show");
+}
+
+function cancelCompetitionTypeChoice(){
+  if($("competitionTypeModal"))$("competitionTypeModal").classList.remove("show");
+  backToRoleHome();
+}
+
+function chooseCompetitionType(type){
+  const previous=leagueSettings.competitionType;
+  leagueSettings.competitionType=type==="tournament"?"tournament":"league";
+
+  if(!previous || /^Ligue Diamond$|^Tournoi Diamond$/i.test(leagueSettings.name||"")){
+    leagueSettings.name=leagueSettings.competitionType==="tournament"?"Tournoi Diamond":"Ligue Diamond";
+  }
+
+  updateCompetitionLanguage();
+  if($("competitionTypeModal"))$("competitionTypeModal").classList.remove("show");
+  if($("managerHub"))$("managerHub").classList.remove("hidden");
+  setRoleBadge("GESTIONNAIRE");
+}
+
 function selectRole(role){
   currentRole=role;
 
@@ -7847,7 +8311,8 @@ function selectRole(role){
 
   if(role==="manager"){
     setRoleBadge("GESTIONNAIRE");
-    if($("managerHub"))$("managerHub").classList.remove("hidden");
+    if($("managerHub"))$("managerHub").classList.add("hidden");
+    openCompetitionTypeChoice();
     return;
   }
 
@@ -7909,6 +8374,7 @@ function backToRoleHome(){
   $("roleHome").classList.remove("hidden");
   if($("managerHub"))$("managerHub").classList.add("hidden");
   if($("officialHub"))$("officialHub").classList.add("hidden");
+  if($("competitionTypeModal"))$("competitionTypeModal").classList.remove("show");
   if($("gameLogCard"))$("gameLogCard").classList.add("hidden");
 }
 

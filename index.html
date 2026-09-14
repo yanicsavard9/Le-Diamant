@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.18.5</title>
+<title>Diamond v0.18.8</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1609,25 +1609,31 @@ body.role-viewer .strike-count{
 
   #leagueSettingsModal .weekly-quick-grid{
     display:grid;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
-    gap:9px;
-    margin-top:2px;
+    grid-template-columns:minmax(0,1fr) !important;
+    gap:10px;
+    margin-top:4px;
+  }
+
+  #leagueSettingsModal .weekly-quick-grid > div{
+    width:100%;
   }
 
   #leagueSettingsModal .weekly-quick-grid > div:last-child{
-    grid-column:1/-1 !important;
+    grid-column:auto !important;
   }
 
   #leagueSettingsModal .weekly-quick-grid label{
     line-height:1.2;
-    min-height:27px;
+    min-height:auto;
+    margin-bottom:6px;
   }
 
   #leagueSettingsModal .weekly-quick-grid input,
   #leagueSettingsModal .weekly-quick-grid select{
     width:100% !important;
-    min-height:48px;
-    font-size:16px;
+    min-height:50px;
+    font-size:17px;
+    border-radius:14px;
   }
 
   #leagueSettingsModal .weekly-active-toggle{
@@ -1794,7 +1800,7 @@ body.role-viewer .strike-count{
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.5 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.8 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2916,7 +2922,7 @@ body.role-viewer .strike-count{
       <button type="button" class="league-info-close-top" onclick="closeManagerSchedule()">FERMER</button>
     </div>
     <div class="readonly-note" style="margin-bottom:10px">
-      Un match <b>remis – pluie</b> reste à sa date originale dans l’horaire. Lorsqu’il est replanifié, Diamond crée un nouveau match marqué <b>REPRISE</b>.
+      Un match <b>remis – pluie</b> reste à sa date originale dans l’horaire. Sélectionnez ensuite <b>Créer une reprise</b> pour choisir sa nouvelle date, son heure et son terrain.
     </div>
     <button type="button" class="primary" style="width:100%;margin-bottom:10px" onclick="openManualGameModal()">＋ AJOUTER UN MATCH MANUELLEMENT</button>
     <div id="managerScheduleList"></div>
@@ -2931,22 +2937,32 @@ body.role-viewer .strike-count{
     </div>
     <div id="managerGameMatchup" class="readonly-note"></div>
 
-    <div class="manager-settings-grid" style="margin-top:12px">
-      <div class="manager-setting">
-        <label>Nouvelle date</label>
-        <input id="managerGameDate" type="date">
+    <button id="managerOpenSchedulingBtn" type="button" class="primary" style="width:100%;margin-top:12px" onclick="showManagerGameSchedulingForm()">REPLANIFIER LE MATCH</button>
+
+    <div id="managerGameSchedulingPanel" class="hidden">
+      <div id="managerGameSchedulingTitle" class="readonly-note" style="margin-top:12px">
+        Choisissez la nouvelle date, l’heure et le terrain.
       </div>
-      <div class="manager-setting">
-        <label>Nouvelle heure</label>
-        <input id="managerGameTime" type="time">
+
+      <div class="manager-settings-grid" style="margin-top:12px">
+        <div class="manager-setting">
+          <label>Nouvelle date</label>
+          <input id="managerGameDate" type="date">
+        </div>
+        <div class="manager-setting">
+          <label>Nouvelle heure</label>
+          <input id="managerGameTime" type="time">
+        </div>
+        <div class="manager-setting full">
+          <label>Terrain</label>
+          <select id="managerGameField"></select>
+        </div>
       </div>
-      <div class="manager-setting full">
-        <label>Terrain</label>
-        <select id="managerGameField"></select>
-      </div>
+
+      <button id="managerRescheduleBtn" type="button" class="primary" style="width:100%;margin-top:12px" onclick="saveManagerGameReschedule()">CONFIRMER LA REPLANIFICATION</button>
+      <button type="button" style="width:100%;margin-top:8px" onclick="hideManagerGameSchedulingForm()">ANNULER</button>
     </div>
 
-    <button id="managerRescheduleBtn" type="button" class="primary" style="width:100%;margin-top:12px" onclick="saveManagerGameReschedule()">REPLANIFIER / REMETTRE PRÉVU</button>
     <button type="button" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('postponed-rain')">🌧️ REMIS — PLUIE</button>
     <button type="button" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('suspended')">⏸️ SUSPENDU</button>
     <button type="button" class="danger" style="width:100%;margin-top:8px" onclick="setManagerGameStatus('cancelled')">ANNULER LE MATCH</button>
@@ -5841,10 +5857,10 @@ let leagueSettings={
   fields:["Terrain 1"],
   weeklySlots:{
     0:{enabled:false,count:0,slots:[]},
-    1:{enabled:true,count:3,slots:[{time:"18:30",field:"Terrain 1"},{time:"19:45",field:"Terrain 1"},{time:"21:00",field:"Terrain 1"}]},
-    2:{enabled:true,count:3,slots:[{time:"18:30",field:"Terrain 1"},{time:"19:45",field:"Terrain 1"},{time:"21:00",field:"Terrain 1"}]},
+    1:{enabled:false,count:0,slots:[]},
+    2:{enabled:false,count:0,slots:[]},
     3:{enabled:false,count:0,slots:[]},
-    4:{enabled:true,count:3,slots:[{time:"18:30",field:"Terrain 1"},{time:"19:45",field:"Terrain 1"},{time:"21:00",field:"Terrain 1"}]},
+    4:{enabled:false,count:0,slots:[]},
     5:{enabled:false,count:0,slots:[]},
     6:{enabled:false,count:0,slots:[]}
   },
@@ -5949,6 +5965,7 @@ leagueSchedule.forEach(g=>{
 
 
 const WEEKDAY_NAMES=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+const WEEKLY_STRUCTURE_ORDER=[1,2,3,4,5,6,0];
 
 function leagueTeamIds(){
   return leagueTeamOrder.slice(0,Math.max(2,Math.min(32,Number(leagueSettings.teamCount)||6)));
@@ -6003,7 +6020,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.18.5 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.18.8 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -6260,7 +6277,8 @@ function renderWeeklyDayRows(){
     weeklyDraftSlots[dow]=migrateWeeklyCfg(leagueSettings.weeklySlots?.[dow]);
   }
 
-  root.innerHTML=WEEKDAY_NAMES.map((name,dow)=>{
+  root.innerHTML=WEEKLY_STRUCTURE_ORDER.map(dow=>{
+    const name=WEEKDAY_NAMES[dow];
     const cfg=weeklyDraftSlots[dow];
     return `<div class="weekly-day-row">
       <div class="weekly-day-title">${name}</div>
@@ -8191,17 +8209,64 @@ function openManagerGame(key){
     ${reprise?`<div class="muted" style="font-size:11px;margin-top:5px">↳ Reprise créée le ${formatScheduleDate(reprise.date)} à ${reprise.time}</div>`:""}
   `;
 
-  $("managerGameDate").value=g.date;
-  $("managerGameTime").value=g.time;
-  populateFieldSelect("managerGameField",g.field||getConfiguredFields()[0]);
+  // À l'ouverture d'un match, on montre seulement les actions.
+  // La date / l'heure / le terrain apparaissent uniquement après avoir choisi
+  // "Créer une reprise" ou "Replanifier".
+  hideManagerGameSchedulingForm();
 
+  const openSchedulingBtn=$("managerOpenSchedulingBtn");
   const rescheduleBtn=$("managerRescheduleBtn");
+
+  if(openSchedulingBtn){
+    if(g.status==="postponed-rain"){
+      openSchedulingBtn.textContent=reprise?"DÉPLACER LA REPRISE":"CRÉER UNE REPRISE";
+    }else if(g.resumption){
+      openSchedulingBtn.textContent="REPLANIFIER LA REPRISE";
+    }else{
+      openSchedulingBtn.textContent="REPLANIFIER LE MATCH";
+    }
+  }
+
   if(rescheduleBtn){
-    rescheduleBtn.textContent=g.status==="postponed-rain"?"CRÉER LA REPRISE":"REPLANIFIER / REMETTRE PRÉVU";
+    rescheduleBtn.textContent=g.status==="postponed-rain"
+      ?(reprise?"CONFIRMER LE DÉPLACEMENT":"CONFIRMER LA REPRISE")
+      :"CONFIRMER LA REPLANIFICATION";
   }
 
   $("managerScheduleModal").classList.remove("show");
   $("managerGameModal").classList.add("show");
+}
+
+function showManagerGameSchedulingForm(){
+  const g=leagueSchedule.find(x=>scheduleGameKey(x)===managerSelectedGameId);if(!g)return;
+
+  // Si le match original a déjà une reprise, on préremplit avec la reprise
+  // plutôt qu'avec l'ancienne date du match remis.
+  const reprise=g.status==="postponed-rain" && g.rescheduledTo
+    ?leagueSchedule.find(x=>x.id===g.rescheduledTo)
+    :null;
+  const target=reprise||g;
+
+  $("managerGameDate").value=target.date||"";
+  $("managerGameTime").value=target.time||"";
+  populateFieldSelect("managerGameField",target.field||getConfiguredFields()[0]);
+
+  const title=$("managerGameSchedulingTitle");
+  if(title){
+    title.innerHTML=g.status==="postponed-rain"
+      ?(reprise
+        ?"<b>Déplacer la reprise</b><br>Choisissez sa nouvelle date, son heure et son terrain."
+        :"<b>Créer une reprise</b><br>Choisissez la date, l’heure et le terrain de la reprise.")
+      :"<b>Replanifier le match</b><br>Choisissez la nouvelle date, l’heure et le terrain.";
+  }
+
+  $("managerOpenSchedulingBtn")?.classList.add("hidden");
+  $("managerGameSchedulingPanel")?.classList.remove("hidden");
+}
+
+function hideManagerGameSchedulingForm(){
+  $("managerGameSchedulingPanel")?.classList.add("hidden");
+  $("managerOpenSchedulingBtn")?.classList.remove("hidden");
 }
 
 function closeManagerGame(){

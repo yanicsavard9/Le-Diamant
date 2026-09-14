@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.18.8</title>
+<title>Diamond v0.18.9</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1797,10 +1797,43 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0189-generate-cta">
+#leagueSettingsModal .generate-schedule-btn{
+  width:100%;
+  min-height:62px;
+  margin-top:10px;
+  border-radius:16px;
+  font-size:16px;
+  font-weight:950;
+  letter-spacing:.015em;
+  border:1px solid rgba(255,255,255,.12);
+  background:#223143;
+  color:#8795a7;
+  box-shadow:none;
+  opacity:.72;
+  transition:background .18s ease,color .18s ease,box-shadow .18s ease,transform .12s ease,opacity .18s ease;
+}
+#leagueSettingsModal .generate-schedule-btn:disabled{
+  cursor:not-allowed;
+}
+#leagueSettingsModal .generate-schedule-btn.schedule-ready{
+  background:linear-gradient(180deg,#ffb32c 0%,#f08a00 100%);
+  color:#121820;
+  border-color:#ffc85f;
+  box-shadow:0 7px 20px rgba(240,138,0,.28), inset 0 1px 0 rgba(255,255,255,.32);
+  opacity:1;
+  cursor:pointer;
+}
+#leagueSettingsModal .generate-schedule-btn.schedule-ready:active{
+  transform:scale(.985);
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.8 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.9 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2720,7 +2753,7 @@ body.role-viewer .strike-count{
 
     <div class="manager-actions-sticky">
       <button type="button" class="primary" style="width:100%" onclick="saveLeagueSettings()">ENREGISTRER LES PARAMÈTRES</button>
-      <button type="button" style="width:100%;margin-top:8px" onclick="generateLeagueScheduleFromSettings()">GÉNÉRER UN NOUVEL HORAIRE</button>
+      <button id="generateScheduleBtn" type="button" class="generate-schedule-btn" disabled onclick="generateLeagueScheduleFromSettings()">⚡ GÉNÉRER UN NOUVEL HORAIRE</button>
     </div>
   </div>
 </div>
@@ -5837,6 +5870,8 @@ const LEAGUE_INVITE_QR_POOL=[{"code":"DMD-RK9HE5","url":"https://yanicsavard9.gi
 let currentRole=null;
 let managerSelectedGameId=null;
 let pendingTieInning=null;
+let leagueSettingsSavedForGeneration=false;
+let leagueSettingsDirtyListenerBound=false;
 let leagueSettings={
   competitionType:null,
   name:"Ligue Diamond",
@@ -6020,7 +6055,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.18.8 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.18.9 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -7073,9 +7108,36 @@ function readLeagueSettingsForm(){
   return s;
 }
 
+function updateGenerateScheduleButtonState(){
+  const btn=$("generateScheduleBtn");if(!btn)return;
+  btn.disabled=!leagueSettingsSavedForGeneration;
+  btn.classList.toggle("schedule-ready",leagueSettingsSavedForGeneration);
+}
+
+function markLeagueSettingsDirty(){
+  if(!leagueSettingsSavedForGeneration)return;
+  leagueSettingsSavedForGeneration=false;
+  updateGenerateScheduleButtonState();
+}
+
+function bindLeagueSettingsDirtyTracking(){
+  if(leagueSettingsDirtyListenerBound)return;
+  const modal=$("leagueSettingsModal");if(!modal)return;
+  const handler=e=>{
+    if(e.target?.id==="generateScheduleBtn")return;
+    if(e.target?.closest?.(".manager-actions-sticky"))return;
+    markLeagueSettingsDirty();
+  };
+  modal.addEventListener("input",handler);
+  modal.addEventListener("change",handler);
+  leagueSettingsDirtyListenerBound=true;
+}
+
 function openLeagueSettings(){
   updateCompetitionLanguage();
   fillLeagueSettingsForm();
+  bindLeagueSettingsDirtyTracking();
+  updateGenerateScheduleButtonState();
   $("leagueSettingsModal").classList.add("show");
 }
 function closeLeagueSettings(){ $("leagueSettingsModal").classList.remove("show"); }
@@ -7090,7 +7152,9 @@ function saveLeagueSettings(){
   }
   toggleLeagueSettingDependencies();
   ensureLeagueInvite();
-  toast(`Paramètres ${competitionArticle()} enregistrés • QR prêt`);
+  leagueSettingsSavedForGeneration=true;
+  updateGenerateScheduleButtonState();
+  toast(`Paramètres ${competitionArticle()} enregistrés • horaire prêt à être généré`);
   return true;
 }
 
@@ -7516,6 +7580,10 @@ function buildRequiredLeagueGames(s){
 }
 
 function generateLeagueScheduleFromSettings(){
+  if(!leagueSettingsSavedForGeneration){
+    toast("Enregistrez les paramètres avant de générer l’horaire.");
+    return;
+  }
   const s=readLeagueSettingsForm();if(!s)return;
   const required=buildRequiredLeagueGames(s);
   const playoffTemplate=buildPlayoffTemplate(s);

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.18.2</title>
+<title>Diamond v0.18.5</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1766,10 +1766,35 @@ body.role-viewer .strike-count{
 }
 </style>
 
+
+<style id="diamond-v0185-bye-editor">
+.playoff-bye-row{
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr);
+  gap:8px;
+  align-items:end;
+  margin-top:7px;
+}
+.playoff-bye-number{
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  border:1px solid #40566b;
+  background:#17222d;
+  font-weight:950;
+}
+.playoff-bye-row select{
+  width:100%;
+  min-width:0;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.2 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.5 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2644,12 +2669,25 @@ body.role-viewer .strike-count{
           <div>
             <label>Qualifiés par pool</label>
             <input id="mgrQualifyPerPool" type="number" min="1" max="8" value="2"
-                   oninput="renderPlayoffMatchupEditor();updateScheduleMathPreview()">
+                   oninput="renderPlayoffByeEditor();renderPlayoffMatchupEditor();updateScheduleMathPreview()">
           </div>
           <div>
-            <label>Meilleurs suivants / wildcards</label>
+            <label>Équipes qualifiées supplémentaires</label>
             <input id="mgrWildcardCount" type="number" min="0" max="16" value="0"
-                   oninput="renderPlayoffMatchupEditor();updateScheduleMathPreview()">
+                   oninput="renderPlayoffByeEditor();renderPlayoffMatchupEditor();updateScheduleMathPreview()">
+            <div class="muted" style="font-size:11px;margin-top:5px">
+              Ajoute les meilleures équipes restantes après les places automatiques par pool.
+            </div>
+          </div>
+
+          <div style="grid-column:1/-1">
+            <label>Byes au premier tour</label>
+            <select id="mgrPlayoffByeMode" onchange="renderPlayoffByeEditor();renderPlayoffMatchupEditor();updateScheduleMathPreview()">
+              <option value="auto">Automatique • recommandé</option>
+              <option value="none">Aucun bye</option>
+              <option value="custom">Personnalisé • choisir qui obtient un bye</option>
+            </select>
+            <div id="playoffByeEditor" style="margin-top:8px"></div>
           </div>
 
           <div style="grid-column:1/-1">
@@ -2666,6 +2704,9 @@ body.role-viewer .strike-count{
         <div class="muted" style="font-size:11px;margin-top:6px">
           Diamond génère les matchs éliminatoires dans l’horaire. En mode personnalisé, vous pouvez choisir par exemple
           <b>1er Pool A vs 2e Pool B</b> ou <b>1er général vs 4e général</b>.
+          Les équipes restent <b>TBD</b> jusqu’à ce que les matchs servant au classement soient terminés.
+          Si le nombre d’équipes qualifiées ne permet pas un tableau de 2, 4, 8 ou 16 équipes,
+          Diamond peut attribuer automatiquement les <b>byes</b> nécessaires.
         </div>
       </div>
 
@@ -4533,7 +4574,7 @@ function renderOfficialGames(){
           </div>
           <div style="margin-top:8px">${gameMatchupHtml(g,34)}</div>
           <div class="muted" style="font-size:12px;margin-top:6px">
-            ${gameSideName(g,"away")} vs ${gameSideName(g,"home")} • participants déterminés automatiquement selon le classement
+            ${gameSideName(g,"away")} vs ${gameSideName(g,"home")} • participants déterminés lorsque la ronde préliminaire / les pools seront terminés
           </div>
         </div>`;
     }
@@ -5816,7 +5857,9 @@ let leagueSettings={
   qualifyPerPool:2,
   wildcardCount:0,
   playoffMatchupMode:"seed",
-  playoffCustomFirstRound:[]
+  playoffCustomFirstRound:[],
+  playoffByeMode:"auto",
+  playoffCustomByeSources:[]
 };
 let leagueTeamOrder=["Brewers","Yankees","Sox","Expos","Indiens","Bananes"];
 let leagueTeamMeta={
@@ -5960,7 +6003,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.18.2 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.18.5 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
@@ -6358,7 +6401,14 @@ function updateScheduleMathPreview(){
     const q=Math.max(1,Number($("mgrQualifyPerPool")?.value)||1);
     const wc=Math.max(0,Number($("mgrWildcardCount")?.value)||0);
     const base=leagueSettings.usePools?(leagueSettings.poolCount||1)*q:q;
-    qualification=`<br>Qualification prévue : <b>${base+wc} équipes</b>`;
+    const previewSettings={
+      ...leagueSettings,
+      usePlayoffs:true,
+      qualifyPerPool:q,
+      wildcardCount:wc
+    };
+    const byeCount=playoffByeCount(previewSettings);
+    qualification=`<br>Qualification prévue : <b>${base+wc} équipes</b>${byeCount?` • <b>${byeCount} bye${byeCount>1?"s":""}</b> nécessaire${byeCount>1?"s":""}`:" • aucun bye nécessaire"}`;
   }
 
   const dailyMax=Number($("mgrMaxGamesPerTeamPerDay")?.value)||leagueSettings.maxGamesPerTeamPerDay||1;
@@ -6444,10 +6494,137 @@ function readCurrentFieldNames(){
 function togglePlayoffFields(){
   const on=!!$("mgrUsePlayoffs")?.checked;
   if($("playoffFieldsWrap"))$("playoffFieldsWrap").classList.toggle("hidden",!on);
-  if(on)renderPlayoffMatchupEditor();
+  if(on){
+    renderPlayoffByeEditor();
+    renderPlayoffMatchupEditor();
+  }
   updateScheduleMathPreview();
 }
 
+
+
+function playoffByeCount(settings=leagueSettings){
+  const q=playoffQualifierCount(settings);
+  if(q<2)return 0;
+  const lower=2**Math.floor(Math.log2(q));
+  const prelim=q-lower;
+  return Math.max(0,lower-prelim);
+}
+
+function playoffQualifierSourceCatalog(settings=leagueSettings){
+  const q=playoffQualifierCount(settings);
+  if(q<1)return [];
+
+  if(!settings.usePools){
+    return Array.from({length:q},(_,i)=>({type:"overallRank",rank:i+1}));
+  }
+
+  const sources=[];
+  const groups=Object.entries(teamsGroupedByPool(settings));
+  const qPer=Math.max(1,Number(settings.qualifyPerPool)||1);
+
+  groups.forEach(([name,teamIds],poolIndex)=>{
+    const maxRank=Math.min(teamIds.length,qPer);
+    for(let rank=1;rank<=maxRank;rank++){
+      sources.push({type:"poolRank",poolIndex,rank});
+    }
+  });
+
+  const wildcards=Math.max(0,Number(settings.wildcardCount)||0);
+  for(let rank=1;rank<=wildcards;rank++){
+    sources.push({type:"wildcardRank",rank});
+  }
+
+  return sources.slice(0,q);
+}
+
+function playoffByeSourceOptionsHtml(selectedToken="",settings=leagueSettings){
+  return playoffQualifierSourceCatalog(settings)
+    .map(source=>{
+      const token=playoffSourceToken(source);
+      return `<option value="${token}" ${token===selectedToken?"selected":""}>${playoffSourceLabel(source)}</option>`;
+    }).join("");
+}
+
+function readPlayoffCustomByesFromForm(){
+  const settings={
+    ...leagueSettings,
+    usePlayoffs:!!$("mgrUsePlayoffs")?.checked,
+    qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool")?.value)||leagueSettings.qualifyPerPool||2),
+    wildcardCount:Math.max(0,Number($("mgrWildcardCount")?.value)||leagueSettings.wildcardCount||0)
+  };
+  const count=playoffByeCount(settings);
+  const out=[];
+  for(let i=0;i<count;i++){
+    const source=parsePlayoffSourceToken($(`playoffBye${i}`)?.value);
+    if(source)out.push(source);
+  }
+  return out;
+}
+
+function renderPlayoffByeEditor(){
+  const root=$("playoffByeEditor");
+  if(!root)return;
+
+  const settings={
+    ...leagueSettings,
+    usePlayoffs:!!$("mgrUsePlayoffs")?.checked,
+    qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool")?.value)||leagueSettings.qualifyPerPool||2),
+    wildcardCount:Math.max(0,Number($("mgrWildcardCount")?.value)||leagueSettings.wildcardCount||0)
+  };
+
+  const q=playoffQualifierCount(settings);
+  const byeCount=playoffByeCount(settings);
+  const mode=$("mgrPlayoffByeMode")?.value||leagueSettings.playoffByeMode||"auto";
+
+  if(q<2){
+    root.innerHTML='<div class="readonly-note">Il faut au moins 2 équipes qualifiées.</div>';
+    return;
+  }
+
+  if(!byeCount){
+    root.innerHTML=`<div class="readonly-note">
+      <b>Aucun bye nécessaire.</b> Avec ${q} équipes qualifiées, le tableau est déjà équilibré.
+    </div>`;
+    return;
+  }
+
+  if(mode==="auto"){
+    root.innerHTML=`<div class="readonly-note">
+      Diamond donnera automatiquement <b>${byeCount} bye${byeCount>1?"s":""}</b>
+      aux meilleures têtes de série pour obtenir un tableau équilibré.
+    </div>`;
+    return;
+  }
+
+  if(mode==="none"){
+    root.innerHTML=`<div class="competition-warning">
+      Avec <b>${q} équipes qualifiées</b>, un tableau à élimination directe nécessite
+      <b>${byeCount} bye${byeCount>1?"s":""}</b>.
+      Pour n’avoir aucun bye, choisissez un nombre de qualifiés égal à 2, 4, 8, 16…
+    </div>`;
+    return;
+  }
+
+  const catalog=playoffQualifierSourceCatalog(settings);
+  const saved=Array.isArray(leagueSettings.playoffCustomByeSources)?leagueSettings.playoffCustomByeSources:[];
+
+  root.innerHTML=`<div class="readonly-note">
+    Sélectionnez les <b>${byeCount} équipe${byeCount>1?"s":""}</b> qui passeront directement au tour suivant.
+  </div>` + Array.from({length:byeCount},(_,i)=>{
+    const fallback=catalog[i]||{type:"overallRank",rank:i+1};
+    const token=playoffSourceToken(saved[i])||playoffSourceToken(fallback);
+    return `<div class="playoff-bye-row">
+      <div class="playoff-bye-number">${i+1}</div>
+      <div>
+        <label>Bye ${i+1}</label>
+        <select id="playoffBye${i}" onchange="renderPlayoffMatchupEditor()">
+          ${playoffByeSourceOptionsHtml(token,settings)}
+        </select>
+      </div>
+    </div>`;
+  }).join("");
+}
 
 function playoffFirstRoundPairCount(settings=leagueSettings){
   const q=playoffQualifierCount(settings);
@@ -6460,6 +6637,7 @@ function playoffFirstRoundPairCount(settings=leagueSettings){
 function playoffSourceToken(source){
   if(!source)return "";
   if(source.type==="poolRank")return `pool:${source.poolIndex}:${source.rank}`;
+  if(source.type==="wildcardRank")return `wildcard:${source.rank}`;
   if(source.type==="overallRank")return `overall:${source.rank}`;
   if(source.type==="seed")return `overall:${source.seed}`;
   return "";
@@ -6472,6 +6650,9 @@ function parsePlayoffSourceToken(token){
   }
   if(parts[0]==="overall"){
     return {type:"overallRank",rank:Number(parts[1])||1};
+  }
+  if(parts[0]==="wildcard"){
+    return {type:"wildcardRank",rank:Number(parts[1])||1};
   }
   return null;
 }
@@ -6498,6 +6679,11 @@ function playoffSourceOptionsHtml(selectedToken=""){
         options.push({value:`pool:${poolIndex}:${rank}`,label:`${name} • ${rank}e`});
       }
     });
+
+    const wildcards=Math.max(0,Number($("mgrWildcardCount")?.value)||leagueSettings.wildcardCount||0);
+    for(let rank=1;rank<=wildcards;rank++){
+      options.push({value:`wildcard:${rank}`,label:`Équipe qualifiée supplémentaire • ${rank}e`});
+    }
   }
 
   return options.map(o=>`<option value="${o.value}" ${o.value===selectedToken?"selected":""}>${o.label}</option>`).join("");
@@ -6612,9 +6798,16 @@ function renderPlayoffMatchupEditor(){
   const lower=2**Math.floor(Math.log2(q));
   const prelim=q-lower;
   if(prelim>0){
+    const byeCount=playoffByeCount(settings);
+    const byeMode=$("mgrPlayoffByeMode")?.value||leagueSettings.playoffByeMode||"auto";
+    const byeText=byeMode==="custom"
+      ?`${byeCount} bye${byeCount>1?"s":""} personnalisé${byeCount>1?"s":""}`
+      :byeMode==="none"
+        ?"aucun bye sélectionné"
+        :`${byeCount} bye${byeCount>1?"s":""} automatique${byeCount>1?"s":""}`;
+
     root.insertAdjacentHTML("beforeend",`<div class="muted" style="font-size:11px;margin-top:8px">
-      ${q} équipes qualifiées nécessitent ${prelim} match${prelim>1?"s":""} de qualification.
-      Les meilleures têtes de série restantes obtiennent un bye automatiquement.
+      ${q} équipes qualifiées nécessitent ${prelim} match${prelim>1?"s":""} de qualification • ${byeText}.
     </div>`);
   }
 }
@@ -6770,6 +6963,7 @@ function fillLeagueSettingsForm(){
   $("mgrUsePlayoffs").checked=!!leagueSettings.usePlayoffs;
   $("mgrQualifyPerPool").value=leagueSettings.qualifyPerPool||2;
   $("mgrWildcardCount").value=leagueSettings.wildcardCount||0;
+  $("mgrPlayoffByeMode").value=leagueSettings.playoffByeMode||"auto";
   $("mgrPlayoffMatchupMode").value=leagueSettings.playoffMatchupMode||"seed";
 
   renderPoolRulesSummary();
@@ -6782,6 +6976,7 @@ function fillLeagueSettingsForm(){
 
   toggleLeagueSettingDependencies();
   togglePlayoffFields();
+  renderPlayoffByeEditor();
   renderPlayoffMatchupEditor();
   updateScheduleMathPreview();
 }
@@ -6813,6 +7008,10 @@ function readLeagueSettingsForm(){
     usePlayoffs:!!$("mgrUsePlayoffs").checked,
     qualifyPerPool:Math.max(1,Number($("mgrQualifyPerPool").value)||1),
     wildcardCount:Math.max(0,Number($("mgrWildcardCount").value)||0),
+    playoffByeMode:$("mgrPlayoffByeMode")?.value||"auto",
+    playoffCustomByeSources:$("mgrPlayoffByeMode")?.value==="custom"
+      ?readPlayoffCustomByesFromForm()
+      :(leagueSettings.playoffCustomByeSources||[]),
     playoffMatchupMode:$("mgrPlayoffMatchupMode")?.value||"seed",
     playoffCustomFirstRound:$("mgrPlayoffMatchupMode")?.value==="custom"
       ?readPlayoffCustomPairingsFromForm()
@@ -6835,6 +7034,24 @@ function readLeagueSettingsForm(){
   if(s.seasonPause && (!s.pauseStart||!s.pauseEnd||s.pauseEnd<s.pauseStart)){
     alert("Vérifiez les dates de la pause.");return null
   }
+
+  if(s.usePlayoffs){
+    const neededByes=playoffByeCount(s);
+
+    if(s.playoffByeMode==="none" && neededByes>0){
+      alert(`Avec ${playoffQualifierCount(s)} équipes qualifiées, ${neededByes} bye${neededByes>1?"s sont nécessaires":" est nécessaire"} pour obtenir un tableau à élimination directe équilibré. Choisissez Automatique ou Personnalisé.`);
+      return null;
+    }
+
+    if(s.playoffByeMode==="custom" && neededByes>0){
+      const tokens=(s.playoffCustomByeSources||[]).map(playoffSourceToken).filter(Boolean);
+      if(tokens.length!==neededByes || new Set(tokens).size!==neededByes){
+        alert(`Choisissez ${neededByes} équipe${neededByes>1?"s différentes":""} pour les byes.`);
+        return null;
+      }
+    }
+  }
+
   return s;
 }
 
@@ -6930,9 +7147,11 @@ function playoffSourceLabel(source){
     const poolName=leagueSettings.poolNames?.[source.poolIndex]||`Pool ${String.fromCharCode(65+(source.poolIndex||0))}`;
     return `${poolName} • ${source.rank}e`;
   }
+  if(source.type==="wildcardRank")return `Équipe qualifiée supplémentaire • ${source.rank}e`;
   if(source.type==="winner")return `Gagnant • ${source.label||source.gameId}`;
   return "À déterminer";
 }
+
 
 
 function buildPlayoffTemplate(s){
@@ -6966,8 +7185,12 @@ function buildPlayoffTemplate(s){
 
   const lowerPower=2**Math.floor(Math.log2(qualifierCount));
   const prelimGames=qualifierCount-lowerPower;
-  const byes=lowerPower-prelimGames;
-  const mode=s.playoffMatchupMode||"seed";
+  const neededByes=playoffByeCount(s);
+  const matchupMode=s.playoffMatchupMode||"seed";
+  const byeMode=s.playoffByeMode||"auto";
+
+  const sourceCatalog=playoffQualifierSourceCatalog(s);
+  const overallCatalog=Array.from({length:qualifierCount},(_,i)=>({type:"overallRank",rank:i+1}));
 
   const defaultPair=(i,total)=>({
     awaySource:{type:"overallRank",rank:i+1},
@@ -6975,35 +7198,78 @@ function buildPlayoffTemplate(s){
   });
 
   let configuredPairs=[];
-
-  if(mode==="custom" && Array.isArray(s.playoffCustomFirstRound)){
+  if(matchupMode==="custom" && Array.isArray(s.playoffCustomFirstRound)){
     configuredPairs=s.playoffCustomFirstRound;
-  }else if(mode==="cross"){
+  }else if(matchupMode==="cross"){
     configuredPairs=defaultCrossPoolPairings(s);
   }
 
   let tokens=[];
 
   if(prelimGames>0){
+    let byeSources=[];
+    let remainingSources=[];
+
+    if(byeMode==="custom"){
+      const wantedTokens=new Set((s.playoffCustomByeSources||[]).map(playoffSourceToken));
+      byeSources=sourceCatalog.filter(src=>wantedTokens.has(playoffSourceToken(src))).slice(0,neededByes);
+      remainingSources=sourceCatalog.filter(src=>!wantedTokens.has(playoffSourceToken(src)));
+    }else{
+      // Automatic = best overall seeds advance.
+      byeSources=overallCatalog.slice(0,neededByes);
+      remainingSources=overallCatalog.slice(neededByes);
+    }
+
+    // Safety fallback if an old configuration is incomplete.
+    if(byeSources.length!==neededByes || remainingSources.length!==prelimGames*2){
+      byeSources=overallCatalog.slice(0,neededByes);
+      remainingSources=overallCatalog.slice(neededByes);
+    }
+
+    const remainingTokens=new Set(remainingSources.map(playoffSourceToken));
+    const used=new Set();
     const winners=[];
+
     for(let i=0;i<prelimGames;i++){
-      const fallback={
-        awaySource:{type:"overallRank",rank:byes+1+i},
-        homeSource:{type:"overallRank",rank:qualifierCount-i}
-      };
-      const pair=configuredPairs[i]||fallback;
+      let awaySource=null;
+      let homeSource=null;
+
+      const configured=configuredPairs[i];
+      if(configured){
+        const aToken=playoffSourceToken(configured.awaySource);
+        const hToken=playoffSourceToken(configured.homeSource);
+        if(
+          remainingTokens.has(aToken) &&
+          remainingTokens.has(hToken) &&
+          aToken!==hToken &&
+          !used.has(aToken) &&
+          !used.has(hToken)
+        ){
+          awaySource=configured.awaySource;
+          homeSource=configured.homeSource;
+        }
+      }
+
+      if(!awaySource||!homeSource){
+        const available=remainingSources.filter(src=>!used.has(playoffSourceToken(src)));
+        awaySource=available[0]||null;
+        homeSource=available[available.length-1]||null;
+      }
+
+      if(!awaySource||!homeSource)continue;
+
+      used.add(playoffSourceToken(awaySource));
+      used.add(playoffSourceToken(homeSource));
+
       winners.push(makeGame(
         "Ronde de qualification",
-        pair.awaySource||fallback.awaySource,
-        pair.homeSource||fallback.homeSource,
+        awaySource,
+        homeSource,
         0
       ));
     }
 
-    tokens=[
-      ...Array.from({length:byes},(_,i)=>({type:"overallRank",rank:i+1})),
-      ...winners
-    ];
+    tokens=[...byeSources,...winners];
 
   }else{
     const pairCount=qualifierCount/2;
@@ -7023,7 +7289,7 @@ function buildPlayoffTemplate(s){
     tokens=winners;
   }
 
-  let roundIndex=prelimGames>0?1:1;
+  let roundIndex=1;
 
   while(tokens.length>1){
     const roundName=playoffRoundName(tokens.length,false);
@@ -7107,6 +7373,17 @@ function resolvePlayoffSource(source,seeds){
     return ranked[source.rank-1]?.team||null;
   }
 
+  if(source.type==="wildcardRank"){
+    const qPer=Math.max(1,Number(leagueSettings.qualifyPerPool)||1);
+    const remaining=[];
+    Object.values(teamsGroupedByPool(leagueSettings)).forEach(teamIds=>{
+      const ranked=sortStandingsRecords(teamIds.map(standingsRecord));
+      remaining.push(...ranked.slice(qPer));
+    });
+    const ordered=sortStandingsRecords(remaining);
+    return ordered[source.rank-1]?.team||null;
+  }
+
   if(source.type==="winner")return completedScheduleWinner(source.gameId);
   return null;
 }
@@ -7126,12 +7403,29 @@ function refreshPlayoffParticipants(){
   );
   if(!playoffGames.length)return;
 
-  const seeds=rankedPlayoffQualifiers();
+  // IMPORTANT:
+  // The displayed standings always have a visual order, even when everybody is 0-0.
+  // That order must NEVER be interpreted as a real qualification.
+  // First-round playoff participants remain TBD until every non-playoff game
+  // that determines the standings has actually been completed.
+  const standingsAreFinal=regularScheduleComplete();
+  const seeds=standingsAreFinal?rankedPlayoffQualifiers():[];
 
   playoffGames.forEach(g=>{
     const oldAway=g.away,oldHome=g.home;
-    const newAway=resolvePlayoffSource(g.awaySource,seeds);
-    const newHome=resolvePlayoffSource(g.homeSource,seeds);
+
+    let newAway=null;
+    let newHome=null;
+
+    if(standingsAreFinal){
+      newAway=resolvePlayoffSource(g.awaySource,seeds);
+      newHome=resolvePlayoffSource(g.homeSource,seeds);
+    }else{
+      // Later rounds may only depend on playoff winners, but before the
+      // preliminary/pool phase is complete none of the bracket is seeded.
+      newAway=null;
+      newHome=null;
+    }
 
     g.away=newAway||null;
     g.home=newHome||null;

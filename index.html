@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Diamond v0.18.9</title>
+<title>Diamond v0.18.10</title>
 <style>
 :root{
   --bg:#0f1720;--card:#18222e;--card2:#223140;--text:#f4f7fb;--muted:#9fb0c3;
@@ -1833,7 +1833,7 @@ body.role-viewer .strike-count{
 </head>
 <body>
 <div class="app">
-  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.9 • 6 ÉQUIPES</div></div></div>
+  <div class="header"><div class="brand">⚾ DIAMOND</div><div style="display:flex;gap:6px;align-items:center"><div id="roleBadge" class="role-pill hidden"></div><div class="badge">v0.18.10 • 6 ÉQUIPES</div></div></div>
 
 
   <section id="roleHome">
@@ -2471,8 +2471,8 @@ body.role-viewer .strike-count{
       <button type="button" id="officialHomeAlignmentBtn" onclick="openOfficialTeamAlignment('home')">ALIGNEMENT LOCAL</button>
     </div>
 
-    <button type="button" class="primary" id="officialPrepareGameBtn" style="width:100%;margin-top:12px" onclick="prepareSelectedOfficialGame()">
-      PRÉPARER CE MATCH
+    <button type="button" class="primary" id="officialPrepareGameBtn" style="width:100%;margin-top:12px" onclick="startPreparedOfficialGame()">
+      DÉBUTER LA PARTIE
     </button>
 
     <button type="button" style="width:100%;margin-top:8px" onclick="backToOfficialGames()">RETOUR AUX MATCHS PAR DATE</button>
@@ -4757,12 +4757,19 @@ function renderOfficialGameStatus(){
   }
 
   const btn=$("officialPrepareGameBtn");
+  const ready=s.awayLocked&&s.homeLocked;
+
+  // Une fois les deux alignements approuvés, la préparation est terminée.
+  // Le marqueur n'a plus besoin d'un écran intermédiaire : il peut débuter
+  // directement la partie ou retourner aux matchs par date.
+  if(awayBtn)awayBtn.classList.toggle("hidden",ready);
+  if(homeBtn)homeBtn.classList.toggle("hidden",ready);
+
   if(btn){
-    const ready=s.awayLocked&&s.homeLocked;
     btn.disabled=!ready;
     btn.classList.toggle("active",ready);
     btn.style.opacity=ready?"1":".48";
-    btn.textContent=ready?"PRÉPARER CE MATCH":"VERROUILLEZ LES 2 ALIGNEMENTS";
+    btn.textContent=ready?"DÉBUTER LA PARTIE":"VERROUILLEZ LES 2 ALIGNEMENTS";
   }
 }
 
@@ -4992,7 +4999,9 @@ function startPreparedOfficialGame(){
   loadSubmissionSnapshotIntoTeam(g,"away");
   loadSubmissionSnapshotIntoTeam(g,"home");
 
-  $("officialPreGameModal").classList.remove("show");currentRole="official";
+  $("officialPreGameModal").classList.remove("show");
+  $("officialGameDetailModal").classList.remove("show");
+  currentRole="official";
   document.body.classList.remove("role-viewer","role-captain","role-official","role-manager");document.body.classList.add("role-official");
   $("roleHome").classList.add("hidden");if($("officialHub"))$("officialHub").classList.add("hidden");$("viewerView").classList.add("hidden");$("pregame").classList.add("hidden");$("game").classList.remove("hidden");
   officialPrepInnings=leagueSettings.regulationInnings||7;
@@ -6055,7 +6064,7 @@ function renderLeagueTeamVisuals(){
       </div>`).join("");
   }
   const badge=document.querySelector(".header .badge");
-  if(badge)badge.textContent=`v0.18.9 • ${ids.length} ÉQUIPES`;
+  if(badge)badge.textContent=`v0.18.10 • ${ids.length} ÉQUIPES`;
 }
 
 function renderCaptainTeamSelectors(){
